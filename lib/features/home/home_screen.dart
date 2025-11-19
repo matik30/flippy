@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
+import 'package:flippy/widgets/scan_dialog.dart';
 
 /// Pomocná funkcia – načíta metadáta asset obrázka a vráti ImageInfo.
 Future<ImageInfo> _loadImageInfo(String assetPath) async {
@@ -116,12 +117,17 @@ class HomePage extends StatelessWidget {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/scan'),
-        backgroundColor: AppColors.primary,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+floatingActionButton: FloatingActionButton(
+  onPressed: () {
+    showDialog(
+      context: context,
+      builder: (_) => const ScanDialog(),
+    );
+  },
+  backgroundColor: AppColors.primary,
+  shape: const CircleBorder(),
+  child: const Icon(Icons.add, color: Colors.white),
+),
     );
   }
 }

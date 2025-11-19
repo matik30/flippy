@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^7.0.0
+  flutter_barcode_scanner: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -23,6 +24,7 @@ flutter:
     - assets/images/
     - assets/packages/
     - assets/fonts/
+    - assets/data/
   fonts:
     - family: Poppins
       fonts:
