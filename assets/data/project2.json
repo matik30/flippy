@@ -2634,6 +2634,2076 @@
                         ]
                     }
                 ]
+            },
+            {
+                "id": "ch3",
+                "title": "Unit 3 – Holidays",
+                "subchapters": [
+                    {
+                        "id": "sc1",
+                        "title": "3A Where were you last weekend?",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "apartmán",
+                                "en": "apartment",
+                                "pronunciation": "/əˈpɑːrt.mənt/",
+                                "image": "assets/images/words/apartment.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "preč",
+                                "en": "away",
+                                "pronunciation": "/əˈweɪ/",
+                                "image": "assets/images/words/away.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "pláž",
+                                "en": "beach",
+                                "pronunciation": "/biːtʃ/",
+                                "image": "assets/images/words/beach.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "výraz",
+                                "en": "expression",
+                                "pronunciation": "/ˈɛk.sprɛʃ.ən/",
+                                "image": "assets/images/words/expression.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "ďaleko",
+                                "en": "far",
+                                "pronunciation": "/fɑːr/",
+                                "image": "assets/images/words/far.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "dúfať",
+                                "en": "hope",
+                                "pronunciation": "/hoʊp/",
+                                "image": "assets/images/words/hope.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "chorý",
+                                "en": "ill",
+                                "pronunciation": "/ɪl/",
+                                "image": "assets/images/words/ill.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "voľný (víkend)",
+                                "en": "off",
+                                "pronunciation": "/ɒf/",
+                                "image": "assets/images/words/off.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "Naozaj?",
+                                "en": "Really?",
+                                "pronunciation": "/ˈrɪə.li/",
+                                "image": "assets/images/words/really.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "pán",
+                                "en": "sir",
+                                "pronunciation": "/sɜːr/",
+                                "image": "assets/images/words/sir.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "športový inštruktor",
+                                "en": "sports instructor",
+                                "pronunciation": "/ˈspɔːrts ɪnˈstrʌk.tər/",
+                                "image": "assets/images/words/sportsInstructor.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "zábavný park",
+                                "en": "theme park",
+                                "pronunciation": "/θiːm pɑːrk/",
+                                "image": "assets/images/words/themePark.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "svadba",
+                                "en": "wedding",
+                                "pronunciation": "/ˈwɛd.ɪŋ/",
+                                "image": "assets/images/words/wedding.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "víkend",
+                                "en": "weekend",
+                                "pronunciation": "/ˈwiː.kend/",
+                                "image": "assets/images/words/weekend.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "v zábavnom parku",
+                                "en": "at a theme park",
+                                "pronunciation": "/æt ə θiːm pɑːrk/",
+                                "image": "assets/images/words/themePark.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "na svadbe",
+                                "en": "at a wedding",
+                                "pronunciation": "/æt ə ˈwɛd.ɪŋ/",
+                                "image": "assets/images/words/wedding.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "doma",
+                                "en": "at home",
+                                "pronunciation": "/həʊm/",
+                                "image": "assets/images/words/home.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "v škole",
+                                "en": "at school",
+                                "pronunciation": "/æt ə ˈskuːl/",
+                                "image": "assets/images/words/school.png"
+                            },
+                            {
+                                "id": "w19",
+                                "sk": "v práci",
+                                "en": "at work",
+                                "pronunciation": "/æt ə ˈwɜːrk/",
+                                "image": "assets/images/words/work.png"
+                            },
+                            {
+                                "id": "w20",
+                                "sk": "v posteli",
+                                "en": "in bed",
+                                "pronunciation": "/ɪn bɛd/",
+                                "image": "assets/images/words/bed.png"
+                            },
+                            {
+                                "id": "w21",
+                                "sk": "v záhrade",
+                                "en": "in the garden",
+                                "pronunciation": "/ɪn ðə ˈɡɑːr.dən/",
+                                "image": "assets/images/words/garden.png"
+                            },
+                            {
+                                "id": "w22",
+                                "sk": "v parku",
+                                "en": "in the park",
+                                "pronunciation": "/ɪn ðə pɑːrk/",
+                                "image": "assets/images/words/park.png"
+                            },
+                            {
+                                "id": "w23",
+                                "sk": "na prázdninách, na dovolenke",
+                                "en": "on holiday",
+                                "pronunciation": "/hɔːl.ɪ.deɪ/",
+                                "image": "assets/images/words/holiday.png"
+                            },
+                            {
+                                "id": "w24",
+                                "sk": "na pláži",
+                                "en": "on the beach",
+                                "pronunciation": "/ɒn ðə biːtʃ/",
+                                "image": "assets/images/words/beach.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc2",
+                        "title": "3B Our holiday",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "nahnevaný",
+                                "en": "angry",
+                                "pronunciation": "/æŋɡri/",
+                                "image": "assets/images/words/angry.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "pýtať sa",
+                                "en": "ask",
+                                "pronunciation": "/ɑːsk/",
+                                "image": "assets/images/words/ask.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "autoumyváreň",
+                                "en": "car wash",
+                                "pronunciation": "/ˈkɑːr wɒʃ/",
+                                "image": "assets/images/words/carWash.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "zatvoriť",
+                                "en": "close (v)",
+                                "pronunciation": "/ˈkləʊz/",
+                                "image": "assets/images/words/close.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "vyzdvihnúť",
+                                "en": "collect",
+                                "pronunciation": "/kəˈlɛkt/",
+                                "image": "assets/images/words/collect.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "užiť si",
+                                "en": "enjoy",
+                                "pronunciation": "/ɪnˈdʒɔɪ/",
+                                "image": "assets/images/words/enjoy.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "schmatnúť",
+                                "en": "grab",
+                                "pronunciation": "/ɡræb/",
+                                "image": "assets/images/words/grab.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "pristáť",
+                                "en": "land (v)",
+                                "pronunciation": "/lænd/",
+                                "image": "assets/images/words/land.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "všimnúť si",
+                                "en": "notice",
+                                "pronunciation": "/ˈnoʊ.tɪs/",
+                                "image": "assets/images/words/notice.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "zabaliť",
+                                "en": "pack",
+                                "pronunciation": "/ˈpæk/",
+                                "image": "assets/images/words/pack.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "telefónny hovor",
+                                "en": "phone call",
+                                "pronunciation": "/ˈfoʊn kɔːl/",
+                                "image": "assets/images/words/phoneCall.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "zobrať",
+                                "en": "pick up",
+                                "pronunciation": "/ˈpɪk ʌp/",
+                                "image": "assets/images/words/pickUp.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "vrecko",
+                                "en": "pocket",
+                                "pronunciation": "/ˈpɒk.ɪt/",
+                                "image": "assets/images/words/pocket.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "nákupný zoznam",
+                                "en": "shopping list",
+                                "pronunciation": "/ˈʃɒp.ɪŋ lɪst/",
+                                "image": "assets/images/words/shoppingList.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "kričať",
+                                "en": "shout",
+                                "pronunciation": "/ʃaʊt/",
+                                "image": "assets/images/words/shout.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "niekto iný",
+                                "en": "someone else",
+                                "pronunciation": "/ˈsʌm.wʌn ɛls/",
+                                "image": "assets/images/words/someoneElse.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "vďaka",
+                                "en": "thanks (for)",
+                                "pronunciation": "/θæŋks/",
+                                "image": "assets/images/words/thanks.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "cestovať",
+                                "en": "travel",
+                                "pronunciation": "/ˈtræv.əl/",
+                                "image": "assets/images/words/travel.png"
+                            },
+                            {
+                                "id": "w19",
+                                "sk": "vybaliť",
+                                "en": "unpack",
+                                "pronunciation": "/ʌnˈpæk/",
+                                "image": "assets/images/words/unpack.png"
+                            },
+                            {
+                                "id": "w20",
+                                "sk": "chcieť",
+                                "en": "want",
+                                "pronunciation": "/wɑːnt/",
+                                "image": "assets/images/words/want.png"
+                            },
+                            {
+                                "id": "w21",
+                                "sk": "letisko",
+                                "en": "airport",
+                                "pronunciation": "/ˈeə.pɔːt/",
+                                "image": "assets/images/words/airport.png"
+                            },
+                            {
+                                "id": "w22",
+                                "sk": "kemping",
+                                "en": "campsite",
+                                "pronunciation": "/ˈkæmp.saɪt/",
+                                "image": "assets/images/words/campsite.png"
+                            },
+                            {
+                                "id": "w23",
+                                "sk": "karavan",
+                                "en": "caravan",
+                                "pronunciation": "/ˈkær.ə.væn/",
+                                "image": "assets/images/words/caravan.png"
+                            },
+                            {
+                                "id": "w24",
+                                "sk": "štítok, nálepka",
+                                "en": "label",
+                                "pronunciation": "/ˈleɪ.bəl/",
+                                "image": "assets/images/words/label.png"
+                            },
+                            {
+                                "id": "w25",
+                                "sk": "batožina",
+                                "en": "luggage",
+                                "pronunciation": "/ˈlʌɡ.ɪdʒ/",
+                                "image": "assets/images/words/luggage.png"
+                            },
+                            {
+                                "id": "w26",
+                                "sk": "cestujúci",
+                                "en": "passenger",
+                                "pronunciation": "/ˈpæs.ɪn.dʒər/",
+                                "image": "assets/images/words/passenger.png"
+                            },
+                            {
+                                "id": "w27",
+                                "sk": "pas",
+                                "en": "passport",
+                                "pronunciation": "/ˈpɑːs.pɔːrt/",
+                                "image": "assets/images/words/passport.png"
+                            },
+                            {
+                                "id": "w28",
+                                "sk": "lietadlo",
+                                "en": "plane",
+                                "pronunciation": "/ˈpleɪn/",
+                                "image": "assets/images/words/plane.png"
+                            },
+                            {
+                                "id": "w29",
+                                "sk": "ruksak",
+                                "en": "rucksack",
+                                "pronunciation": "/ˈrʌk.sæk/",
+                                "image": "assets/images/words/rucksack.png"
+                            },
+                            {
+                                "id": "w30",
+                                "sk": "pristávacia dráha",
+                                "en": "runway",
+                                "pronunciation": "/ˈrʌn.weɪ/",
+                                "image": "assets/images/words/runway.png"
+                            },
+                            {
+                                "id": "w31",
+                                "sk": "kufor",
+                                "en": "suitcase",
+                                "pronunciation": "/ˈsuːt.keɪs/",
+                                "image": "assets/images/words/suitcase.png"
+                            },
+                            {
+                                "id": "w32",
+                                "sk": "taxík",
+                                "en": "taxi",
+                                "pronunciation": "/ˈtæks.i/",
+                                "image": "assets/images/words/taxi.png"
+                            },
+                            {
+                                "id": "w33",
+                                "sk": "stan",
+                                "en": "tent",
+                                "pronunciation": "/tɛnt/",
+                                "image": "assets/images/words/tent.png"
+                            },
+                            {
+                                "id": "w34",
+                                "sk": "lístok",
+                                "en": "ticket",
+                                "pronunciation": "/ˈtɪk.ɪt/",
+                                "image": "assets/images/words/ticket.png"
+                            },
+                            {
+                                "id": "w35",
+                                "sk": "vozík",
+                                "en": "trolley",
+                                "pronunciation": "/ˈtrɒl.i/",
+                                "image": "assets/images/words/trolley.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc3",
+                        "title": "3C Holiday problems",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "loďou",
+                                "en": "by boat",
+                                "pronunciation": "/baɪ boʊt/",
+                                "image": "assets/images/words/boat.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "šoférovať, ísť autom",
+                                "en": "drive",
+                                "pronunciation": "/dɪˈvaɪv/",
+                                "image": "assets/images/words/drive.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "spadnúť",
+                                "en": "drop",
+                                "pronunciation": "/drɒp/",
+                                "image": "assets/images/words/drop.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "Srdečný pozdrav z...",
+                                "en": "Greetings from...",
+                                "pronunciation": "/ˈɡriː.tɪŋz frɒm/",
+                                "image": "assets/images/words/greetings.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "mať nehodu",
+                                "en": "have an accident",
+                                "pronunciation": "/ˈhæv ən ˈæksɪdənt/",
+                                "image": "assets/images/words/accident.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "zraniť",
+                                "en": "hurt",
+                                "pronunciation": "/hɜːrt/",
+                                "image": "assets/images/words/hurt.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "nepravidelný",
+                                "en": "irregular",
+                                "pronunciation": "/ɪˈrɛɡjʊlər/",
+                                "image": "assets/images/words/irregular.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "cesta, cestovanie",
+                                "en": "journey",
+                                "pronunciation": "/ˈdʒɜːr.ni/",
+                                "image": "assets/images/words/journey.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "málo",
+                                "en": "little",
+                                "pronunciation": "/ˈlɪt.əl/",
+                                "image": "assets/images/words/little.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "našťastie",
+                                "en": "luckily",
+                                "pronunciation": "/ˈlʌkɪli/",
+                                "image": "assets/images/words/luckily.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "už ... viac nie",
+                                "en": "not ... any more",
+                                "pronunciation": "/nɒt ˈɛni mɔːr/",
+                                "image": "assets/images/words/notAnyMore.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "cestou, po ceste",
+                                "en": "on the way",
+                                "pronunciation": "/ɒn ðə weɪ/",
+                                "image": "assets/images/words/onTheWay.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "von z",
+                                "en": "out of",
+                                "pronunciation": "/aʊt ʌv/",
+                                "image": "assets/images/words/outOf.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "bolestivý",
+                                "en": "painful",
+                                "pronunciation": "/ˈpeɪn.fəl/",
+                                "image": "assets/images/words/painful.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "kus papiera",
+                                "en": "piece of paper",
+                                "pronunciation": "/ˈpiːs ʌv ˈpeɪ.pər/",
+                                "image": "assets/images/words/pieceOfPaper.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "pohľadnica",
+                                "en": "postcard",
+                                "pronunciation": "/ˈpoʊst.kɑːrd/",
+                                "image": "assets/images/words/postcard.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "pravidelný",
+                                "en": "regular",
+                                "pronunciation": "/ˈrɛɡ.jə.lər/",
+                                "image": "assets/images/words/regular.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "oddelený",
+                                "en": "separate",
+                                "pronunciation": "/ˈsɛp.ər.ət/",
+                                "image": "assets/images/words/separate.png"
+                            },
+                            {
+                                "id": "w19",
+                                "sk": "vrchol",
+                                "en": "top",
+                                "pronunciation": "/tɒp/",
+                                "image": "assets/images/words/top.png"
+                            },
+                            {
+                                "id": "w20",
+                                "sk": "čašník",
+                                "en": "waiter",
+                                "pronunciation": "/ˈweɪ.tər/",
+                                "image": "assets/images/words/waiter.png"
+                            },
+                            {
+                                "id": "w21",
+                                "sk": "uhryznúť",
+                                "en": "bite",
+                                "pronunciation": "/baɪt/",
+                                "image": "assets/images/words/bite.png"
+                            },
+                            {
+                                "id": "w22",
+                                "sk": "zlomiť",
+                                "en": "break",
+                                "pronunciation": "/ˈbreɪk/",
+                                "image": "assets/images/words/break.png"
+                            },
+                            {
+                                "id": "w23",
+                                "sk": "spadnúť",
+                                "en": "fall over",
+                                "pronunciation": "/ˈfɔːl ˈoʊ.vər/",
+                                "image": "assets/images/words/fallOver.png"
+                            },
+                            {
+                                "id": "w24",
+                                "sk": "mať morskú chorobu",
+                                "en": "feel seasick",
+                                "pronunciation": "/ˈsiː.sɪk/",
+                                "image": "assets/images/words/seasick.png"
+                            },
+                            {
+                                "id": "w25",
+                                "sk": "zabudnúť",
+                                "en": "forget",
+                                "pronunciation": "/fərˈɡɛt/",
+                                "image": "assets/images/words/forget.png"
+                            },
+                            {
+                                "id": "w26",
+                                "sk": "stratiť sa",
+                                "en": "get lost",
+                                "pronunciation": "/ɡɛt lɔːst/",
+                                "image": "assets/images/words/getLost.png"
+                            },
+                            {
+                                "id": "w27",
+                                "sk": "odísť",
+                                "en": "leave",
+                                "pronunciation": "/liːv/",
+                                "image": "assets/images/words/leave.png"
+                            },
+                            {
+                                "id": "w28",
+                                "sk": "stratiť",
+                                "en": "lose",
+                                "pronunciation": "/luːz/",
+                                "image": "assets/images/words/lose.png"
+                            },
+                            {
+                                "id": "w29",
+                                "sk": "zmeškať",
+                                "en": "miss",
+                                "pronunciation": "/mɪs/",
+                                "image": "assets/images/words/miss.png"
+                            },
+                            {
+                                "id": "w30",
+                                "sk": "kradnúť",
+                                "en": "steal",
+                                "pronunciation": "/stiːl/",
+                                "image": "assets/images/words/steal.png"
+                            },
+                            {
+                                "id": "w31",
+                                "sk": "nastúpiť do nesprávneho autobusu",
+                                "en": "take the wrong bus",
+                                "pronunciation": "/teɪk ðə rɒŋ bʌs/",
+                                "image": "assets/images/words/wrongBus.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc4",
+                        "title": "3D Mut's holiday",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "ísť kempovať",
+                                "en": "go camping",
+                                "pronunciation": "/ˈkæm.pɪŋ/",
+                                "image": "assets/images/words/goCamping.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "ísť sa plaviť",
+                                "en": "go sailing",
+                                "pronunciation": "/ˈseɪ.lɪŋ/",
+                                "image": "assets/images/words/goSailing.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "starať sa o",
+                                "en": "look after",
+                                "pronunciation": "/lʊk ˈæf.tər/",
+                                "image": "assets/images/words/lookAfter.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "nešťastný",
+                                "en": "unhappy",
+                                "pronunciation": "/ʌnˈhæp.i/",
+                                "image": "assets/images/words/unhappy.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc5",
+                        "title": "360° Culture",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "pobrežie",
+                                "en": "coast",
+                                "pronunciation": "/koʊst/",
+                                "image": "assets/images/words/coast.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "kultúra",
+                                "en": "culture",
+                                "pronunciation": "/ˈkʌl.tʃər/",
+                                "image": "assets/images/words/culture.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "krájať",
+                                "en": "cut (v)",
+                                "pronunciation": "/ˈkɒt/",
+                                "image": "assets/images/words/cut.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "vzrušujúci",
+                                "en": "exciting",
+                                "pronunciation": "/ɪkˈsaɪ.tɪŋ/",
+                                "image": "assets/images/words/exciting.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "plávajúci",
+                                "en": "floating",
+                                "pronunciation": "/ˈfloʊ.tɪŋ/",
+                                "image": "assets/images/words/floating.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "jazdenie na koni",
+                                "en": "horse riding",
+                                "pronunciation": "/ˈhɔːrs ˈraɪ.dɪŋ/",
+                                "image": "assets/images/words/horse_riding.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "neuveriteľný",
+                                "en": "incredible",
+                                "pronunciation": "/ɪnˈkrɛd.ə.bəl/",
+                                "image": "assets/images/words/incredible.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "ostrov",
+                                "en": "island",
+                                "pronunciation": "/ˈaɪ.lənd/",
+                                "image": "assets/images/words/island.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "ostrovan",
+                                "en": "islander",
+                                "pronunciation": "/ˈaɪ.lən.dər/",
+                                "image": "assets/images/words/islander.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "miestny",
+                                "en": "local",
+                                "pronunciation": "/ˈfɜːr/",
+                                "image": "assets/images/words/fur.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "súkromný",
+                                "en": "private",
+                                "pronunciation": "/ˈprɪ.vət/",
+                                "image": "assets/images/words/private.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "jazda",
+                                "en": "ride",
+                                "pronunciation": "/raɪd/",
+                                "image": "assets/images/words/ride.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "lano",
+                                "en": "rope",
+                                "pronunciation": "/roʊp/",
+                                "image": "assets/images/words/rope.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "suvenír",
+                                "en": "souvenir",
+                                "pronunciation": "/ˈsuː.və.nɪr/",
+                                "image": "assets/images/words/souvenir.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "kravata",
+                                "en": "tie (n)",
+                                "pronunciation": "/ˈtaɪ/",
+                                "image": "assets/images/words/tie.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "turizmus",
+                                "en": "tourism",
+                                "pronunciation": "/ˈtʊə.rɪ.zəm/",
+                                "image": "assets/images/words/tourism.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "vlna",
+                                "en": "wool",
+                                "pronunciation": "/ˈwʊl/",
+                                "image": "assets/images/words/wool.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "zip line (aktivita na lane s karabínou)",
+                                "en": "zip wire",
+                                "pronunciation": "/ˈzɪp waɪər/",
+                                "image": "assets/images/words/zip-wire.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc6",
+                        "title": "My Project",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "fantastický",
+                                "en": "fantastic",
+                                "pronunciation": "/ˈfæn.tæst.ɪk/",
+                                "image": "assets/images/words/fantastic.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "materiál",
+                                "en": "material",
+                                "pronunciation": "/ˈmæt.ər.i.əl/",
+                                "image": "assets/images/words/material.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "rutina",
+                                "en": "routine",
+                                "pronunciation": "/ruːˈtiːn/",
+                                "image": "assets/images/words/routine.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "riadok",
+                                "en": "row (n)",
+                                "pronunciation": "/ˈroʊ/",
+                                "image": "assets/images/words/row.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc7",
+                        "title": "Revision",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "konečne",
+                                "en": "finally",
+                                "pronunciation": "/ˈfaɪ.nə.li/",
+                                "image": "assets/images/words/finally.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "spriateliť sa",
+                                "en": "make friends",
+                                "pronunciation": "/meɪk frɛndz/",
+                                "image": "assets/images/words/makeFriends.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "náhliť sa",
+                                "en": "rush",
+                                "pronunciation": "/rʌʃ/",
+                                "image": "assets/images/words/rush.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "hrozný",
+                                "en": "terrible",
+                                "pronunciation": "/ˈtɛr.ə.bəl/",
+                                "image": "assets/images/words/terrible.png"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "ch4",
+                "title": "Unit 4 – Food",
+                "subchapters": [
+                    {
+                        "id": "sc1",
+                        "title": "4A Food and drink",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "Ešte niečo?",
+                                "en": "Anything else?",
+                                "pronunciation": "/ˈɛniθɪŋ ɛls/",
+                                "image": "assets/images/words/anythingElse.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "Nech sa páči.",
+                                "en": "Here you are.",
+                                "pronunciation": "/hɪər juː ɑːr./",
+                                "image": "assets/images/words/hereYouAre.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "druh",
+                                "en": "kind",
+                                "pronunciation": "/kaɪnd/",
+                                "image": "assets/images/words/kind.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "krabička na obed",
+                                "en": "lunchbox",
+                                "pronunciation": "/ˈlʌnʧ.bɒks/",
+                                "image": "assets/images/words/lunchbox.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "menu",
+                                "en": "menu",
+                                "pronunciation": "/ˈmɛnjuː/",
+                                "image": "assets/images/words/menu.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "miešaný, zmiešaný",
+                                "en": "mixed",
+                                "pronunciation": "/mɪkst/",
+                                "image": "assets/images/words/mixed.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "objednať si",
+                                "en": "order",
+                                "pronunciation": "/ˈɔːr.dər/",
+                                "image": "assets/images/words/order.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "banán",
+                                "en": "banana",
+                                "pronunciation": "/bəˈnæn.ə/",
+                                "image": "assets/images/words/banana.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "fazuľa",
+                                "en": "beans",
+                                "pronunciation": "/biːnz/",
+                                "image": "assets/images/words/beans.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "hovädzina",
+                                "en": "beef",
+                                "pronunciation": "/biːf/",
+                                "image": "assets/images/words/beef.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "syr",
+                                "en": "cheese",
+                                "pronunciation": "/ˈʧiːz/",
+                                "image": "assets/images/words/cheese.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "cheeseburger",
+                                "en": "cheeseburger",
+                                "pronunciation": "/ˈʧiːz.bɜːr.ɡər/",
+                                "image": "assets/images/words/cheeseburger.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "kurča",
+                                "en": "chicken",
+                                "pronunciation": "/ˈʧɪk.ɪn/",
+                                "image": "assets/images/words/chicken.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "hranolky",
+                                "en": "chips",
+                                "pronunciation": "/ˈʧɪps/",
+                                "image": "assets/images/words/chips.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "kola",
+                                "en": "cola",
+                                "pronunciation": "/ˈkoʊ.lə/",
+                                "image": "assets/images/words/cola.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "smotaná",
+                                "en": "cream",
+                                "pronunciation": "/kriːm/",
+                                "image": "assets/images/words/cream.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "dezert",
+                                "en": "dessert",
+                                "pronunciation": "/dɪˈzɜːrt/",
+                                "image": "assets/images/words/dessert.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "nápoj",
+                                "en": "drink",
+                                "pronunciation": "/drɪŋk/",
+                                "image": "assets/images/words/drink.png"
+                            },
+                            {
+                                "id": "w19",
+                                "sk": "vajce",
+                                "en": "egg",
+                                "pronunciation": "/ɛɡ/",
+                                "image": "assets/images/words/egg.png"
+                            },
+                            {
+                                "id": "w20",
+                                "sk": "ryba, ryby",
+                                "en": "fish",
+                                "pronunciation": "/fɪʃ/",
+                                "image": "assets/images/words/fish.png"
+                            },
+                            {
+                                "id": "w21",
+                                "sk": "ovocie",
+                                "en": "fruit",
+                                "pronunciation": "/fruːt/",
+                                "image": "assets/images/words/fruit.png"
+                            },
+                            {
+                                "id": "w22",
+                                "sk": "hrozno",
+                                "en": "grapes",
+                                "pronunciation": "/ɡreɪps/",
+                                "image": "assets/images/words/grapes.png"
+                            },
+                            {
+                                "id": "w23",
+                                "sk": "horúca čokoláda",
+                                "en": "hot chocolate",
+                                "pronunciation": "/hɔːt ˈʧɒk.lət/",
+                                "image": "assets/images/words/hotChocolate.png"
+                            },
+                            {
+                                "id": "w24",
+                                "sk": "zmrzlina",
+                                "en": "ice-cream",
+                                "pronunciation": "/ˈaɪs.kriːm/",
+                                "image": "assets/images/words/iceCream.png"
+                            },
+                            {
+                                "id": "w25",
+                                "sk": "jahniatko",
+                                "en": "lamb",
+                                "pronunciation": "/læm/",
+                                "image": "assets/images/words/lamb.png"
+                            },
+                            {
+                                "id": "w26",
+                                "sk": "malinovka",
+                                "en": "lemonade",
+                                "pronunciation": "/ˌlɛm.əˈneɪd/",
+                                "image": "assets/images/words/lemonade.png"
+                            },
+                            {
+                                "id": "w27",
+                                "sk": "hlávkový šalát",
+                                "en": "lettuce",
+                                "pronunciation": "/ˈlɛt.ɪs/",
+                                "image": "assets/images/words/lettuce.png"
+                            },
+                            {
+                                "id": "w28",
+                                "sk": "mäso",
+                                "en": "meat",
+                                "pronunciation": "/miːt/",
+                                "image": "assets/images/words/meat.png"
+                            },
+                            {
+                                "id": "w29",
+                                "sk": "mliečny kokteil",
+                                "en": "milkshake",
+                                "pronunciation": "/ˈmɪlk.ʃeɪk/",
+                                "image": "assets/images/words/milkshake.png"
+                            },
+                            {
+                                "id": "w30",
+                                "sk": "pomerančový džús",
+                                "en": "orange juice",
+                                "pronunciation": "/ˈɔːr.ɪndʒ ˈdʒuːs/",
+                                "image": "assets/images/words/orangeJuice.png"
+                            },
+                            {
+                                "id": "w31",
+                                "sk": "cestoviny",
+                                "en": "pasta",
+                                "pronunciation": "/ˈpɑː.stə/",
+                                "image": "assets/images/words/pasta.png"
+                            },
+                            {
+                                "id": "w32",
+                                "sk": "koláč",
+                                "en": "pie",
+                                "pronunciation": "/paɪ/",
+                                "image": "assets/images/words/pie.png"
+                            },
+                            {
+                                "id": "w33",
+                                "sk": "ryža",
+                                "en": "rice",
+                                "pronunciation": "/raɪs/",
+                                "image": "assets/images/words/rice.png"
+                            },
+                            {
+                                "id": "w34",
+                                "sk": "šalát",
+                                "en": "salad",
+                                "pronunciation": "/ˈsæl.əd/",
+                                "image": "assets/images/words/salad.png"
+                            },
+                            {
+                                "id": "w35",
+                                "sk": "losos",
+                                "en": "salmon",
+                                "pronunciation": "/ˈsælmən/",
+                                "image": "assets/images/words/salmon.png"
+                            },
+                            {
+                                "id": "w36",
+                                "sk": "mandarínka",
+                                "en": "satsuma",
+                                "pronunciation": "/ˈsætsuːmə/",
+                                "image": "assets/images/words/satsuma.png"
+                            },
+                            {
+                                "id": "w36",
+                                "sk": "boloňské špagety",
+                                "en": "spaghetti bolognese",
+                                "pronunciation": "/spəˈɡɛti ˌbɒləˈneɪz/",
+                                "image": "assets/images/words/spaghettiBolognese.png"
+                            },
+                            {
+                                "id": "w37",
+                                "sk": "čaj",
+                                "en": "tea",
+                                "pronunciation": "/tiː/",
+                                "image": "assets/images/words/tea.png"
+                            },
+                            {
+                                "id": "w38",
+                                "sk": "paradajka",
+                                "en": "tomato",
+                                "pronunciation": "/təˈmɑː.təʊ/",
+                                "image": "assets/images/words/tomato.png"
+                            },
+                            {
+                                "id": "w39",
+                                "sk": "tuniak",
+                                "en": "tuna",
+                                "pronunciation": "/ˈtuː.nə/",
+                                "image": "assets/images/words/tuna.png"
+                            },
+                            {
+                                "id": "w40",
+                                "sk": "zelenina",
+                                "en": "vegetable",
+                                "pronunciation": "/ˈvɛdʒ.tə.bəl/",
+                                "image": "assets/images/words/vegetable.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc2",
+                        "title": "4B Stone soup",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "takmer",
+                                "en": "almost",
+                                "pronunciation": "/ˈɔːl.məʊst/",
+                                "image": "assets/images/words/almost.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "ďalší",
+                                "en": "another",
+                                "pronunciation": "/ɑːnʌðər/",
+                                "image": "assets/images/words/another.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "nejaký, žiadny",
+                                "en": "any",
+                                "pronunciation": "/ˈɛni/",
+                                "image": "assets/images/words/any.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "niekto, nikto",
+                                "en": "anyone",
+                                "pronunciation": "/ˈɛniˌwʌn/",
+                                "image": "assets/images/words/anyone.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "fľaša",
+                                "en": "bottle",
+                                "pronunciation": "/ˈbɒt.əl/",
+                                "image": "assets/images/words/bottle.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "chlieb",
+                                "en": "bread",
+                                "pronunciation": "/bɹɛd/",
+                                "image": "assets/images/words/bread.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "priniesť",
+                                "en": "bring back",
+                                "pronunciation": "/brɪŋ bæk/",
+                                "image": "assets/images/words/bringBack.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "maslo",
+                                "en": "butter",
+                                "pronunciation": "/ˈbʌt.ər/",
+                                "image": "assets/images/words/butter.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "kapusta",
+                                "en": "cabbage",
+                                "pronunciation": "/ˈkæb.ɪdʒ/",
+                                "image": "assets/images/words/cabbage.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "mrkva",
+                                "en": "carrot",
+                                "pronunciation": "/ˈkær.ət/",
+                                "image": "assets/images/words/carrot.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "vrátiť sa",
+                                "en": "come back",
+                                "pronunciation": "/kʌm bæk/",
+                                "image": "assets/images/words/comeBack.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "chrumky",
+                                "en": "crisps",
+                                "pronunciation": "/ˈkrɪsps/",
+                                "image": "assets/images/words/crisps.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "zábavný park",
+                                "en": "cut up",
+                                "pronunciation": "/ˈkʌt ʌp/",
+                                "image": "assets/images/words/cutUp.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "chutný",
+                                "en": "delicious",
+                                "pronunciation": "/dɪˈlɪʃ.əs/",
+                                "image": "assets/images/words/delicious.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "diéta",
+                                "en": "diet",
+                                "pronunciation": "/ˈdaɪ.ət/",
+                                "image": "assets/images/words/diet.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "Ospravedlňujem sa.",
+                                "en": "Excuse me.",
+                                "pronunciation": "/ɪkˈskjuːz miː/",
+                                "image": "assets/images/words/excuseMe.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "priniesť",
+                                "en": "fetch",
+                                "pronunciation": "/fɛtʃ/",
+                                "image": "assets/images/words/fetch.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "zistiť",
+                                "en": "find out",
+                                "pronunciation": "/ˈfaɪnd aʊt/",
+                                "image": "assets/images/words/findOut.png"
+                            },
+                            {
+                                "id": "w19",
+                                "sk": "zdravý",
+                                "en": "healthy",
+                                "pronunciation": "/ˈhɛl.θi/",
+                                "image": "assets/images/words/healthy.png"
+                            },
+                            {
+                                "id": "w20",
+                                "sk": "zaklopať",
+                                "en": "knock",
+                                "pronunciation": "/nɒk/",
+                                "image": "assets/images/words/knock.png"
+                            },
+                            {
+                                "id": "w21",
+                                "sk": "citrón",
+                                "en": "lemon",
+                                "pronunciation": "/ˈlɛm.ən/",
+                                "image": "assets/images/words/lemon.png"
+                            },
+                            {
+                                "id": "w22",
+                                "sk": "bochník, peceň",
+                                "en": "loaf",
+                                "pronunciation": "/loʊf/",
+                                "image": "assets/images/words/loaf.png"
+                            },
+                            {
+                                "id": "w23",
+                                "sk": "kúzelný",
+                                "en": "magic",
+                                "pronunciation": "/ˈmædʒ.ɪk/",
+                                "image": "assets/images/words/magic.png"
+                            },
+                            {
+                                "id": "w24",
+                                "sk": "mlieko",
+                                "en": "milk",
+                                "pronunciation": "/ˈmɪlk/",
+                                "image": "assets/images/words/milk.png"
+                            },
+                            {
+                                "id": "w25",
+                                "sk": "huba",
+                                "en": "mushroom",
+                                "pronunciation": "/ˈmʌʃ.ruːm/",
+                                "image": "assets/images/words/mushroom.png"
+                            },
+                            {
+                                "id": "w26",
+                                "sk": "bežný",
+                                "en": "normal",
+                                "pronunciation": "/ˈnɔːr.məl/",
+                                "image": "assets/images/words/normal.png"
+                            },
+                            {
+                                "id": "w27",
+                                "sk": "cibuľa",
+                                "en": "onion",
+                                "pronunciation": "/ˈɒn.jən/",
+                                "image": "assets/images/words/onion.png"
+                            },
+                            {
+                                "id": "w28",
+                                "sk": "korenie",
+                                "en": "pepper",
+                                "pronunciation": "/ˈpɛp.ər/",
+                                "image": "assets/images/words/pepper.png"
+                            },
+                            {
+                                "id": "w29",
+                                "sk": "škoda",
+                                "en": "pity",
+                                "pronunciation": "/ˈpɪt.i/",
+                                "image": "assets/images/words/pity.png"
+                            },
+                            {
+                                "id": "w30",
+                                "sk": "zemiak",
+                                "en": "potato",
+                                "pronunciation": "/pəˈteɪ.toʊ/",
+                                "image": "assets/images/words/potato.png"
+                            },
+                            {
+                                "id": "w31",
+                                "sk": "hotový",
+                                "en": "ready",
+                                "pronunciation": "/ˈrɛd.i/",
+                                "image": "assets/images/words/ready.png"
+                            },
+                            {
+                                "id": "w32",
+                                "sk": "soľ",
+                                "en": "salt",
+                                "pronunciation": "/sɔːlt/",
+                                "image": "assets/images/words/salt.png"
+                            },
+                            {
+                                "id": "w33",
+                                "sk": "panvica",
+                                "en": "saucepan",
+                                "pronunciation": "/ˈsɔːs.pæn/",
+                                "image": "assets/images/words/saucepan.png"
+                            },
+                            {
+                                "id": "w34",
+                                "sk": "párok, klobása",
+                                "en": "sausage",
+                                "pronunciation": "/ˈsɔː.sɪdʒ/",
+                                "image": "assets/images/words/sausage.png"
+                            },
+                            {
+                                "id": "w35",
+                                "sk": "krajec",
+                                "en": "slice",
+                                "pronunciation": "/ˈslaɪs/",
+                                "image": "assets/images/words/slice.png"
+                            },
+                            {
+                                "id": "w36",
+                                "sk": "polievka",
+                                "en": "soup",
+                                "pronunciation": "/suːp/",
+                                "image": "assets/images/words/soup.png"
+                            },
+                            {
+                                "id": "w37",
+                                "sk": "lyžica",
+                                "en": "spoon",
+                                "pronunciation": "/spuːn/",
+                                "image": "assets/images/words/spoon.png"
+                            },
+                            {
+                                "id": "w38",
+                                "sk": "kameň",
+                                "en": "stone",
+                                "pronunciation": "/ˈstoʊn/",
+                                "image": "assets/images/words/stone.png"
+                            },
+                            {
+                                "id": "w39",
+                                "sk": "cukor",
+                                "en": "sugar",
+                                "pronunciation": "/ˈsuː.ɡər/",
+                                "image": "assets/images/words/sugar.png"
+                            },
+                            {
+                                "id": "w40",
+                                "sk": "ochutnať",
+                                "en": "taste",
+                                "pronunciation": "/teɪst/",
+                                "image": "assets/images/words/taste.png"
+                            },
+                            {
+                                "id": "w41",
+                                "sk": "či",
+                                "en": "whether",
+                                "pronunciation": "/ˈwɛð.ər/",
+                                "image": "assets/images/words/whether.png"
+                            },
+                            {
+                                "id": "w42",
+                                "sk": "víno",
+                                "en": "wine",
+                                "pronunciation": "/ˈwaɪn/",
+                                "image": "assets/images/words/wine.png"
+                            },
+                            {
+                                "id": "w43",
+                                "sk": "jogurt",
+                                "en": "yoghurt",
+                                "pronunciation": "/ˈjɒɡ.ərt/",
+                                "image": "assets/images/words/yoghurt.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc3",
+                        "title": "4C Mut goes shopping",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "jablkový džús",
+                                "en": "apple juice",
+                                "pronunciation": "/ˈæp.əl dʒuːs/",
+                                "image": "assets/images/words/appleJuice.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "Konečne!",
+                                "en": "At last!",
+                                "pronunciation": "/æt lɑːst/",
+                                "image": "assets/images/words/atLast.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "tabuľka",
+                                "en": "bar",
+                                "pronunciation": "/bɑːr/",
+                                "image": "assets/images/words/bar.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "zväzok",
+                                "en": "bunch",
+                                "pronunciation": "/ˈbʌnʧ/",
+                                "image": "assets/images/words/bunch.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "kartónový obal",
+                                "en": "carton",
+                                "pronunciation": "/ˈkɑːr.tən/",
+                                "image": "assets/images/words/carton.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "gram",
+                                "en": "gram",
+                                "pronunciation": "/ɡræm/",
+                                "image": "assets/images/words/gram.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "Koľko...?",
+                                "en": "How much...?",
+                                "pronunciation": "/haʊ mʌʧ/",
+                                "image": "assets/images/words/howMuch.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "vrecúško",
+                                "en": "packet",
+                                "pronunciation": "/ˈpæk.ɪt/",
+                                "image": "assets/images/words/packet.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "téglik",
+                                "en": "pot",
+                                "pronunciation": "/ˈpɒt/",
+                                "image": "assets/images/words/pot.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "množstvo",
+                                "en": "quantity",
+                                "pronunciation": "/ˈkwɒn.tɪ.ti/",
+                                "image": "assets/images/words/quantity.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "polica",
+                                "en": "shelf",
+                                "pronunciation": "/ʃɛlf/",
+                                "image": "assets/images/words/shelf.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "konzerva",
+                                "en": "tin",
+                                "pronunciation": "/tɪn/",
+                                "image": "assets/images/words/tin.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "znepokojený",
+                                "en": "worried",
+                                "pronunciation": "/ˈwʌr.id/",
+                                "image": "assets/images/words/worried.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc4",
+                        "title": "4D Emma's apple crumble",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "pečené jabká s posýpkou",
+                                "en": "apple crumble",
+                                "pronunciation": "/ˈæp.əl ˈkrʌm.bəl/",
+                                "image": "assets/images/words/appleCrumble.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "variť",
+                                "en": "boil",
+                                "pronunciation": "/ˈbɔɪl/",
+                                "image": "assets/images/words/boil.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "miska",
+                                "en": "bowl",
+                                "pronunciation": "/boʊl/",
+                                "image": "assets/images/words/bowl.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "zakryť",
+                                "en": "cover",
+                                "pronunciation": "/ˈkʌv.ər/",
+                                "image": "assets/images/words/cover.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "stupeň",
+                                "en": "degree",
+                                "pronunciation": "/dɪˈɡriː/",
+                                "image": "assets/images/words/degree.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "misa",
+                                "en": "dish",
+                                "pronunciation": "/dɪʃ/",
+                                "image": "assets/images/words/dish.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "múka",
+                                "en": "flour",
+                                "pronunciation": "/flaʊər/",
+                                "image": "assets/images/words/flour.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "vyprážiť",
+                                "en": "fry",
+                                "pronunciation": "/fraɪ/",
+                                "image": "assets/images/words/fry.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "panvica na vyprážanie",
+                                "en": "frying pan",
+                                "pronunciation": "/ˈfraɪ.ɪŋ pæn/",
+                                "image": "assets/images/words/frying_pan.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "strúhať",
+                                "en": "grate",
+                                "pronunciation": "/ɡreɪt/",
+                                "image": "assets/images/words/grate.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "gril",
+                                "en": "grill",
+                                "pronunciation": "/ɡrɪl/",
+                                "image": "assets/images/words/grill.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "polovica",
+                                "en": "half",
+                                "pronunciation": "/hɑːf/",
+                                "image": "assets/images/words/half.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "prísada",
+                                "en": "ingredient",
+                                "pronunciation": "/ɪnˈɡriː.di.ənt/",
+                                "image": "assets/images/words/ingredient.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "margarín",
+                                "en": "margarine",
+                                "pronunciation": "/ˈmɑːr.ɡə.riːn/",
+                                "image": "assets/images/words/margarine.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "roztopiť",
+                                "en": "melt",
+                                "pronunciation": "/mɛlt/",
+                                "image": "assets/images/words/melt.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "zmiešať",
+                                "en": "mix",
+                                "pronunciation": "/mɪks/",
+                                "image": "assets/images/words/mix.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "zmes",
+                                "en": "mixture",
+                                "pronunciation": "/ˈmɪk.stʃər/",
+                                "image": "assets/images/words/mixture.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "sporák",
+                                "en": "oven",
+                                "pronunciation": "/ˈʌv.ən/",
+                                "image": "assets/images/words/oven.png"
+                            },
+                            {
+                                "id": "w19",
+                                "sk": "hrášok",
+                                "en": "peas",
+                                "pronunciation": "/piːz/",
+                                "image": "assets/images/words/peas.png"
+                            },
+                            {
+                                "id": "w20",
+                                "sk": "olúpať",
+                                "en": "peel",
+                                "pronunciation": "/piːl/",
+                                "image": "assets/images/words/peel.png"
+                            },
+                            {
+                                "id": "w21",
+                                "sk": "škrabka",
+                                "en": "peeler",
+                                "pronunciation": "/ˈpiː.lər/",
+                                "image": "assets/images/words/peeler.png"
+                            },
+                            {
+                                "id": "w22",
+                                "sk": "naliať",
+                                "en": "pour",
+                                "pronunciation": "/ˈpɔːr/",
+                                "image": "assets/images/words/pour.png"
+                            },
+                            {
+                                "id": "w23",
+                                "sk": "recept",
+                                "en": "recipe",
+                                "pronunciation": "/ˈrɛs.ɪ.pi/",
+                                "image": "assets/images/words/recipe.png"
+                            },
+                            {
+                                "id": "w24",
+                                "sk": "omáčka",
+                                "en": "sauce",
+                                "pronunciation": "/ˈsɔːs/",
+                                "image": "assets/images/words/sauce.png"
+                            },
+                            {
+                                "id": "w25",
+                                "sk": "podávať, servírovať",
+                                "en": "serve",
+                                "pronunciation": "/sɜːrv/",
+                                "image": "assets/images/words/serve.png"
+                            },
+                            {
+                                "id": "w26",
+                                "sk": "zvyšok",
+                                "en": "the rest",
+                                "pronunciation": "/ðə rɛst/",
+                                "image": "assets/images/words/theRest.png"
+                            },
+                            {
+                                "id": "w27",
+                                "sk": "toast",
+                                "en": "toast",
+                                "pronunciation": "/toʊst/",
+                                "image": "assets/images/words/toast.png"
+                            },
+                            {
+                                "id": "w28",
+                                "sk": "ocot",
+                                "en": "vinegar",
+                                "pronunciation": "/ˈvɪn.ɪ.ɡər/",
+                                "image": "assets/images/words/vinegar.png"
+                            },
+                            {
+                                "id": "w29",
+                                "sk": "zapekaný toast so syrom",
+                                "en": "Welsh rarebit",
+                                "pronunciation": "/ˈwɛlʃ ˈrɛr.bɪt/",
+                                "image": "assets/images/words/welshRarebit.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc5",
+                        "title": "360° Culture",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "oslava",
+                                "en": "celebration",
+                                "pronunciation": "/ˌsɛl.ɪ.brəˈeɪ.ʃən/",
+                                "image": "assets/images/words/celebration.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "šéfkuchár",
+                                "en": "chef",
+                                "pronunciation": "/ˈʃɛf/",
+                                "image": "assets/images/words/chef.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "životné prostredie",
+                                "en": "environment",
+                                "pronunciation": "/ˈɪn.vaɪ.rən.mənt/",
+                                "image": "assets/images/words/environment.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "odborník",
+                                "en": "expert",
+                                "pronunciation": "/ɪkˈspɜːrt/",
+                                "image": "assets/images/words/expert.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "poľnohospodárska pôda",
+                                "en": "farmland",
+                                "pronunciation": "/ˈfɑːrmlænd/",
+                                "image": "assets/images/words/farmland.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "skleníkový plyn",
+                                "en": "greenhouse gas",
+                                "pronunciation": "/ˈɡriːn.haʊs ˈɡæs/",
+                                "image": "assets/images/words/greenhouseGas.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "škodca",
+                                "en": "pest",
+                                "pronunciation": "/pɛst/",
+                                "image": "assets/images/words/pest.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "planéta",
+                                "en": "planet",
+                                "pronunciation": "/ˈplæn.ɪt/",
+                                "image": "assets/images/words/planet.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "na rastlinnej báze",
+                                "en": "plant-based",
+                                "pronunciation": "/ˈplæntˌbeɪst/",
+                                "image": "assets/images/words/plantBased.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "produkovať",
+                                "en": "produce (v)",
+                                "pronunciation": "/ˈprɒd.juːs/",
+                                "image": "assets/images/words/produce.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "vegán",
+                                "en": "vegan",
+                                "pronunciation": "/ˈviː.ɡən/",
+                                "image": "assets/images/words/vegan.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc6",
+                        "title": "My Project",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "dýchať",
+                                "en": "breathe",
+                                "pronunciation": "/briːð/",
+                                "image": "assets/images/words/breathe.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "čínske jedlo",
+                                "en": "Chinese",
+                                "pronunciation": "/ˈtʃaɪ.niːz/",
+                                "image": "assets/images/words/chinese.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "upravovať, editovať",
+                                "en": "edit",
+                                "pronunciation": "/ˈɛd.ɪt/",
+                                "image": "assets/images/words/edit.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "výraz",
+                                "en": "expression",
+                                "pronunciation": "/ˈɛk.sprɛʃ.ən/",
+                                "image": "assets/images/words/expression.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "ovos",
+                                "en": "oats",
+                                "pronunciation": "/oʊts/",
+                                "image": "assets/images/words/oats.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "urobiť pauzu",
+                                "en": "pause",
+                                "pronunciation": "/pɔːz/",
+                                "image": "assets/images/words/pause.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "bod, myšlienka v prezentácii",
+                                "en": "point (n)",
+                                "pronunciation": "/pɔɪnt/",
+                                "image": "assets/images/words/point.png"
+                            },
+                            {
+                                "id": "w8",
+                                "sk": "(ovsená) kaša",
+                                "en": "porridge",
+                                "pronunciation": "/ˈpɔːr.ɪdʒ/",
+                                "image": "assets/images/words/porridge.png"
+                            },
+                            {
+                                "id": "w9",
+                                "sk": "rekvizita",
+                                "en": "prop",
+                                "pronunciation": "/prɒp/",
+                                "image": "assets/images/words/prop.png"
+                            },
+                            {
+                                "id": "w10",
+                                "sk": "nacvičiť si",
+                                "en": "rehearse",
+                                "pronunciation": "/rɪˈhɜːrs/",
+                                "image": "assets/images/words/rehearse.png"
+                            },
+                            {
+                                "id": "w11",
+                                "sk": "znázorňovať",
+                                "en": "represent",
+                                "pronunciation": "/ˈrɛp.rɪ.zɛnt/",
+                                "image": "assets/images/words/represent.png"
+                            },
+                            {
+                                "id": "w12",
+                                "sk": "scéna",
+                                "en": "scene",
+                                "pronunciation": "/siːn/",
+                                "image": "assets/images/words/scene.png"
+                            },
+                            {
+                                "id": "w13",
+                                "sk": "koláčik, buchta",
+                                "en": "scone",
+                                "pronunciation": "/skoʊn/",
+                                "image": "assets/images/words/scone.png"
+                            },
+                            {
+                                "id": "w14",
+                                "sk": "špecialita",
+                                "en": "speciality",
+                                "pronunciation": "/speˈʃæl.ɪ.ti/",
+                                "image": "assets/images/words/speciality.png"
+                            },
+                            {
+                                "id": "w15",
+                                "sk": "jarná rolka",
+                                "en": "spring roll",
+                                "pronunciation": "/ˈsprɪŋ ˌroʊl/",
+                                "image": "assets/images/words/springRoll.png"
+                            },
+                            {
+                                "id": "w16",
+                                "sk": "zdôrazniť",
+                                "en": "stress",
+                                "pronunciation": "/ˈstrɛs/",
+                                "image": "assets/images/words/stress.png"
+                            },
+                            {
+                                "id": "w17",
+                                "sk": "jedlo, koré si zákazník berie so sebou",
+                                "en": "takeaway",
+                                "pronunciation": "/ˈteɪk.ə.weɪ/",
+                                "image": "assets/images/words/takeaway.png"
+                            },
+                            {
+                                "id": "w18",
+                                "sk": "nahovorený komentár vo videu ",
+                                "en": "voice-over",
+                                "pronunciation": "/ˈvɔɪsˌoʊ.vər/",
+                                "image": "assets/images/words/voiceOver.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sc7",
+                        "title": "Revision",
+                        "words": [
+                            {
+                                "id": "w1",
+                                "sk": "kruh",
+                                "en": "circle",
+                                "pronunciation": "/ˈsɜːr.kəl/",
+                                "image": "assets/images/words/circle.png"
+                            },
+                            {
+                                "id": "w2",
+                                "sk": "vystrihnúť",
+                                "en": "cut out",
+                                "pronunciation": "/kʌt aʊt/",
+                                "image": "assets/images/words/cutOut.png"
+                            },
+                            {
+                                "id": "w3",
+                                "sk": "balík",
+                                "en": "parcel",
+                                "pronunciation": "/ˈpɑːr.səl/",
+                                "image": "assets/images/words/parcel.png"
+                            },
+                            {
+                                "id": "w4",
+                                "sk": "plastový",
+                                "en": "plastic",
+                                "pronunciation": "/ˈplæs.tɪk/",
+                                "image": "assets/images/words/plastic.png"
+                            },
+                            {
+                                "id": "w5",
+                                "sk": "hádanka",
+                                "en": "puzzle",
+                                "pronunciation": "/ˈpʌz.əl/",
+                                "image": "assets/images/words/puzzle.png"
+                            },
+                            {
+                                "id": "w6",
+                                "sk": "okolo",
+                                "en": "round",
+                                "pronunciation": "/raʊnd/",
+                                "image": "assets/images/words/round.png"
+                            },
+                            {
+                                "id": "w7",
+                                "sk": "zamiešať",
+                                "en": "stir",
+                                "pronunciation": "/stɜːr/",
+                                "image": "assets/images/words/stir.png"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     }
