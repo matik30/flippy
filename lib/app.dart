@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'features/home/home_screen.dart';
 import 'features/splash/splash_page.dart';
+import 'features/chapters/chapters_screen.dart';
+import 'features/lessons/lesson_screen.dart';
 import 'theme/colors.dart';
 import 'theme/fonts.dart';
 
@@ -21,15 +23,25 @@ class FlippyApp extends StatelessWidget {
 final _router = GoRouter(
   initialLocation: '/splash',
   routes: [
+    GoRoute(path: '/splash', builder: (_, __) => const SplashPage()),
+    GoRoute(path: '/', builder: (_, __) => const HomePage()),
     GoRoute(
-      path: '/splash',
-      builder: (_, __) => const SplashPage(),
+      path: '/chapters',
+      builder: (ctx, state) {
+        final book = state.extra as Map<String, dynamic>?; // extra posielané z HomePage
+        if (book == null) {
+          return const Scaffold(body: Center(child: Text('No book provided')));
+        }
+        return BookScreen(book: book);
+      },
     ),
     GoRoute(
-      path: '/',
-      builder: (_, __) => const HomePage(),
-    ),
-  ],
+      path: '/lessons',
+      builder: (_, state) {
+        final args = state.extra as Map<String, dynamic>?;
+        return LessonScreen(args: args);
+      },
+    ),  ],
 );
 
 final _theme = ThemeData(
