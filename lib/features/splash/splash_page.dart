@@ -41,61 +41,65 @@ class _SplashPageState extends State<SplashPage>
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-                    children: [
+          children: [
             SizedBox(
               width: 160,
               height: 160,
               child: Stack(
                 alignment: Alignment.center,
-          children: [
-            // Gradient CircularProgressIndicator with rotation animation
-            SizedBox(
-              width: 140,
-              height: 140,
-              child: ClipOval(
-                    child: AnimatedBuilder(
-                      animation: _controller,
-                      builder: (_, child) {
-                        return Transform.rotate(
-                          angle: _controller.value * 2 * 3.14, // otáča pomaly
-                          child: ShaderMask(
-                            shaderCallback: (rect) {
-                              return SweepGradient(
-                                startAngle: 0,
-                                endAngle: 3.14 * 2,
-                                colors: [
-                                  AppColors.accent,
-                                  AppColors.secondary.withValues(alpha: 0.4),
-                                ],
-                                stops: [0.0, 0.4],
-                              ).createShader(rect);
-                            },
-                            child: CircularProgressIndicator(
-                              strokeWidth: 12, // hrúbka kruhu
-                              valueColor: const AlwaysStoppedAnimation(Colors.white),
-                              backgroundColor: Colors.transparent,
+                children: [
+                  // Gradient CircularProgressIndicator with rotation animation
+                  SizedBox(
+                    width: 140,
+                    height: 140,
+                    child: ClipOval(
+                      child: AnimatedBuilder(
+                        animation: _controller,
+                        builder: (_, child) {
+                          return Transform.rotate(
+                            angle: _controller.value * 2 * 3.14, // otáča pomaly
+                            child: ShaderMask(
+                              shaderCallback: (rect) {
+                                return SweepGradient(
+                                  startAngle: 0,
+                                  endAngle: 3.14 * 2,
+                                  colors: [
+                                    AppColors.accent,
+                                    AppColors.secondary.withValues(alpha: 0.4),
+                                  ],
+                                  stops: [0.0, 0.4],
+                                ).createShader(rect);
+                              },
+                              child: CircularProgressIndicator(
+                                strokeWidth: 12, // hrúbka kruhu
+                                valueColor: const AlwaysStoppedAnimation(
+                                  Colors.white,
+                                ),
+                                backgroundColor: Colors.transparent,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                  ),
-              ),
-            ),
-
-                  // Placeholder loga
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
+                          );
+                        },
+                      ),
                     ),
-                    child: const Center(
-                      child: Text(
-                        'Logo',
-                        style: TextStyle(
-                          color: AppColors.secondary,
-                          fontWeight: FontWeight.bold,
+                  ),
+
+                  // App logo image
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/images/logo/len-logo.png',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 60,
+                        height: 60,
+                        color: AppColors.secondary.withValues(alpha: 0.2),
+                        child: const Center(
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: AppColors.secondary,
+                          ),
                         ),
                       ),
                     ),

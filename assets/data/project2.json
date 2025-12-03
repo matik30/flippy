@@ -1815,119 +1815,119 @@
                 "sk": "zahrať, zinscenovať",
                 "en": "act",
                 "pronunciation": "/ækt/",
-                "image": "assets/images/words/act.png"
+                "image": "assets/images/words/act.jpg"
               },
               {
                 "id": "w2",
                 "sk": "kosť",
                 "en": "bone",
                 "pronunciation": "/bəʊn/",
-                "image": "assets/images/words/bone.png"
+                "image": "assets/images/words/bone.jpg"
               },
               {
                 "id": "w3",
                 "sk": "dinosaurus",
                 "en": "dinosaur",
                 "pronunciation": "/ˈdɪn.ə.sɔː/",
-                "image": "assets/images/words/dinosaur.png"
+                "image": "assets/images/words/dinosaur.jpg"
               },
               {
                 "id": "w4",
                 "sk": "ukončenie",
-                "en": "ending",
+                "en": "termination",
                 "pronunciation": "/ˈen.dɪŋ/",
-                "image": "assets/images/words/ending.png"
+                "image": "assets/images/words/ending.jpg"
               },
               {
                 "id": "w5",
                 "sk": "lepidlo",
                 "en": "glue",
                 "pronunciation": "/ɡluː/",
-                "image": "assets/images/words/glue.png"
+                "image": "assets/images/words/glue.jpg"
               },
               {
                 "id": "w6",
                 "sk": "Prilepil som sa!",
                 "en": "I'm stuck!",
                 "pronunciation": "/aɪm stʌk/",
-                "image": "assets/images/words/stuck.png"
+                "image": "assets/images/words/iAmStuck.jpg"
               },
               {
                 "id": "w7",
                 "sk": "pokyn",
                 "en": "instruction",
                 "pronunciation": "/ɪnˈstrʌk.ʃən/",
-                "image": "assets/images/words/instruction.png"
+                "image": "assets/images/words/instruction.jpg"
               },
               {
                 "id": "w8",
                 "sk": "popoludní",
                 "en": "in the afternoon",
                 "pronunciation": "/ɪn ðə ˌɑːf.təˈnuːn/",
-                "image": "assets/images/words/inTheAfternoon.png"
+                "image": "assets/images/words/inTheAfternoon.jpg"
               },
               {
                 "id": "w9",
                 "sk": "hľadať",
                 "en": "look for",
                 "pronunciation": "/lʊk fɔː/",
-                "image": "assets/images/words/lookFor.png"
+                "image": "assets/images/words/lookFor.jpg"
               },
               {
                 "id": "w10",
                 "sk": "časopis",
                 "en": "magazine",
                 "pronunciation": "/ˈmæɡ.ə.ziːn/",
-                "image": "assets/images/words/magazine.png"
+                "image": "assets/images/words/magazine.jpg"
               },
               {
                 "id": "w11",
                 "sk": "model",
                 "en": "model",
                 "pronunciation": "/ˈmɒd.əl/",
-                "image": "assets/images/words/model.png"
+                "image": "assets/images/words/model.jpg"
               },
               {
                 "id": "w12",
                 "sk": "ústa",
                 "en": "mouth",
                 "pronunciation": "/maʊθ/",
-                "image": "assets/images/words/mouth.png"
+                "image": "assets/images/words/mouth.jpg"
               },
               {
                 "id": "w13",
                 "sk": "hýbať sa",
                 "en": "move",
                 "pronunciation": "/muːv/",
-                "image": "assets/images/words/move.png"
+                "image": "assets/images/words/move.jpg"
               },
               {
                 "id": "w14",
                 "sk": "pršať",
                 "en": "rain",
                 "pronunciation": "/reɪn/",
-                "image": "assets/images/words/rain.png"
+                "image": "assets/images/words/rain.jpg"
               },
               {
                 "id": "w15",
                 "sk": "niečo",
                 "en": "something",
                 "pronunciation": "/ˈsʌm.θɪŋ/",
-                "image": "assets/images/words/something.png"
+                "image": "assets/images/words/something.jpg"
               },
               {
                 "id": "w16",
                 "sk": "Prepáč./Prepáč mi.",
                 "en": "Sorry./I'm sorry.",
                 "pronunciation": "/ˈsɒr.i/",
-                "image": "assets/images/words/sorry.png"
+                "image": "assets/images/words/sorry.jpg"
               },
               {
                 "id": "w17",
                 "sk": "Čo sa deje?",
                 "en": "What's wrong?",
                 "pronunciation": "/ˈwɒts rɒŋ/",
-                "image": "assets/images/words/whatsWrong.png"
+                "image": "assets/images/words/whatsWrong.jpg"
               }
             ]
           },
