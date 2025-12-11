@@ -28,8 +28,14 @@ class _LessonScreenState extends State<LessonScreen> {
   // uložené označené id slovíčok
   Set<String> _marked = <String>{};
 
-  // kľúč pre uchovanie označených slovíčok (globálny)
-  static const String _markedKey = 'marked_words';
+  // kľúč pre uchovanie označených slovíčok (per-subchapter)
+  late String _markedKey;
+
+  // pinch / gallery state
+  double _minScaleSeen = 1.0;
+  bool _galleryOpen = false;
+  // trigger when user pinches fingers together (scale goes below this)
+  static const double _galleryTriggerScale = 0.85;
 
   Future<void> _loadMarked() async {
     try {
@@ -120,9 +126,13 @@ class _LessonScreenState extends State<LessonScreen> {
           .toString();
       _saveKey = 'lesson_pos_$id';
 
+      // set marked key per subchapter (sanitize id)
+      final keyId = id.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+      _markedKey = 'marked_words_$keyId';
+
       // load saved index (after words are set)
       _loadSavedIndexAndJump();
-      // load marked words
+      // load marked words for this subchapter
       _loadMarked();
     }
     _inited = true;
@@ -322,32 +332,9 @@ class _LessonScreenState extends State<LessonScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // Header
-                /*Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    Expanded(
-                      child: Text(
-                        _title.isEmpty ? 'Lekcia' : _title,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.heading,
-                      ),
-                    ),
-                    const SizedBox(width: 48), // space for symmetry
-                  ],
-                ),
-              ),*/
-
                 // Card pager
                 Expanded(
+                  // wrap pager with GestureDetector to detect pinch and open gallery
                   child: total == 0
                       ? const Center(
                           child: Text(
@@ -355,18 +342,39 @@ class _LessonScreenState extends State<LessonScreen> {
                             style: TextStyle(fontSize: 16),
                           ),
                         )
-                      : PageView.builder(
-                          controller: _pageController,
-                          itemCount: total,
-                          onPageChanged: (i) => setState(() {
-                            _index = i;
-                            _showBack = false;
-                            _saveIndex(i); // save on page change
-                          }),
-                          itemBuilder: (context, i) {
-                            final word = _words[i];
-                            return _buildCard(word);
+                      : GestureDetector(
+                          onScaleStart: (_) {
+                            _minScaleSeen = 1.0;
                           },
+                          onScaleUpdate: (details) {
+                            _minScaleSeen = min(_minScaleSeen, details.scale);
+                          },
+                          onScaleEnd: (_) async {
+                            if (_minScaleSeen <= _galleryTriggerScale &&
+                                !_galleryOpen) {
+                              _galleryOpen = true;
+                              final selected = await _showGalleryAndPick();
+                              _galleryOpen = false;
+                              if (selected != null) {
+                                // jump to selected card
+                                _goTo(selected);
+                              }
+                            }
+                            _minScaleSeen = 1.0;
+                          },
+                          child: PageView.builder(
+                            controller: _pageController,
+                            itemCount: total,
+                            onPageChanged: (i) => setState(() {
+                              _index = i;
+                              _showBack = false;
+                              _saveIndex(i); // save on page change
+                            }),
+                            itemBuilder: (context, i) {
+                              final word = _words[i];
+                              return _buildCard(word);
+                            },
+                          ),
                         ),
                 ),
 
@@ -434,6 +442,105 @@ class _LessonScreenState extends State<LessonScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // shows gallery dialog/grid and returns tapped index (or null)
+  Future<int?> _showGalleryAndPick() {
+    // fixed 5 rows x 4 columns layout; allow scrolling if more items
+    const cols = 4;
+    const rows = 5;
+    const tileHeight = 100.0;
+    final gridHeight = rows * tileHeight;
+
+    return showDialog<int>(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
+          child: SizedBox(
+            height: min(
+              gridHeight + 56,
+              MediaQuery.of(context).size.height * 0.85,
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Galeria', style: AppTextStyles.heading),
+                ),
+                Expanded(
+                  child: GridView.count(
+                    crossAxisCount: cols,
+                    childAspectRatio: 0.9,
+                    padding: const EdgeInsets.all(8),
+                    children: List.generate(_words.length, (i) {
+                      final w = _words[i];
+                      final en = (w['en'] ?? w['english'] ?? '').toString();
+                      final imgPath = (w['image'] ?? '').toString();
+                      // identify word id used for marking
+                      final wid = (w['id']?.toString() ?? en);
+                      final isMarked = _marked.contains(wid);
+                      return InkWell(
+                        onTap: () => Navigator.of(ctx).pop(i),
+                        child: Card(
+                          margin: const EdgeInsets.all(6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: isMarked ? AppColors.accent: Colors.transparent,
+                              width: isMarked ? 3.0 : 1.0,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (imgPath.isNotEmpty)
+                                SizedBox(
+                                  height: 64,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                    ),
+                                    child: WordImage(
+                                      assetPath: imgPath,
+                                      fallbackText: en,
+                                      maxHeight: 64,
+                                    ),
+                                  ),
+                                )
+                              else
+                                const SizedBox(height: 64),
+                              const SizedBox(height: 6),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                  child: Text(
+                                    en,
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
