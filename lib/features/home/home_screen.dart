@@ -80,10 +80,22 @@ Future<List<Map<String, dynamic>>> loadAllTextbooks() async {
   return textbooks;
 }
 
-Future<ImageInfo> loadImageInfo(String assetPath) async {
+Future<ImageInfo> loadImageInfo(String path) async {
   final completer = Completer<ImageInfo>();
-  final stream = AssetImage(assetPath)
-      .resolve(const ImageConfiguration());
+  ImageProvider provider;
+  try {
+    if (path.startsWith('assets/')) {
+      provider = AssetImage(path);
+    } else if (io.File(path).existsSync()) {
+      provider = FileImage(io.File(path));
+    } else {
+      provider = AssetImage(path);
+    }
+  } catch (_) {
+    provider = AssetImage(path);
+  }
+
+  final stream = provider.resolve(const ImageConfiguration());
 
   late final ImageStreamListener listener;
   listener = ImageStreamListener(
@@ -211,7 +223,9 @@ class _HomePageState extends State<HomePage> {
                                   color: AppColors.text, width: 2),
                               borderRadius: BorderRadius.circular(13),
                               image: DecorationImage(
-                                image: AssetImage(cover),
+                                image: cover is String && !cover.startsWith('assets/') && io.File(cover).existsSync()
+                                    ? FileImage(io.File(cover)) as ImageProvider
+                                    : AssetImage(cover),
                                 fit: BoxFit.cover,
                               ),
                             ),

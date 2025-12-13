@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 class QrScanPage extends StatefulWidget {
   const QrScanPage({super.key});
@@ -26,10 +28,23 @@ class _QrScanPageState extends State<QrScanPage> {
         return 'Server vrátil ${response.statusCode}';
       }
 
-      jsonDecode(response.body);
+      // validate JSON
+      final body = response.body;
+      jsonDecode(body);
 
+      // save to application documents directory
+      final docsDir = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final filename = 'imported_$timestamp.json';
+      final filePath = '${docsDir.path}/$filename';
+      final f = io.File(filePath);
+      await f.writeAsString(body, encoding: const Utf8Codec());
+
+      // record in imported_textbooks list
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('textbook_json', response.body);
+      final imported = prefs.getStringList('imported_textbooks') ?? <String>[];
+      imported.add(filePath);
+      await prefs.setStringList('imported_textbooks', imported);
 
       return null;
     } catch (e) {
