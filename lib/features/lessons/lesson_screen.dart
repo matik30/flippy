@@ -99,6 +99,11 @@ class _LessonScreenState extends State<LessonScreen> {
           if (_pageController.hasClients) {
             _pageController.jumpToPage(saved);
           }
+          // mark the saved page as visited so UI (test button) updates immediately
+          if (mounted) {
+            // do not honor suppression here — saved position should count as visited
+            _markVisited(saved);
+          }
         });
       }
     } catch (_) {}
@@ -126,43 +131,90 @@ class _LessonScreenState extends State<LessonScreen> {
         }).toList();
       }
 
-      // prepare persistence key (prefer stable id if available)
-      // Compose a deterministic key from as many available identifiers as possible
-      // so saved position and marked words are unique per book/chapter/subchapter.
-      final subId = (routeArgs['subchapterId'] ??
-              routeArgs['id'] ??
-              routeArgs['subId'] ??
-              routeArgs['sub'] ??
-              '')
-          .toString();
-      final subTitle = (routeArgs['subchapterTitle'] ??
-              routeArgs['title'] ??
-              routeArgs['name'] ??
-              _title)
-          .toString();
+      // Try to build a stable signature from textbook -> chapters -> subchapters -> words ids.
+      // The combination of these ids should be unique per specific imported/book copy.
+      String? signature;
+      final tb = routeArgs['textbook'] ?? routeArgs['book'] ?? routeArgs['textbookMap'];
+      if (tb is Map) {
+        final tbId = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
 
-      final chapterId = (routeArgs['chapterId'] ??
-              routeArgs['parentId'] ??
-              routeArgs['chapterId'] ??
-              '')
-          .toString();
-      final chapterTitle = (routeArgs['chapterTitle'] ??
-              routeArgs['chapter'] ??
-              '')
-          .toString();
+        final chapterIds = <String>[];
+        final subIds = <String>[];
 
-      final bookId = (routeArgs['bookId'] ?? routeArgs['courseId'] ?? '')
-          .toString();
-      final bookTitle = (routeArgs['bookTitle'] ?? routeArgs['book'] ?? '')
-          .toString();
+        if (tb['chapters'] is List) {
+          for (final ch in tb['chapters']) {
+            if (ch is Map) {
+              final cid = (ch['id'] ?? ch['chapterId'] ?? '').toString();
+              if (cid.isNotEmpty) chapterIds.add(cid);
+              if (ch['subchapters'] is List) {
+                for (final sc in ch['subchapters']) {
+                  if (sc is Map) {
+                    final sid = (sc['id'] ?? sc['subchapterId'] ?? '').toString();
+                    if (sid.isNotEmpty) subIds.add(sid);
+                  }
+                }
+              }
+            }
+          }
+        }
 
-      final parts = [bookId, bookTitle, chapterId, chapterTitle, subId, subTitle]
-          .map((s) => s.toString().trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
+        // word ids for the current subchapter (from loaded _words)
+        final wordIds = _words
+            .map((w) => (w['id']?.toString() ?? ''))
+            .where((s) => s.isNotEmpty)
+            .toList();
 
-      final combinedKey = parts.isNotEmpty ? parts.join('::') : subTitle;
-      final keyId = combinedKey.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+        final partsList = <String>[];
+        if (tbId.isNotEmpty) partsList.add(tbId);
+        if (chapterIds.isNotEmpty) partsList.add(chapterIds.join('|'));
+        if (subIds.isNotEmpty) partsList.add(subIds.join('|'));
+        if (wordIds.isNotEmpty) partsList.add(wordIds.join('|'));
+
+        if (partsList.isNotEmpty) signature = partsList.join('::');
+      }
+
+      // Fallback: previous heuristic using available id/title pieces
+      String keySource;
+      if (signature != null && signature.isNotEmpty) {
+        keySource = signature;
+      } else {
+        final subId = (routeArgs['subchapterId'] ??
+                routeArgs['id'] ??
+                routeArgs['subId'] ??
+                routeArgs['sub'] ??
+                '')
+            .toString();
+        final subTitle = (routeArgs['subchapterTitle'] ??
+                routeArgs['title'] ??
+                routeArgs['name'] ??
+                _title)
+            .toString();
+
+        final chapterId = (routeArgs['chapterId'] ??
+                routeArgs['parentId'] ??
+                routeArgs['chapterId'] ??
+                '')
+            .toString();
+        final chapterTitle = (routeArgs['chapterTitle'] ??
+                routeArgs['chapter'] ??
+                '')
+            .toString();
+
+        final bookId = (routeArgs['bookId'] ?? routeArgs['courseId'] ?? '')
+            .toString();
+        final bookTitle = (routeArgs['bookTitle'] ?? routeArgs['book'] ?? '')
+            .toString();
+
+        final parts = [bookId, bookTitle, chapterId, chapterTitle, subId, subTitle]
+            .map((s) => s.toString().trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+
+        final combinedKey = parts.isNotEmpty ? parts.join('::') : subTitle;
+        keySource = combinedKey;
+      }
+
+      final keyId = keySource.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
 
       _saveKey = 'lesson_pos_$keyId';
       _markedKey = 'marked_words_$keyId';
@@ -174,6 +226,14 @@ class _LessonScreenState extends State<LessonScreen> {
       _loadMarked();
       // load visited indices
       _loadVisited();
+
+      // ensure the currently displayed page counts as visited (covers initial display)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_words.isNotEmpty && !_visited.contains(_index) && !_suppressVisitMark) {
+          _markVisited(_index);
+        }
+      });
     }
     _inited = true;
   }
@@ -182,7 +242,16 @@ class _LessonScreenState extends State<LessonScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList(_visitedKey) ?? <String>[];
-      if (mounted) setState(() => _visited = list.map(int.parse).toSet());
+      final loaded = list.map(int.parse).toSet();
+      if (!mounted) return;
+      setState(() => _visited = loaded);
+
+      // After we loaded persisted visited indices, ensure the currently
+      // displayed page is counted as visited — this avoids a race where
+      // _markVisited was called earlier but then overwritten by this load.
+      if (_words.isNotEmpty && !_visited.contains(_index) && !_suppressVisitMark) {
+        _markVisited(_index);
+      }
     } catch (_) {}
   }
 
@@ -216,6 +285,12 @@ class _LessonScreenState extends State<LessonScreen> {
     );
     setState(() => _index = idx);
     _saveIndex(idx);
+    // If this navigation isn't coming from the gallery (suppression), mark
+    // the target page as visited immediately so the test button can enable
+    // without requiring an extra user interaction.
+    if (!_suppressVisitMark) {
+      _markVisited(idx);
+    }
   }
 
   Widget _buildCard(Map<String, dynamic> word) {

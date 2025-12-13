@@ -1,84 +1,98 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/scan_dialog.dart';
-import 'package:flutter/foundation.dart';
+
+Map<String, dynamic> _parseManifest(String s) => jsonDecode(s) as Map<String, dynamic>;
 
 Future<List<String>> loadJsonPaths() async {
-  debugPrint("loadJsonPaths() CALLED");
-
-  // try engine-provided manifest (may not exist on desktop -> throws)
   try {
-    // Read the generated AssetManifest.json and decode it to a Map
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = await compute(jsonDecode, manifestContent) as Map<String,dynamic>;
-    //final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    final Map<String, dynamic> manifestMap =
+        await compute(_parseManifest, manifestContent);
 
-    // Vyfiltruj JSON súbory z assets/data/
-    final files = manifestMap.keys
+    return manifestMap.keys
         .where(
-          (path) => path.startsWith('assets/data/') && path.endsWith('.json'),
+          (p) => p.startsWith('assets/data/') && p.endsWith('.json'),
         )
-        .cast<String>()
         .toList();
-
-    debugPrint("FOUND JSON FILES (from AssetManifest.json): $files");
-    return files;
-  } catch (e) {
-    debugPrint("AssetManifest.json not available: $e");
-
-    // fallback: try a local index you add to assets/data/index.json
+  } catch (_) {
     try {
-      final indexContent = await rootBundle.loadString('assets/data/index.json');
-      final List<dynamic> list = json.decode(indexContent) as List<dynamic>;
-      final files = list.cast<String>().where((p) => p.endsWith('.json')).toList();
-      debugPrint("FOUND JSON FILES (from assets/data/index.json): $files");
-      return files;
-    } catch (e2) {
-      debugPrint("index.json fallback failed: $e2");
-
-      // final fallback: probe a small list of expected files so UI doesn't hang
-      final candidates = ['assets/data/project1.json', 'assets/data/project2.json'];
-      final found = <String>[];
-      for (final p in candidates) {
-        try {
-          await rootBundle.loadString(p);
-          found.add(p);
-        } catch (_) {}
-      }
-      debugPrint("FOUND JSON FILES (fallback candidates): $found");
-      return found;
+      final indexContent =
+          await rootBundle.loadString('assets/data/index.json');
+      final list = jsonDecode(indexContent) as List<dynamic>;
+      return list.cast<String>();
+    } catch (_) {
+      return const [];
     }
   }
 }
 
-/// Načíta textbook objekt z jedného JSON
 Future<Map<String, dynamic>> loadTextbook(String path) async {
   final jsonString = await rootBundle.loadString(path);
   final jsonData = jsonDecode(jsonString);
-  return jsonData["textbook"];
+  return jsonData['textbook'];
 }
 
-/// Načíta image info pre aspect ratio
+Future<dynamic> _readJsonFileUtf8(String path) async {
+  // Read as bytes and decode as UTF-8 to avoid platform-dependent encodings
+  final bytes = await io.File(path).readAsBytes();
+  var s = utf8.decode(bytes);
+  // Strip UTF-8 BOM if present
+  if (s.isNotEmpty && s.codeUnitAt(0) == 0xFEFF) {
+    s = s.substring(1);
+  }
+  return jsonDecode(s);
+}
+
+Future<List<Map<String, dynamic>>> loadAllTextbooks() async {
+  final paths = await loadJsonPaths();
+  final textbooks = await Future.wait(paths.map(loadTextbook));
+
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final imported = prefs.getStringList('imported_textbooks') ?? [];
+
+    for (final path in imported) {
+      try {
+        final data = await _readJsonFileUtf8(path);
+        final tb = data['textbook'];
+        if (tb is Map<String, dynamic>) {
+          final m = Map<String, dynamic>.from(tb);
+          m['__imported__'] = true;
+          m['__source__'] = path; // provide a stable source identifier for imported books
+          m['__file__'] = path;
+          textbooks.insert(0, m);
+        }
+      } catch (_) {}
+    }
+  } catch (_) {}
+
+  return textbooks;
+}
+
 Future<ImageInfo> loadImageInfo(String assetPath) async {
-  final imageProvider = AssetImage(assetPath);
-  final config = const ImageConfiguration();
   final completer = Completer<ImageInfo>();
+  final stream = AssetImage(assetPath)
+      .resolve(const ImageConfiguration());
 
-  final stream = imageProvider.resolve(config);
   late final ImageStreamListener listener;
-
   listener = ImageStreamListener(
-    (ImageInfo info, bool _) {
+    (info, _) {
       completer.complete(info);
       stream.removeListener(listener);
     },
-    onError: (error, stack) {
-      completer.completeError(error);
+    onError: (e, _) {
+      completer.completeError(e);
       stream.removeListener(listener);
     },
   );
@@ -90,22 +104,42 @@ Future<ImageInfo> loadImageInfo(String assetPath) async {
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
- @override
+  @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  late final Future<List<String>> _jsonPathsFuture;
+  late Future<List<Map<String, dynamic>>> _textbooksFuture;
 
   @override
   void initState() {
     super.initState();
-    _jsonPathsFuture = loadJsonPaths();
+    _textbooksFuture = loadAllTextbooks();
+  }
+
+  Future<void> _openImportManager() async {
+    final changed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _ImportedManagerDialog(),
+    );
+
+    if (changed == true && mounted) {
+      setState(() {
+        _textbooksFuture = loadAllTextbooks();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        onPressed: () {
+          showDialog(context: context, builder: (_) => const ScanDialog());
+        },
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -120,91 +154,69 @@ class _HomePageState extends State<HomePage> {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
+            automaticallyImplyLeading: false,
             centerTitle: true,
             title: Text('Učebnice', style: AppTextStyles.chapter),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.import_contacts),
+                onPressed: _openImportManager,
+              ),
+            ],
           ),
-
-          body: FutureBuilder<List<String>>(
-            future: _jsonPathsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+          body: FutureBuilder<List<Map<String, dynamic>>>(
+            future: _textbooksFuture,
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (snapshot.hasError) {
-                debugPrint('loadJsonPaths error: ${snapshot.error}');
-                return Center(child: Text('Error loading assets'));
-              }
-              final jsonPaths = snapshot.data ?? [];
-              if (jsonPaths.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No json files found in assets/data/ (check pubspec.yaml)',
-                  ),
-                );
+
+              final books = snap.data ?? [];
+              if (books.isEmpty) {
+                return const Center(child: Text('Žiadne učebnice'));
               }
 
-              return FutureBuilder<List<Map<String, dynamic>>>(
-                future: Future.wait(jsonPaths.map(loadTextbook)),
-                builder: (context, snapshot2) {
-                  if (!snapshot2.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+              return GridView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: books.length,
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 20,
+                ),
+                itemBuilder: (_, i) {
+                  final book = books[i];
+                  final cover = book['coverImage'];
 
-                  final textbooks = snapshot2.data!;
+                  return FutureBuilder<ImageInfo>(
+                    future: loadImageInfo(cover),
+                    builder: (_, img) {
+                      if (!img.hasData) return const SizedBox.shrink();
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: textbooks.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 20,
-                          crossAxisSpacing: 20,
-                        ),
-                    itemBuilder: (_, index) {
-                      final book = textbooks[index];
-                      final cover = book["coverImage"];
+                      final info = img.data!;
+                      final aspect =
+                          info.image.width / info.image.height;
 
-                      return FutureBuilder<ImageInfo>(
-                        future: loadImageInfo(cover),
-                        builder: (context, img) {
-                          if (!img.hasData) {
-                            return const SizedBox.shrink();
-                          }
-
-                          final imageInfo = img.data!;
-                          final aspect =
-                              imageInfo.image.width / imageInfo.image.height;
-
-                          return GestureDetector(
-                            onTap: () {
-                              context.go('/chapters', extra: book);
-                            },
-                            child: AspectRatio(
-                              aspectRatio: aspect,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: AppColors.text,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(13),
-                                  image: DecorationImage(
-                                    image: AssetImage(cover),
-                                    fit: BoxFit.cover,
-                                  ),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
+                      return GestureDetector(
+                        onTap: () =>
+                            // pass the textbook explicitly under 'textbook' so
+                            // downstream screens can read full textbook map
+                            context.go('/chapters', extra: {'textbook': book}),
+                        child: AspectRatio(
+                          aspectRatio: aspect,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: AppColors.text, width: 2),
+                              borderRadius: BorderRadius.circular(13),
+                              image: DecorationImage(
+                                image: AssetImage(cover),
+                                fit: BoxFit.cover,
                               ),
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       );
                     },
                   );
@@ -214,15 +226,102 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+    );
+  }
+}
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(context: context, builder: (_) => const ScanDialog());
-        },
-        backgroundColor: AppColors.primary,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white),
+class _ImportedManagerDialog extends StatefulWidget {
+  const _ImportedManagerDialog();
+
+  @override
+  State<_ImportedManagerDialog> createState() =>
+      _ImportedManagerDialogState();
+}
+
+class _ImportedManagerDialogState
+    extends State<_ImportedManagerDialog> {
+  List<String> _paths = [];
+  final Map<String, String> _titles = {};
+  bool _changed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    _paths = List<String>.from(prefs.getStringList('imported_textbooks') ?? []);
+
+    final Map<String, String> titles = {};
+    for (final path in _paths) {
+      try {
+        final data = await _readJsonFileUtf8(path);
+        final tb = data['textbook'];
+        String title = '';
+        if (tb is Map<String, dynamic>) {
+          title = (tb['title'] ?? tb['name'] ?? '') as String? ?? '';
+        }
+        if (title.isEmpty) title = path.split('/').last;
+        titles[path] = title;
+      } catch (_) {
+        titles[path] = path.split('/').last;
+      }
+    }
+
+    _titles.clear();
+    _titles.addAll(titles);
+
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _delete(int i) async {
+    final prefs = await SharedPreferences.getInstance();
+    final path = _paths[i];
+
+    try {
+      final f = io.File(path);
+      if (await f.exists()) await f.delete();
+    } catch (_) {}
+
+    _paths.removeAt(i);
+    _titles.remove(path);
+    await prefs.setStringList('imported_textbooks', _paths);
+    _changed = true;
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Importované učebnice'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: _paths.isEmpty
+            ? const Text('Žiadne importované učebnice')
+            : ListView.builder(
+                shrinkWrap: true,
+                itemCount: _paths.length,
+                itemBuilder: (_, i) {
+                  final path = _paths[i];
+                  final title = _titles[path] ?? path.split('/').last;
+                  return ListTile(
+                    title: Text(title),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _delete(i),
+                    ),
+                  );
+                },
+              ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_changed),
+          child: const Text('Zavrieť'),
+        ),
+      ],
     );
   }
 }

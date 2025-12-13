@@ -19,14 +19,24 @@ class _BookScreenState extends State<BookScreen> {
   @override
   void initState() {
     super.initState();
-    // book already contains the textbook object loaded in HomePage
-    data = widget.book;
-    expanded = List<bool>.filled((data["chapters"] as List).length, false);
+    // Normalize incoming payload: callers may pass either the textbook map
+    // directly or a wrapper like { 'textbook': <map> } (Home was changed to
+    // send the textbook under that key). Accept both.
+    final raw = widget.book;
+    if (raw.containsKey('textbook') && raw['textbook'] is Map) {
+      data = Map<String, dynamic>.from(raw['textbook'] as Map);
+    } else {
+      data = Map<String, dynamic>.from(raw);
+    }
+
+    // Safely obtain chapters list (may be null) and initialize expansion state
+    final chaptersList = (data['chapters'] as List<dynamic>?) ?? <dynamic>[];
+    expanded = List<bool>.filled(chaptersList.length, false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final chapters = data["chapters"] as List<dynamic>;
+    final chapters = (data['chapters'] as List<dynamic>?) ?? <dynamic>[];
 
     return Scaffold(
       // rovnaký gradient background ako na home_screen
@@ -151,6 +161,11 @@ class _BookScreenState extends State<BookScreen> {
                                   context.push(
                                     '/lessons',
                                     extra: {
+                                      // ensure LessonScreen receives the full textbook
+                                      // map so it can build a unique signature per book
+                                      'textbook': data,
+                                      'chapterId': chapter['id'],
+                                      'chapterTitle': chapter['title'],
                                       "subchapterId": sub["id"],
                                       "subchapterTitle": sub["title"],
                                       "words": sub["words"],

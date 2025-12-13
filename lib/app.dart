@@ -4,6 +4,7 @@ import 'features/home/home_screen.dart';
 import 'features/splash/splash_page.dart';
 import 'features/chapters/chapters_screen.dart';
 import 'features/lessons/lesson_screen.dart';
+import 'features/scan/qr_scan_page.dart';
 import 'theme/colors.dart';
 import 'theme/fonts.dart';
 
@@ -25,6 +26,7 @@ final _router = GoRouter(
   routes: [
     GoRoute(path: '/splash', builder: (_, __) => const SplashPage()),
     GoRoute(path: '/', builder: (_, __) => const HomePage()),
+    GoRoute(path: '/qr', builder: (_, __) => const QrScanPage()),
     GoRoute(
       path: '/chapters',
       builder: (ctx, state) {
@@ -41,7 +43,8 @@ final _router = GoRouter(
         final args = state.extra as Map<String, dynamic>?;
         return LessonScreen(args: args);
       },
-    ),  ],
+    ),
+  ],
 );
 
 final _theme = ThemeData(
