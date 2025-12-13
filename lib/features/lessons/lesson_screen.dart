@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // pre zapamätanie
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/word_card.dart';
+import 'package:flippy/features/quiz/quiz_screen.dart';
 
 class LessonScreen extends StatefulWidget {
   // získané dáta z GoRouter (routerConfig passes args via state.extra)
@@ -481,10 +482,11 @@ class _LessonScreenState extends State<LessonScreen> {
                   child: ElevatedButton(
                     onPressed: _canTest
                         ? () {
-                            // placeholder: start test (not implemented)
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Spustiť test (TODO)')),
-                            );
+                            // navigate to QuizScreen, pass same args available to this LessonScreen
+                            final args = Map<String, dynamic>.from(widget.args ?? {});
+                            // mark default test type if not provided
+                            args['testType'] = args['testType'] ?? 'mcq';
+                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
@@ -514,8 +516,7 @@ class _LessonScreenState extends State<LessonScreen> {
                           onScaleEnd: (_) async {
                             if (_minScaleSeen <= _galleryTriggerScale && !_galleryOpen) {
                               _galleryOpen = true;
-                              // capture ScaffoldMessenger before awaiting to avoid using context after async gap
-                              final scaffold = ScaffoldMessenger.of(context);
+                              // open gallery and await selected index (or null)
                               final selected = await _showGalleryAndPick(initialIndex: _index);
                               _galleryOpen = false;
 
@@ -526,241 +527,235 @@ class _LessonScreenState extends State<LessonScreen> {
                               }
 
                               if (selected != null) {
-                                if (selected == -999) {
-                                  // user requested to start test from gallery
-                                  scaffold.showSnackBar(const SnackBar(content: Text('Spustiť test (TODO)')));
-                                } else {
-                                  // jump to selected card but do not mark as visited (since it was a gallery jump)
-                                  setState(() => _suppressVisitMark = true);
-                                  _goTo(selected);
-                                }
+                                // jump to selected card but do not mark as visited (gallery jump)
+                                setState(() => _suppressVisitMark = true);
+                                _goTo(selected);
                               }
-                            }
-                            _minScaleSeen = 1.0;
-                          },
-                          child: PageView.builder(
-                            controller: _pageController,
-                            itemCount: total,
-                            onPageChanged: (i) => setState(() {
-                              _index = i;
-                              _showBack = false;
-                              _saveIndex(i); // save on page change
-                              if (!_suppressVisitMark) {
-                                _markVisited(i);
-                              } else {
-                                // reset suppression for next normal navigation
-                                _suppressVisitMark = false;
-                              }
-                            }),
-                            itemBuilder: (context, i) {
-                              final word = _words[i];
-                              return _buildCard(word);
-                            },
-                          ),
-                        ),
-                ),
+                           }
+                           _minScaleSeen = 1.0;
+                         },
+                         child: PageView.builder(
+                           controller: _pageController,
+                           itemCount: total,
+                           onPageChanged: (i) => setState(() {
+                             _index = i;
+                             _showBack = false;
+                             _saveIndex(i); // save on page change
+                             if (!_suppressVisitMark) {
+                               _markVisited(i);
+                             } else {
+                               // reset suppression for next normal navigation
+                               _suppressVisitMark = false;
+                             }
+                           }),
+                           itemBuilder: (context, i) {
+                             final word = _words[i];
+                             return _buildCard(word);
+                           },
+                         ),
+                       ),
+                 ),
 
-                // Footer controls
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        total == 0 ? '0/0' : '${_index + 1}/$total',
-                        style: AppTextStyles.lesson,
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_left),
-                            onPressed: () => _goTo(_index - 1),
-                          ),
-                          const SizedBox(width: 8),
-                          // quick jump buttons: prev, current, next
-                          for (
-                            var i = max(0, _index - 1);
-                            i <= min(total - 1, _index + 1);
-                            i++
-                          )
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                              ),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: i == _index
-                                      ? AppColors.primary
-                                      : Colors.white,
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                onPressed: () => _goTo(i),
-                                child: Text(
-                                  '${i + 1}',
-                                  style: TextStyle(
-                                    color: i == _index
-                                        ? Colors.white
-                                        : AppColors.text,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.arrow_right),
-                            onPressed: () => _goTo(_index + 1),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+                 // Footer controls
+                 Padding(
+                   padding: const EdgeInsets.symmetric(vertical: 12.0),
+                   child: Column(
+                     children: [
+                       Text(
+                         total == 0 ? '0/0' : '${_index + 1}/$total',
+                         style: AppTextStyles.lesson,
+                       ),
+                       const SizedBox(height: 8),
+                       Row(
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           IconButton(
+                             icon: const Icon(Icons.arrow_left),
+                             onPressed: () => _goTo(_index - 1),
+                           ),
+                           const SizedBox(width: 8),
+                           // quick jump buttons: prev, current, next
+                           for (
+                             var i = max(0, _index - 1);
+                             i <= min(total - 1, _index + 1);
+                             i++
+                           )
+                             Padding(
+                               padding: const EdgeInsets.symmetric(
+                                 horizontal: 6,
+                               ),
+                               child: ElevatedButton(
+                                 style: ElevatedButton.styleFrom(
+                                   backgroundColor: i == _index
+                                       ? AppColors.primary
+                                       : Colors.white,
+                                   elevation: 4,
+                                   shape: RoundedRectangleBorder(
+                                     borderRadius: BorderRadius.circular(12),
+                                   ),
+                                 ),
+                                 onPressed: () => _goTo(i),
+                                 child: Text(
+                                   '${i + 1}',
+                                   style: TextStyle(
+                                     color: i == _index
+                                         ? Colors.white
+                                         : AppColors.text,
+                                   ),
+                                 ),
+                               ),
+                             ),
+                           const SizedBox(width: 8),
+                           IconButton(
+                             icon: const Icon(Icons.arrow_right),
+                             onPressed: () => _goTo(_index + 1),
+                           ),
+                         ],
+                       ),
+                     ],
+                   ),
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+   }
 
-  // shows gallery dialog/grid and returns tapped index (or null)
-  Future<int?> _showGalleryAndPick({int initialIndex = 0}) async {
-    const cols = 3;
+   // shows gallery dialog/grid and returns tapped index (or null)
+   Future<int?> _showGalleryAndPick({int initialIndex = 0}) async {
+     const cols = 3;
 
-    // compute longest English string length in this subchapter
-    int maxEnLen = 0;
-    for (final w in _words) {
-      final en = (w['en'] ?? w['english'] ?? '').toString();
-      if (en.length > maxEnLen) maxEnLen = en.length;
-    }
+     // compute longest English string length in this subchapter
+     int maxEnLen = 0;
+     for (final w in _words) {
+       final en = (w['en'] ?? w['english'] ?? '').toString();
+       if (en.length > maxEnLen) maxEnLen = en.length;
+     }
 
-    double computeFontSize(int maxLen) {
-      // slightly reduced sizes for gallery tiles so text fits neatly
-      if (maxLen <= 8) return 16.0;
-      if (maxLen <= 12) return 14.0;
-      if (maxLen <= 16) return 13.0;
-      if (maxLen <= 24) return 12.0;
-      return 11.0;
-    }
+     double computeFontSize(int maxLen) {
+       if (maxLen <= 8) return 16.0;
+       if (maxLen <= 12) return 14.0;
+       if (maxLen <= 16) return 13.0;
+       if (maxLen <= 24) return 12.0;
+       return 11.0;
+     }
 
-    final tileFontSize = computeFontSize(maxEnLen);
+     final tileFontSize = computeFontSize(maxEnLen);
 
-    // push a full-screen page so gallery is displayed fullscreen with matching app styling
-    // ensure state is mounted before pushing a new route
-    if (!mounted) return null;
-    // capture Navigator before the await so we don't use `context` after an async gap
-    final nav = Navigator.of(context);
-    final selected = await nav.push<int>(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (ctx) {
-          // track max scale to detect pinch-out (fingers apart)
-          double maxScaleSeen = 1.0;
-          const double returnTriggerScale = 1.15; // threshold to return
+     if (!mounted) return null;
 
-          return GestureDetector(
-            onScaleStart: (_) => maxScaleSeen = 1.0,
-            onScaleUpdate: (details) => maxScaleSeen = max(maxScaleSeen, details.scale),
-            onScaleEnd: (_) {
-              if (maxScaleSeen >= returnTriggerScale) {
-                // return to original card index only if this builder context is still mounted
-                if (ctx.mounted) Navigator.of(ctx).pop(initialIndex);
-              }
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [AppColors.accent, AppColors.background],
-                  stops: const [0.0, 0.15],
-                ),
-              ),
-              child: Scaffold(
-                backgroundColor: Colors.transparent,
-                appBar: AppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  centerTitle: true,
-                  title: Text('Galéria', style: AppTextStyles.heading),
-                  foregroundColor: AppColors.text,
-                ),
-                body: SafeArea(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: GridView.count(
-                          crossAxisCount: cols,
-                          // wider aspect ratio -> lower tile height
-                          childAspectRatio: 1.4,
-                          padding: const EdgeInsets.all(6),
-                          children: List.generate(_words.length, (i) {
-                            final w = _words[i];
-                            final en = (w['en'] ?? w['english'] ?? '').toString();
-                            final wid = (w['id']?.toString() ?? en);
-                            final isMarked = _marked.contains(wid);
+     final selected = await Navigator.of(context).push<int>(
+       MaterialPageRoute<int>(
+         fullscreenDialog: true,
+         builder: (ctx) {
+           double maxScaleSeen = 1.0;
+           const double returnTriggerScale = 1.15;
 
-                            return InkWell(
-                              onTap: () { if (ctx.mounted) Navigator.of(ctx).pop(i); },
-                              child: Card(
-                                margin: const EdgeInsets.all(4),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  side: BorderSide(
-                                    color: isMarked ? AppColors.accent : Colors.transparent,
-                                    width: isMarked ? 3.0 : 1.0,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                    child: Text(
-                                      en,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: tileFontSize,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.text,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                        child: ElevatedButton(
-                          onPressed: _canTest
-                              ? () {
-                                  if (ctx.mounted) Navigator.of(ctx).pop(-999);
-                                }
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(44),
-                            backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
-                          ),
-                          child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Colors.white : AppColors.text)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+           return GestureDetector(
+             onScaleStart: (_) => maxScaleSeen = 1.0,
+             onScaleUpdate: (details) => maxScaleSeen = max(maxScaleSeen, details.scale),
+             onScaleEnd: (_) {
+               if (maxScaleSeen >= returnTriggerScale) {
+                 if (ctx.mounted) Navigator.of(ctx).pop(initialIndex);
+               }
+             },
+             child: Container(
+               decoration: BoxDecoration(
+                 gradient: LinearGradient(
+                   begin: Alignment.topCenter,
+                   end: Alignment.bottomCenter,
+                   colors: [AppColors.accent, AppColors.background],
+                   stops: const [0.0, 0.15],
+                 ),
+               ),
+               child: Scaffold(
+                 backgroundColor: Colors.transparent,
+                 appBar: AppBar(
+                   backgroundColor: Colors.transparent,
+                   elevation: 0,
+                   centerTitle: true,
+                   title: Text('Galéria', style: AppTextStyles.heading),
+                   foregroundColor: AppColors.text,
+                 ),
+                 body: SafeArea(
+                   child: Column(
+                     children: <Widget>[
+                       Expanded(
+                         child: GridView.count(
+                           crossAxisCount: cols,
+                           childAspectRatio: 1.4,
+                           padding: const EdgeInsets.all(6),
+                           children: List<Widget>.generate(_words.length, (i) {
+                             final w = _words[i];
+                             final en = (w['en'] ?? w['english'] ?? '').toString();
+                             final wid = (w['id']?.toString() ?? en);
+                             final isMarked = _marked.contains(wid);
 
-    return selected;
-  }
-}
+                             return InkWell(
+                               onTap: () {
+                                 if (ctx.mounted) Navigator.of(ctx).pop(i);
+                               },
+                               child: Card(
+                                 margin: const EdgeInsets.all(4),
+                                 shape: RoundedRectangleBorder(
+                                   borderRadius: BorderRadius.circular(8),
+                                   side: BorderSide(
+                                     color: isMarked ? AppColors.accent : Colors.transparent,
+                                     width: isMarked ? 3.0 : 1.0,
+                                   ),
+                                 ),
+                                 child: Center(
+                                   child: Padding(
+                                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                     child: Text(
+                                       en,
+                                       textAlign: TextAlign.center,
+                                       maxLines: 2,
+                                       overflow: TextOverflow.ellipsis,
+                                       style: TextStyle(
+                                         fontSize: tileFontSize,
+                                         fontWeight: FontWeight.w600,
+                                         color: AppColors.text,
+                                       ),
+                                     ),
+                                   ),
+                                 ),
+                               ),
+                             );
+                           }),
+                         ),
+                       ),
+
+                       Padding(
+                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                         child: ElevatedButton(
+                           onPressed: _canTest
+                               ? () {
+                                   if (!ctx.mounted) return;
+                                   final args = Map<String, dynamic>.from(widget.args ?? {});
+                                   args['testType'] = args['testType'] ?? 'mcq';
+                                   Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
+                                 }
+                               : null,
+                           style: ElevatedButton.styleFrom(
+                             minimumSize: const Size.fromHeight(44),
+                             backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
+                           ),
+                           child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Colors.white : AppColors.text)),
+                         ),
+                       ),
+                     ],
+                   ),
+                 ),
+               ),
+             ),
+           );
+         },
+       ),
+     );
+
+     return selected;
+   }
+ }

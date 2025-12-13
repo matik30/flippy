@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:go_router/go_router.dart'; // <-- pridaj tento import
+import 'package:flippy/features/lesson_or_quiz/lesson_or_quiz_screen.dart';
 
 class BookScreen extends StatefulWidget {
   final Map<String, dynamic> book;
@@ -157,20 +158,23 @@ class _BookScreenState extends State<BookScreen> {
                                 in (chapter["subchapters"] as List<dynamic>))
                               InkWell(
                                 onTap: () {
-                                  // použij go_router a pošli dáta cez extra -> navigácia na LessonScreen
-                                  context.push(
-                                    '/lessons',
-                                    extra: {
-                                      // ensure LessonScreen receives the full textbook
-                                      // map so it can build a unique signature per book
-                                      'textbook': data,
-                                      'chapterId': chapter['id'],
-                                      'chapterTitle': chapter['title'],
-                                      "subchapterId": sub["id"],
-                                      "subchapterTitle": sub["title"],
-                                      "words": sub["words"],
-                                    },
-                                  );
+                                  // open intermediary screen where user chooses
+                                  // between Slovíčka (LessonScreen) and Test (QuizScreen)
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) =>
+                                        // import lazily to avoid import cycles
+                                        // pass same payload as before
+                                        LessonOrQuizScreen(
+                                      args: {
+                                        'textbook': data,
+                                        'chapterId': chapter['id'],
+                                        'chapterTitle': chapter['title'],
+                                        'subchapterId': sub['id'],
+                                        'subchapterTitle': sub['title'],
+                                        'words': sub['words'],
+                                      },
+                                    ),
+                                  ));
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
