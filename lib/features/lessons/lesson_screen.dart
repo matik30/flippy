@@ -31,6 +31,11 @@ class _LessonScreenState extends State<LessonScreen> {
   // kľúč pre uchovanie označených slovíčok (per-subchapter)
   late String _markedKey;
 
+  // visited indices for enabling the test; persisted per subchapter
+  Set<int> _visited = <int>{};
+  late String _visitedKey;
+  bool _suppressVisitMark = false; // prevent marking when jumping from gallery
+
   // pinch / gallery state
   double _minScaleSeen = 1.0;
   bool _galleryOpen = false;
@@ -41,7 +46,7 @@ class _LessonScreenState extends State<LessonScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList(_markedKey) ?? <String>[];
-      setState(() => _marked = list.toSet());
+      if (mounted) setState(() => _marked = list.toSet());
     } catch (_) {}
   }
 
@@ -122,20 +127,82 @@ class _LessonScreenState extends State<LessonScreen> {
       }
 
       // prepare persistence key (prefer stable id if available)
-      final id = (routeArgs['subchapterId'] ?? routeArgs['id'] ?? _title)
+      // Compose a deterministic key from as many available identifiers as possible
+      // so saved position and marked words are unique per book/chapter/subchapter.
+      final subId = (routeArgs['subchapterId'] ??
+              routeArgs['id'] ??
+              routeArgs['subId'] ??
+              routeArgs['sub'] ??
+              '')
           .toString();
-      _saveKey = 'lesson_pos_$id';
+      final subTitle = (routeArgs['subchapterTitle'] ??
+              routeArgs['title'] ??
+              routeArgs['name'] ??
+              _title)
+          .toString();
 
-      // set marked key per subchapter (sanitize id)
-      final keyId = id.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+      final chapterId = (routeArgs['chapterId'] ??
+              routeArgs['parentId'] ??
+              routeArgs['chapterId'] ??
+              '')
+          .toString();
+      final chapterTitle = (routeArgs['chapterTitle'] ??
+              routeArgs['chapter'] ??
+              '')
+          .toString();
+
+      final bookId = (routeArgs['bookId'] ?? routeArgs['courseId'] ?? '')
+          .toString();
+      final bookTitle = (routeArgs['bookTitle'] ?? routeArgs['book'] ?? '')
+          .toString();
+
+      final parts = [bookId, bookTitle, chapterId, chapterTitle, subId, subTitle]
+          .map((s) => s.toString().trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+
+      final combinedKey = parts.isNotEmpty ? parts.join('::') : subTitle;
+      final keyId = combinedKey.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+
+      _saveKey = 'lesson_pos_$keyId';
       _markedKey = 'marked_words_$keyId';
+      _visitedKey = 'visited_$keyId';
 
       // load saved index (after words are set)
       _loadSavedIndexAndJump();
       // load marked words for this subchapter
       _loadMarked();
+      // load visited indices
+      _loadVisited();
     }
     _inited = true;
+  }
+
+  Future<void> _loadVisited() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_visitedKey) ?? <String>[];
+      if (mounted) setState(() => _visited = list.map(int.parse).toSet());
+    } catch (_) {}
+  }
+
+  Future<void> _saveVisited() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_visitedKey, _visited.map((e) => e.toString()).toList());
+    } catch (_) {}
+  }
+
+  void _markVisited(int idx) {
+    if (_visited.contains(idx)) return;
+    setState(() => _visited.add(idx));
+    _saveVisited();
+  }
+
+  bool get _canTest {
+    if (_words.isEmpty) return false;
+    // user must have visited every index at least once
+    return _visited.length >= _words.length;
   }
 
   void _goTo(int idx) {
@@ -183,8 +250,9 @@ class _LessonScreenState extends State<LessonScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.text, width: 2),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -332,6 +400,25 @@ class _LessonScreenState extends State<LessonScreen> {
           body: SafeArea(
             child: Column(
               children: [
+                // Test button (above pager) — enabled only when user visited all cards
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: ElevatedButton(
+                    onPressed: _canTest
+                        ? () {
+                            // placeholder: start test (not implemented)
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Spustiť test (TODO)')),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
+                    ),
+                    child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Colors.white : AppColors.text)),
+                  ),
+                ),
+
                 // Card pager
                 Expanded(
                   // wrap pager with GestureDetector to detect pinch and open gallery
@@ -350,14 +437,28 @@ class _LessonScreenState extends State<LessonScreen> {
                             _minScaleSeen = min(_minScaleSeen, details.scale);
                           },
                           onScaleEnd: (_) async {
-                            if (_minScaleSeen <= _galleryTriggerScale &&
-                                !_galleryOpen) {
+                            if (_minScaleSeen <= _galleryTriggerScale && !_galleryOpen) {
                               _galleryOpen = true;
-                              final selected = await _showGalleryAndPick();
+                              // capture ScaffoldMessenger before awaiting to avoid using context after async gap
+                              final scaffold = ScaffoldMessenger.of(context);
+                              final selected = await _showGalleryAndPick(initialIndex: _index);
                               _galleryOpen = false;
+
+                              // guard any UI usage with mounted after async gap
+                              if (!mounted) {
+                                _minScaleSeen = 1.0;
+                                return;
+                              }
+
                               if (selected != null) {
-                                // jump to selected card
-                                _goTo(selected);
+                                if (selected == -999) {
+                                  // user requested to start test from gallery
+                                  scaffold.showSnackBar(const SnackBar(content: Text('Spustiť test (TODO)')));
+                                } else {
+                                  // jump to selected card but do not mark as visited (since it was a gallery jump)
+                                  setState(() => _suppressVisitMark = true);
+                                  _goTo(selected);
+                                }
                               }
                             }
                             _minScaleSeen = 1.0;
@@ -369,6 +470,12 @@ class _LessonScreenState extends State<LessonScreen> {
                               _index = i;
                               _showBack = false;
                               _saveIndex(i); // save on page change
+                              if (!_suppressVisitMark) {
+                                _markVisited(i);
+                              } else {
+                                // reset suppression for next normal navigation
+                                _suppressVisitMark = false;
+                              }
                             }),
                             itemBuilder: (context, i) {
                               final word = _words[i];
@@ -446,101 +553,139 @@ class _LessonScreenState extends State<LessonScreen> {
   }
 
   // shows gallery dialog/grid and returns tapped index (or null)
-  Future<int?> _showGalleryAndPick() {
-    // fixed 5 rows x 4 columns layout; allow scrolling if more items
-    const cols = 4;
-    const rows = 5;
-    const tileHeight = 100.0;
-    final gridHeight = rows * tileHeight;
+  Future<int?> _showGalleryAndPick({int initialIndex = 0}) async {
+    const cols = 3;
 
-    return showDialog<int>(
-      context: context,
-      builder: (ctx) {
-        return Dialog(
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 24,
-          ),
-          child: SizedBox(
-            height: min(
-              gridHeight + 56,
-              MediaQuery.of(context).size.height * 0.85,
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Galeria', style: AppTextStyles.heading),
+    // compute longest English string length in this subchapter
+    int maxEnLen = 0;
+    for (final w in _words) {
+      final en = (w['en'] ?? w['english'] ?? '').toString();
+      if (en.length > maxEnLen) maxEnLen = en.length;
+    }
+
+    double computeFontSize(int maxLen) {
+      // slightly reduced sizes for gallery tiles so text fits neatly
+      if (maxLen <= 8) return 16.0;
+      if (maxLen <= 12) return 14.0;
+      if (maxLen <= 16) return 13.0;
+      if (maxLen <= 24) return 12.0;
+      return 11.0;
+    }
+
+    final tileFontSize = computeFontSize(maxEnLen);
+
+    // push a full-screen page so gallery is displayed fullscreen with matching app styling
+    // ensure state is mounted before pushing a new route
+    if (!mounted) return null;
+    // capture Navigator before the await so we don't use `context` after an async gap
+    final nav = Navigator.of(context);
+    final selected = await nav.push<int>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (ctx) {
+          // track max scale to detect pinch-out (fingers apart)
+          double maxScaleSeen = 1.0;
+          const double returnTriggerScale = 1.15; // threshold to return
+
+          return GestureDetector(
+            onScaleStart: (_) => maxScaleSeen = 1.0,
+            onScaleUpdate: (details) => maxScaleSeen = max(maxScaleSeen, details.scale),
+            onScaleEnd: (_) {
+              if (maxScaleSeen >= returnTriggerScale) {
+                // return to original card index only if this builder context is still mounted
+                if (ctx.mounted) Navigator.of(ctx).pop(initialIndex);
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [AppColors.accent, AppColors.background],
+                  stops: const [0.0, 0.15],
                 ),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: cols,
-                    childAspectRatio: 0.9,
-                    padding: const EdgeInsets.all(8),
-                    children: List.generate(_words.length, (i) {
-                      final w = _words[i];
-                      final en = (w['en'] ?? w['english'] ?? '').toString();
-                      final imgPath = (w['image'] ?? '').toString();
-                      // identify word id used for marking
-                      final wid = (w['id']?.toString() ?? en);
-                      final isMarked = _marked.contains(wid);
-                      return InkWell(
-                        onTap: () => Navigator.of(ctx).pop(i),
-                        child: Card(
-                          margin: const EdgeInsets.all(6),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(
-                              color: isMarked ? AppColors.accent: Colors.transparent,
-                              width: isMarked ? 3.0 : 1.0,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (imgPath.isNotEmpty)
-                                SizedBox(
-                                  height: 64,
+              ),
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  centerTitle: true,
+                  title: Text('Galéria', style: AppTextStyles.heading),
+                  foregroundColor: AppColors.text,
+                ),
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: GridView.count(
+                          crossAxisCount: cols,
+                          // wider aspect ratio -> lower tile height
+                          childAspectRatio: 1.4,
+                          padding: const EdgeInsets.all(6),
+                          children: List.generate(_words.length, (i) {
+                            final w = _words[i];
+                            final en = (w['en'] ?? w['english'] ?? '').toString();
+                            final wid = (w['id']?.toString() ?? en);
+                            final isMarked = _marked.contains(wid);
+
+                            return InkWell(
+                              onTap: () { if (ctx.mounted) Navigator.of(ctx).pop(i); },
+                              child: Card(
+                                margin: const EdgeInsets.all(4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: BorderSide(
+                                    color: isMarked ? AppColors.accent : Colors.transparent,
+                                    width: isMarked ? 3.0 : 1.0,
+                                  ),
+                                ),
+                                child: Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                    child: Text(
+                                      en,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: tileFontSize,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.text,
+                                      ),
                                     ),
-                                    child: WordImage(
-                                      assetPath: imgPath,
-                                      fallbackText: en,
-                                      maxHeight: 64,
-                                    ),
-                                  ),
-                                )
-                              else
-                                const SizedBox(height: 64),
-                              const SizedBox(height: 6),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                  ),
-                                  child: Text(
-                                    en,
-                                    textAlign: TextAlign.center,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          }),
                         ),
-                      );
-                    }),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                        child: ElevatedButton(
+                          onPressed: _canTest
+                              ? () {
+                                  if (ctx.mounted) Navigator.of(ctx).pop(-999);
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44),
+                            backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
+                          ),
+                          child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Colors.white : AppColors.text)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
+
+    return selected;
   }
 }

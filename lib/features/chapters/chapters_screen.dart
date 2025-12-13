@@ -83,8 +83,18 @@ class _BookScreenState extends State<BookScreen> {
                     // CHAPTER HEADER (unit)
                     InkWell(
                       borderRadius: BorderRadius.circular(12),
-                      onTap: () =>
-                          setState(() => expanded[index] = !expanded[index]),
+                      onTap: () => setState(() {
+                        // if this chapter is already open, close it
+                        if (expanded[index]) {
+                          expanded[index] = false;
+                        } else {
+                          // close all chapters, then open the tapped one
+                          for (var i = 0; i < expanded.length; i++) {
+                            expanded[i] = false;
+                          }
+                          expanded[index] = true;
+                        }
+                      }),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,

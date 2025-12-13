@@ -36,6 +36,9 @@ migrate_working_dir/
 # ignore local scripts with secrets
 scripts/
 
+# ignore local backup JSON files in assets/data
+assets/data/*.bak
+
 # Symbolication related
 app.*.symbols
 
