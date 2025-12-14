@@ -27,6 +27,9 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
   int _totalWords = 0;
   int _grammarScore = 0;
   int _mcqScore = 0;
+  // whether full quiz run was completed
+  bool _grammarDone = false;
+  bool _mcqDone = false;
 
   @override
   void initState() {
@@ -121,12 +124,6 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
     }
   }
 
-  String _computeKeyId() {
-    final visited = _computeVisitedKey();
-    if (visited.startsWith('visited_')) return visited.substring('visited_'.length);
-    return visited;
-  }
-
   Future<void> _loadProgress() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -135,12 +132,15 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
       final visited = list.map(int.parse).toSet();
 
       final words = (_args['words'] is List) ? (_args['words'] as List) : <dynamic>[];
-      final keyId = _computeKeyId();
-      final grammarKey = 'score_${keyId}_grammar';
-      final mcqKey = 'score_${keyId}_mcq';
 
-      final grammar = prefs.getInt(grammarKey) ?? 0;
-      final mcq = prefs.getInt(mcqKey) ?? 0;
+      // read persisted quiz scores/done flags using the same key base as QuizScreen
+      final grammarBase = quizKeyFromArgs(_args, 'grammar');
+      final mcqBase = quizKeyFromArgs(_args, 'mcq');
+
+      final grammar = prefs.getInt('${grammarBase}_score') ?? 0;
+      final grammarDone = prefs.getBool('${grammarBase}_done') ?? false;
+      final mcq = prefs.getInt('${mcqBase}_score') ?? 0;
+      final mcqDone = prefs.getBool('${mcqBase}_done') ?? false;
 
       if (!mounted) return;
       setState(() {
@@ -148,6 +148,8 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
         _totalWords = words.length;
         _grammarScore = grammar;
         _mcqScore = mcq;
+        _grammarDone = grammarDone;
+        _mcqDone = mcqDone;
       });
     } catch (_) {}
   }
@@ -378,7 +380,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                             backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
                                             foregroundColor: _canTest ? Theme.of(context).colorScheme.onSurface : AppColors.text,
                                           ),
-                                          child: const Text('Spustiť'),
+                                          child: Text(_grammarDone ? 'Zopakovať' : 'Spustiť'),
                                         ),
                                       ],
                                     ),
@@ -485,7 +487,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                             backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
                                             foregroundColor: _canTest ? Theme.of(context).colorScheme.onSurface: AppColors.text,
                                           ),
-                                          child: const Text('Spustiť'),
+                                          child: Text(_mcqDone ? 'Zopakovať' : 'Spustiť'),
                                         ),
                                       ],
                                     ),

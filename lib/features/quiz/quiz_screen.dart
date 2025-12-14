@@ -2,6 +2,22 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Generate a stable key base for a quiz from the same args structure used
+// across the app. Other screens can call this to read/write the same prefs.
+String quizKeyFromArgs(Map<String, dynamic>? args, String testType) {
+  final a = args ?? {};
+  final tb = a['textbook'] ?? a['book'] ?? a['textbookMap'];
+  String part = '';
+  if (tb is Map) {
+    part = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
+  }
+  final subId = (a['subchapterId'] ?? a['id'] ?? a['subId'] ?? a['sub'] ?? '').toString();
+  final subTitle = (a['subchapterTitle'] ?? a['title'] ?? a['name'] ?? '').toString();
+  final combined = [part, subId, subTitle].where((s) => s.isNotEmpty).join('::');
+  final safe = combined.isEmpty ? 'default' : combined.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+  return 'quiz_${safe}_$testType';
+}
+
 class QuizScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
   const QuizScreen({super.key, this.args});
@@ -12,7 +28,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   late final List<Map<String, dynamic>> _words;
-  late final String _testType; // 'grammar' or 'mcq'
+  late String _testType; // 'grammar' or 'mcq'
   int _index = 0;
   int _score = 0;
   bool _answered = false;
@@ -42,17 +58,7 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   String _progressKeyBase() {
-    final args = widget.args ?? {};
-    final tb = args['textbook'] ?? args['book'] ?? args['textbookMap'];
-    String part = '';
-    if (tb is Map) {
-      part = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
-    }
-    final subId = (args['subchapterId'] ?? args['id'] ?? args['subId'] ?? args['sub'] ?? '').toString();
-    final subTitle = (args['subchapterTitle'] ?? args['title'] ?? args['name'] ?? '').toString();
-    final combined = [part, subId, subTitle].where((s) => s.isNotEmpty).join('::');
-    final safe = combined.isEmpty ? 'default' : combined.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
-    return 'quiz_${safe}_${_testType}';
+    return quizKeyFromArgs(widget.args, _testType);
   }
 
   Future<void> _saveProgress() async {
@@ -81,17 +87,6 @@ class _QuizScreenState extends State<QuizScreen> {
         if (ans != null) _answered = ans;
         if (_testType == 'grammar' && input != null) _controller.text = input;
       });
-    } catch (_) {}
-  }
-
-  Future<void> _clearProgress() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final base = _progressKeyBase();
-      await prefs.remove('${base}_index');
-      await prefs.remove('${base}_score');
-      await prefs.remove('${base}_answered');
-      await prefs.remove('${base}_input');
     } catch (_) {}
   }
 
@@ -167,15 +162,24 @@ class _QuizScreenState extends State<QuizScreen> {
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Výsledok'),
-          content: Text('Skóre:  $_score/${_words.length}'),
+          content: Text('Skóre:  $_score/${_words.length}'),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Zavrieť')),
             TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
           ],
         ),
       ).then((_) async {
-        // clear saved progress when user finishes
-        await _clearProgress();
+        // persist final score and mark as done so LessonOrQuizScreen can show 'Zopakovať' and stars
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          final base = _progressKeyBase();
+          await prefs.setInt('${base}_score', _score);
+          await prefs.setBool('${base}_done', true);
+          // keep index/answered/input if you want resume behavior; remove them if you prefer a fresh restart
+          await prefs.remove('${base}_index');
+          await prefs.remove('${base}_answered');
+          await prefs.remove('${base}_input');
+        } catch (_) {}
       });
       return;
     }
