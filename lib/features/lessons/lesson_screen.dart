@@ -323,7 +323,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 key: const ValueKey('back'),
                 margin: const EdgeInsets.symmetric(
                   horizontal: 22,
-                  vertical: 12,
+                  vertical: 10,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -377,7 +377,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 key: const ValueKey('front'),
                 margin: const EdgeInsets.symmetric(
                   horizontal: 22,
-                  vertical: 12,
+                  vertical: 30,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -416,6 +416,7 @@ class _LessonScreenState extends State<LessonScreen> {
                     Text(
                       sk.toString().toUpperCase(),
                       style: AppTextStyles.lesson,
+                      
                     ),
                     const SizedBox(height: 12),
                     if (img != null && img.toString().isNotEmpty)
@@ -478,7 +479,7 @@ class _LessonScreenState extends State<LessonScreen> {
               children: [
                 // Test button (above pager) — enabled only when user visited all cards
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 30.0),
                   child: ElevatedButton(
                     onPressed: _canTest
                         ? () {
@@ -558,7 +559,7 @@ class _LessonScreenState extends State<LessonScreen> {
 
                  // Footer controls
                  Padding(
-                   padding: const EdgeInsets.symmetric(vertical: 12.0),
+                   padding: const EdgeInsets.symmetric(vertical: 32.0),
                    child: Column(
                      children: [
                        Text(

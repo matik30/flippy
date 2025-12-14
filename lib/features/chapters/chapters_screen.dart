@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
-import 'package:go_router/go_router.dart'; // <-- pridaj tento import
+import 'package:go_router/go_router.dart';
 import 'package:flippy/features/lesson_or_quiz/lesson_or_quiz_screen.dart';
 
 class BookScreen extends StatefulWidget {
@@ -70,7 +70,7 @@ class _BookScreenState extends State<BookScreen> {
           ),
           body: ListView.builder(
             // builder pre jednotlivé kapitoly
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 24),
             itemCount: chapters.length,
             itemBuilder: (context, index) {
               final chapter = chapters[index];

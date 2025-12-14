@@ -277,7 +277,7 @@ class _HomePageState extends State<HomePage> {
               }
 
               return GridView.builder(                
-                padding: const EdgeInsets.only(top:50, left:20),
+                padding: const EdgeInsets.only(top:50, left:20, right: 20),
                 itemCount: books.length,
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
