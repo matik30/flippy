@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flippy/theme/colors.dart';
+//import 'package:flippy/theme/colors.dart';
 
 class AppTextStyles {
   static const TextStyle heading = TextStyle(
