@@ -276,8 +276,8 @@ class _HomePageState extends State<HomePage> {
                 return const Center(child: Text('Žiadne učebnice'));
               }
 
-              return GridView.builder(
-                padding: const EdgeInsets.all(20),
+              return GridView.builder(                
+                padding: const EdgeInsets.only(top:50, left:20),
                 itemCount: books.length,
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(

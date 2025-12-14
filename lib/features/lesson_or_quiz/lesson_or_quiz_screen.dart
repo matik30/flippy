@@ -176,8 +176,10 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
           body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+            minimum: EdgeInsets.only(top:40),
+            child: Center(
+              child: Padding(
+              padding: const EdgeInsets.all(20.0),
               child: ListView(
                 children: [
                   // Slovíčka (styled like chapters list item)
@@ -498,6 +500,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),
