@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // pre zapamätanie pozície v lekcii
-import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/word_card.dart';
 import 'package:flippy/features/quiz/quiz_screen.dart';
@@ -471,7 +470,7 @@ class _LessonScreenState extends State<LessonScreen> {
               _title.isEmpty ? 'Lekcia' : _title,
               style: AppTextStyles.chapter,
             ),
-            foregroundColor: AppColors.text,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
           body: SafeArea(
             child: Column(
@@ -490,9 +489,9 @@ class _LessonScreenState extends State<LessonScreen> {
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
+                      backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
                     ),
-                    child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Colors.white : AppColors.text)),
+                    child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface)),
                   ),
                 ),
 
@@ -587,7 +586,7 @@ class _LessonScreenState extends State<LessonScreen> {
                                child: ElevatedButton(
                                  style: ElevatedButton.styleFrom(
                                    backgroundColor: i == _index
-                                       ? AppColors.primary
+                                       ? Theme.of(context).colorScheme.primary
                                        : Colors.white,
                                    elevation: 4,
                                    shape: RoundedRectangleBorder(
@@ -599,8 +598,8 @@ class _LessonScreenState extends State<LessonScreen> {
                                    '${i + 1}',
                                    style: TextStyle(
                                      color: i == _index
-                                         ? Colors.white
-                                         : AppColors.text,
+                                         ? Theme.of(context).colorScheme.onPrimary
+                                         : Theme.of(context).colorScheme.onSurface,
                                    ),
                                  ),
                                ),
@@ -666,7 +665,7 @@ class _LessonScreenState extends State<LessonScreen> {
                  gradient: LinearGradient(
                    begin: Alignment.topCenter,
                    end: Alignment.bottomCenter,
-                   colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
+                   colors: [Theme.of(ctx).colorScheme.secondary, Theme.of(ctx).colorScheme.surface],
                    stops: const [0.0, 0.15],
                  ),
                ),
@@ -677,7 +676,7 @@ class _LessonScreenState extends State<LessonScreen> {
                    elevation: 0,
                    centerTitle: true,
                    title: Text('Galéria', style: AppTextStyles.heading),
-                   foregroundColor: AppColors.text,
+                   foregroundColor: Theme.of(ctx).colorScheme.onSurface,
                  ),
                  body: SafeArea(
                    child: Column(
@@ -702,7 +701,7 @@ class _LessonScreenState extends State<LessonScreen> {
                                  shape: RoundedRectangleBorder(
                                    borderRadius: BorderRadius.circular(8),
                                    side: BorderSide(
-                                     color: isMarked ? AppColors.accent : Colors.transparent,
+                                     color: isMarked ? Theme.of(ctx).colorScheme.secondary : Colors.transparent,
                                      width: isMarked ? 3.0 : 1.0,
                                    ),
                                  ),
@@ -717,7 +716,7 @@ class _LessonScreenState extends State<LessonScreen> {
                                        style: TextStyle(
                                          fontSize: tileFontSize,
                                          fontWeight: FontWeight.w600,
-                                         color: AppColors.text,
+                                         color: Theme.of(ctx).colorScheme.onSurface,
                                        ),
                                      ),
                                    ),
@@ -741,9 +740,9 @@ class _LessonScreenState extends State<LessonScreen> {
                                : null,
                            style: ElevatedButton.styleFrom(
                              minimumSize: const Size.fromHeight(44),
-                             backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
+                             backgroundColor: _canTest ? Theme.of(ctx).colorScheme.primary : Colors.grey.shade300,
                            ),
-                           child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Colors.white : AppColors.text)),
+                           child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Theme.of(ctx).colorScheme.onPrimary : Theme.of(ctx).colorScheme.onSurface)),
                          ),
                        ),
                      ],
