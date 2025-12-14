@@ -328,7 +328,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.text, width: 2),
+                  border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -382,7 +382,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.text, width: 2),
+                  border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -403,7 +403,7 @@ class _LessonScreenState extends State<LessonScreen> {
                         return IconButton(
                           icon: Icon(
                             Icons.priority_high,
-                            color: marked ? Colors.red : AppColors.text,
+                            color: marked ? Colors.red : Theme.of(context).colorScheme.onSurface,
                           ),
                           onPressed: () => _toggleMarked(id),
                           tooltip: marked
@@ -456,7 +456,7 @@ class _LessonScreenState extends State<LessonScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.accent, AppColors.background],
+            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
             stops: const [0.0, 0.15],
           ),
         ),
@@ -666,7 +666,7 @@ class _LessonScreenState extends State<LessonScreen> {
                  gradient: LinearGradient(
                    begin: Alignment.topCenter,
                    end: Alignment.bottomCenter,
-                   colors: [AppColors.accent, AppColors.background],
+                   colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
                    stops: const [0.0, 0.15],
                  ),
                ),

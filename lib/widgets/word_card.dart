@@ -53,7 +53,7 @@ class WordImage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.text, width: 2),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))
         ],
@@ -69,7 +69,7 @@ class WordImage extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          Icon(Icons.image_not_supported, size: 56, color: AppColors.text),
+          Icon(Icons.image_not_supported, size: 56, color: Theme.of(context).colorScheme.onSurface),
         ],
       ),
     );

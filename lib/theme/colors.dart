@@ -12,7 +12,7 @@ class AppColorsRed {
   static const Color background = Color(0xFFFFFFF9);
   static const Color primary = Color(0xFFF24D41);
   static const Color secondary = Color(0xFF8F352D);
-  static const Color accent = Color(0xFFC23F36);
+  static const Color accent = Color.fromARGB(255, 83, 22, 18);
   static const Color text = Color(0xFF332625); 
 }
 

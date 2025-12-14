@@ -162,7 +162,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.accent, AppColors.background],
+            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
             stops: const [0.0, 0.15],
           ),
         ),
@@ -173,7 +173,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
             elevation: 0,
             centerTitle: true,
             title: Text(title, style: AppTextStyles.chapter),
-            foregroundColor: AppColors.text,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
           body: SafeArea(
             child: Padding(
@@ -184,7 +184,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _expandedSlovicka ? AppColors.primary : Colors.white,
+                      color: _expandedSlovicka ? Theme.of(context).colorScheme.primary : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))],
                     ),
@@ -210,7 +210,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                 Expanded(
                                   child: Text('Slovíčka', style: TextStyle(color: _expandedSlovicka ? Colors.white : AppColors.text, fontSize: 18)),
                                 ),
-                                Icon(_expandedSlovicka ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right, color: _expandedSlovicka ? Colors.white : AppColors.text),
+                                Icon(_expandedSlovicka ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right, color: _expandedSlovicka ? Colors.white : Theme.of(context).colorScheme.onSurface),
                               ],
                             ),
                           ),
@@ -219,7 +219,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                         if (_expandedSlovicka)
                           Container(
                             decoration: BoxDecoration(
-                              color: AppColors.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
                             ),
                             child: Padding(
@@ -266,8 +266,8 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                         Navigator.of(context).push(MaterialPageRoute(builder: (_) => LessonScreen(args: _args))).then((_) { _computeCanTest(); _loadProgress(); });
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: AppColors.background,
+                                        backgroundColor: Theme.of(context).colorScheme.primary,
+                                        foregroundColor: Theme.of(context).colorScheme.onSurface,
                                       ),
                                       child: const Text('Spustiť'),
                                     ),
@@ -284,7 +284,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _expandedGrammar ? AppColors.primary : Colors.white,
+                      color: _expandedGrammar ? Theme.of(context).colorScheme.primary : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))],
                     ),
@@ -306,7 +306,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                             child: Row(
                               children: [
                                 Expanded(child: Text('Test - Gramatika', style: TextStyle(color: _expandedGrammar ? Colors.white : AppColors.text, fontSize: 18))),
-                                Icon(_expandedGrammar ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right, color: _expandedGrammar ? Colors.white : AppColors.text),
+                                Icon(_expandedGrammar ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right, color: _expandedGrammar ? Colors.white : Theme.of(context).colorScheme.onSurface),
                               ],
                             ),
                           ),
@@ -315,7 +315,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                         if (_expandedGrammar)
                           Container(
                             decoration: BoxDecoration(
-                              color: AppColors.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
                             ),
                             child: Padding(
@@ -373,8 +373,8 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                                 }
                                               : null,
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
-                                            foregroundColor: _canTest ? AppColors.background : AppColors.text,
+                                            backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
+                                            foregroundColor: _canTest ? Theme.of(context).colorScheme.onSurface : AppColors.text,
                                           ),
                                           child: const Text('Spustiť'),
                                         ),
@@ -393,7 +393,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _expandedMcq ? AppColors.primary : Colors.white,
+                      color: _expandedMcq ? Theme.of(context).colorScheme.primary : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))],
                     ),
@@ -415,7 +415,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                             child: Row(
                               children: [
                                 Expanded(child: Text('Test - výber odpovede', style: TextStyle(color: _expandedMcq ? Colors.white : AppColors.text, fontSize: 18))),
-                                Icon(_expandedMcq ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right, color: _expandedMcq ? Colors.white : AppColors.text),
+                                Icon(_expandedMcq ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right, color: _expandedMcq ? Colors.white : Theme.of(context).colorScheme.onSurface),
                               ],
                             ),
                           ),
@@ -424,7 +424,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                         if (_expandedMcq)
                           Container(
                             decoration: BoxDecoration(
-                              color: AppColors.background,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
                             ),
                             child: Padding(
@@ -480,8 +480,8 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                                 }
                                               : null,
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: _canTest ? AppColors.primary : Colors.grey.shade300,
-                                            foregroundColor: _canTest ? AppColors.background: AppColors.text,
+                                            backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
+                                            foregroundColor: _canTest ? Theme.of(context).colorScheme.onSurface: AppColors.text,
                                           ),
                                           child: const Text('Spustiť'),
                                         ),

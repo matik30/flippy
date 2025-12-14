@@ -7,10 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/scan_dialog.dart';
+import 'package:flippy/theme/theme_notifier.dart';
 
 Map<String, dynamic> _parseManifest(String s) => jsonDecode(s) as Map<String, dynamic>;
 
@@ -146,18 +148,20 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
+        // use theme colors so the FAB updates when theme changes
+        backgroundColor: Theme.of(context).colorScheme.primary,
         onPressed: () {
           showDialog(context: context, builder: (_) => const ScanDialog());
         },
-        child: const Icon(Icons.add, color: Colors.white),
+        child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.accent, AppColors.background],
+            // use theme colors for gradient so it reacts to theme changes
+            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
             stops: const [0.0, 0.15],
           ),
         ),
@@ -170,9 +174,93 @@ class _HomePageState extends State<HomePage> {
             centerTitle: true,
             title: Text('Učebnice', style: AppTextStyles.chapter),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.import_contacts),
-                onPressed: _openImportManager,
+              // menu with import manager and theme selector
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.menu),
+                onSelected: (v) async {
+                  if (v == 'import') return _openImportManager();
+                  if (v == 'theme') {
+                    // Obtain the ThemeNotifier synchronously (no async gap)
+                    final tn = Provider.of<ThemeNotifier>(context, listen: false);
+
+                    // Show the dialog and await the selection. We do not use
+                    // the surrounding `context` after this await (we already
+                    // captured `tn`), so this avoids using BuildContext across
+                    // an async gap.
+                    final sel = await showDialog<String>(
+                      context: context,
+                      builder: (dialogCtx) => SimpleDialog(
+                        title: const Text('Vyber motív'),
+                        children: [
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.of(dialogCtx).pop('blue'),
+                            child: Row(children: [
+                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4))),
+                              const SizedBox(width: 12),
+                              const Text('Modrá (základná)'),
+                            ]),
+                          ),
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.of(dialogCtx).pop('red'),
+                            child: Row(children: [
+                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsRed.primary, borderRadius: BorderRadius.circular(4))),
+                              const SizedBox(width: 12),
+                              const Text('Červená'),
+                            ]),
+                          ),
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.of(dialogCtx).pop('green'),
+                            child: Row(children: [
+                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsGreen.primary, borderRadius: BorderRadius.circular(4))),
+                              const SizedBox(width: 12),
+                              const Text('Zelená'),
+                            ]),
+                          ),
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.of(dialogCtx).pop('orange'),
+                            child: Row(children: [
+                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsOrange.primary, borderRadius: BorderRadius.circular(4))),
+                              const SizedBox(width: 12),
+                              const Text('Oranžová'),
+                            ]),
+                          ),
+                          SimpleDialogOption(
+                            onPressed: () => Navigator.of(dialogCtx).pop('turq'),
+                            child: Row(children: [
+                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsTurquise.primary, borderRadius: BorderRadius.circular(4))),
+                              const SizedBox(width: 12),
+                              const Text('Tyrkysová'),
+                            ]),
+                          ),
+                        ],
+                      ),
+                     );
+
+                     if (sel != null) await tn.setThemeByKey(sel);
+                  }
+                },
+                itemBuilder: (menuCtx) => [
+                  PopupMenuItem(
+                    value: 'import',
+                    child: Row(
+                      children: [
+                        Icon(Icons.menu_book, size: 20, color: Theme.of(menuCtx).colorScheme.onSurface),
+                        const SizedBox(width: 10),
+                        const Text('Správa učebníc'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'theme',
+                    child: Row(
+                      children: [
+                        Icon(Icons.format_paint, size: 20, color: Theme.of(menuCtx).colorScheme.onSurface),
+                        const SizedBox(width: 10),
+                        const Text('Motív'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -197,13 +285,19 @@ class _HomePageState extends State<HomePage> {
                   mainAxisSpacing: 20,
                   crossAxisSpacing: 20,
                 ),
-                itemBuilder: (_, i) {
+                // Use the local builder context (gridCtx) instead of capturing
+                // the surrounding `context` to avoid using a BuildContext
+                // across the async gap of the inner FutureBuilder.
+                itemBuilder: (gridCtx, i) {
                   final book = books[i];
                   final cover = book['coverImage'];
 
                   return FutureBuilder<ImageInfo>(
                     future: loadImageInfo(cover),
-                    builder: (_, img) {
+                    // Use the builder's local context (tileCtx) and use that
+                    // when navigating so we don't rely on an outer context
+                    // captured across async gaps.
+                    builder: (tileCtx, img) {
                       if (!img.hasData) return const SizedBox.shrink();
 
                       final info = img.data!;
@@ -211,16 +305,18 @@ class _HomePageState extends State<HomePage> {
                           info.image.width / info.image.height;
 
                       return GestureDetector(
-                        onTap: () =>
-                            // pass the textbook explicitly under 'textbook' so
-                            // downstream screens can read full textbook map
-                            context.go('/chapters', extra: {'textbook': book}),
+                        onTap: () {
+                          // Use the local tileCtx (the BuildContext passed to
+                          // this builder) for navigation so we don't reference
+                          // the outer context after an async boundary.
+                          tileCtx.go('/chapters', extra: {'textbook': book});
+                        },
                         child: AspectRatio(
                           aspectRatio: aspect,
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                  color: AppColors.text, width: 2),
+                                  color: Theme.of(tileCtx).colorScheme.onSurface, width: 2),
                               borderRadius: BorderRadius.circular(13),
                               image: DecorationImage(
                                 image: cover is String && !cover.startsWith('assets/') && io.File(cover).existsSync()

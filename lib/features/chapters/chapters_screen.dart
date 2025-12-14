@@ -46,7 +46,7 @@ class _BookScreenState extends State<BookScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.accent, AppColors.background],
+            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
             stops: const [0.0, 0.15],
           ),
         ),
@@ -66,7 +66,7 @@ class _BookScreenState extends State<BookScreen> {
               data["title"] ?? 'Chapters',
               style: AppTextStyles.chapter,
             ),
-            foregroundColor: AppColors.text,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
           body: ListView.builder(
             // builder pre jednotlivé kapitoly
@@ -79,7 +79,7 @@ class _BookScreenState extends State<BookScreen> {
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isOpen ? AppColors.primary : Colors.white,
+                  color: isOpen ? Theme.of(context).colorScheme.primary : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: const [
                     BoxShadow(
@@ -126,7 +126,7 @@ class _BookScreenState extends State<BookScreen> {
                               child: Text(
                                 chapter["title"] ?? '',
                                 style: TextStyle(
-                                  color: isOpen ? Colors.white : AppColors.text,
+                                  color: isOpen ? Colors.white : Theme.of(context).colorScheme.onSurface,
                                   fontSize: 18,
                                 ),
                               ),
@@ -135,7 +135,7 @@ class _BookScreenState extends State<BookScreen> {
                               isOpen
                                   ? Icons.keyboard_arrow_down
                                   : Icons.keyboard_arrow_right,
-                              color: isOpen ? Colors.white : AppColors.text,
+                              color: isOpen ? Colors.white : Theme.of(context).colorScheme.onSurface,
                             ),
                           ],
                         ),
