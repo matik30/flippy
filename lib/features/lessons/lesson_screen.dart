@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // pre zapamätanie pozície v lekcii
+import 'package:path/path.dart' as path;
 import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/word_card.dart';
 import 'package:flippy/features/quiz/quiz_screen.dart';
@@ -21,6 +22,8 @@ class _LessonScreenState extends State<LessonScreen> {
 
   List<Map<String, dynamic>> _words = [];
   String _title = '';
+  String? _baseDir; // Base directory for relative image paths from JSON
+  String? _baseUrl; // Base URL for server images
 
   // kľúč pre zapamätanie pozície v lekcii
   String? _saveKey;
@@ -136,6 +139,18 @@ class _LessonScreenState extends State<LessonScreen> {
       String? signature;
       final tb = routeArgs['textbook'] ?? routeArgs['book'] ?? routeArgs['textbookMap'];
       if (tb is Map) {
+        // Extract base directory from __file__ if it exists
+        final filePath = tb['__file__'];
+        if (filePath is String && filePath.isNotEmpty) {
+          _baseDir = path.dirname(filePath);
+        }
+
+        // Extract base URL from textbook (automatically saved from QR scan)
+        final serverUrl = tb['serverBaseUrl'] ?? tb['baseUrl'];
+        if (serverUrl is String && serverUrl.isNotEmpty) {
+          _baseUrl = serverUrl;
+        }
+
         final tbId = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
 
         final chapterIds = <String>[];
@@ -353,6 +368,8 @@ class _LessonScreenState extends State<LessonScreen> {
                             assetPath: img.toString(),
                             fallbackText: en.toString(),
                             maxHeight: 240,
+                            baseDir: _baseDir,
+                            baseUrl: _baseUrl,
                           ),
                         ),
                       ),
@@ -426,6 +443,8 @@ class _LessonScreenState extends State<LessonScreen> {
                             assetPath: img.toString(),
                             fallbackText: en.toString(),
                             maxHeight: 240,
+                            baseDir: _baseDir,
+                            baseUrl: _baseUrl,
                           ),
                         ),
                       ),

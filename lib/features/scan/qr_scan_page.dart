@@ -30,7 +30,23 @@ class _QrScanPageState extends State<QrScanPage> {
 
       // validate JSON
       final body = response.body;
-      jsonDecode(body);
+      final jsonData = jsonDecode(body);
+
+      // Extract base URL from the source URL
+      // Example: https://pekiskol.alwaysdata.net/generator_v2.php/api/textbook.json
+      // -> https://pekiskol.alwaysdata.net/generator_v2.php
+      String baseUrl = uri.toString();
+      final lastSlash = baseUrl.lastIndexOf('/');
+      if (lastSlash > 8) { // after "https://"
+        baseUrl = baseUrl.substring(0, lastSlash);
+      }
+
+      // Add base URL to JSON metadata
+      if (jsonData is Map<String, dynamic>) {
+        if (jsonData['textbook'] is Map<String, dynamic>) {
+          jsonData['textbook']['serverBaseUrl'] = baseUrl;
+        }
+      }
 
       // save to application documents directory
       final docsDir = await getApplicationDocumentsDirectory();
@@ -38,7 +54,7 @@ class _QrScanPageState extends State<QrScanPage> {
       final filename = 'imported_$timestamp.json';
       final filePath = '${docsDir.path}/$filename';
       final f = io.File(filePath);
-      await f.writeAsString(body, encoding: const Utf8Codec());
+      await f.writeAsString(jsonEncode(jsonData), encoding: const Utf8Codec());
 
       // record in imported_textbooks list
       final prefs = await SharedPreferences.getInstance();
