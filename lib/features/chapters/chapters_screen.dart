@@ -70,7 +70,7 @@ class _BookScreenState extends State<BookScreen> {
           ),
           body: ListView.builder(
             // builder pre jednotlivé kapitoly
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.fromLTRB(24,45,24,24),
             itemCount: chapters.length,
             itemBuilder: (context, index) {
               final chapter = chapters[index];

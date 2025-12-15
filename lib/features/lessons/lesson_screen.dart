@@ -137,7 +137,10 @@ class _LessonScreenState extends State<LessonScreen> {
       // Try to build a stable signature from textbook -> chapters -> subchapters -> words ids.
       // The combination of these ids should be unique per specific imported/book copy.
       String? signature;
-      final tb = routeArgs['textbook'] ?? routeArgs['book'] ?? routeArgs['textbookMap'];
+      final tb =
+          routeArgs['textbook'] ??
+          routeArgs['book'] ??
+          routeArgs['textbookMap'];
       if (tb is Map) {
         // Extract base directory from __file__ if it exists
         final filePath = tb['__file__'];
@@ -151,7 +154,8 @@ class _LessonScreenState extends State<LessonScreen> {
           _baseUrl = serverUrl;
         }
 
-        final tbId = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
+        final tbId = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '')
+            .toString();
 
         final chapterIds = <String>[];
         final subIds = <String>[];
@@ -164,7 +168,8 @@ class _LessonScreenState extends State<LessonScreen> {
               if (ch['subchapters'] is List) {
                 for (final sc in ch['subchapters']) {
                   if (sc is Map) {
-                    final sid = (sc['id'] ?? sc['subchapterId'] ?? '').toString();
+                    final sid = (sc['id'] ?? sc['subchapterId'] ?? '')
+                        .toString();
                     if (sid.isNotEmpty) subIds.add(sid);
                   }
                 }
@@ -193,37 +198,43 @@ class _LessonScreenState extends State<LessonScreen> {
       if (signature != null && signature.isNotEmpty) {
         keySource = signature;
       } else {
-        final subId = (routeArgs['subchapterId'] ??
-                routeArgs['id'] ??
-                routeArgs['subId'] ??
-                routeArgs['sub'] ??
-                '')
-            .toString();
-        final subTitle = (routeArgs['subchapterTitle'] ??
-                routeArgs['title'] ??
-                routeArgs['name'] ??
-                _title)
-            .toString();
+        final subId =
+            (routeArgs['subchapterId'] ??
+                    routeArgs['id'] ??
+                    routeArgs['subId'] ??
+                    routeArgs['sub'] ??
+                    '')
+                .toString();
+        final subTitle =
+            (routeArgs['subchapterTitle'] ??
+                    routeArgs['title'] ??
+                    routeArgs['name'] ??
+                    _title)
+                .toString();
 
-        final chapterId = (routeArgs['chapterId'] ??
-                routeArgs['parentId'] ??
-                routeArgs['chapterId'] ??
-                '')
-            .toString();
-        final chapterTitle = (routeArgs['chapterTitle'] ??
-                routeArgs['chapter'] ??
-                '')
-            .toString();
+        final chapterId =
+            (routeArgs['chapterId'] ??
+                    routeArgs['parentId'] ??
+                    routeArgs['chapterId'] ??
+                    '')
+                .toString();
+        final chapterTitle =
+            (routeArgs['chapterTitle'] ?? routeArgs['chapter'] ?? '')
+                .toString();
 
         final bookId = (routeArgs['bookId'] ?? routeArgs['courseId'] ?? '')
             .toString();
         final bookTitle = (routeArgs['bookTitle'] ?? routeArgs['book'] ?? '')
             .toString();
 
-        final parts = [bookId, bookTitle, chapterId, chapterTitle, subId, subTitle]
-            .map((s) => s.toString().trim())
-            .where((s) => s.isNotEmpty)
-            .toList();
+        final parts = [
+          bookId,
+          bookTitle,
+          chapterId,
+          chapterTitle,
+          subId,
+          subTitle,
+        ].map((s) => s.toString().trim()).where((s) => s.isNotEmpty).toList();
 
         final combinedKey = parts.isNotEmpty ? parts.join('::') : subTitle;
         keySource = combinedKey;
@@ -245,7 +256,9 @@ class _LessonScreenState extends State<LessonScreen> {
       // ensure the currently displayed page counts as visited (covers initial display)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        if (_words.isNotEmpty && !_visited.contains(_index) && !_suppressVisitMark) {
+        if (_words.isNotEmpty &&
+            !_visited.contains(_index) &&
+            !_suppressVisitMark) {
           _markVisited(_index);
         }
       });
@@ -264,7 +277,9 @@ class _LessonScreenState extends State<LessonScreen> {
       // After we loaded persisted visited indices, ensure the currently
       // displayed page is counted as visited — this avoids a race where
       // _markVisited was called earlier but then overwritten by this load.
-      if (_words.isNotEmpty && !_visited.contains(_index) && !_suppressVisitMark) {
+      if (_words.isNotEmpty &&
+          !_visited.contains(_index) &&
+          !_suppressVisitMark) {
         _markVisited(_index);
       }
     } catch (_) {}
@@ -273,7 +288,10 @@ class _LessonScreenState extends State<LessonScreen> {
   Future<void> _saveVisited() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(_visitedKey, _visited.map((e) => e.toString()).toList());
+      await prefs.setStringList(
+        _visitedKey,
+        _visited.map((e) => e.toString()).toList(),
+      );
     } catch (_) {}
   }
 
@@ -336,13 +354,16 @@ class _LessonScreenState extends State<LessonScreen> {
             ? Container(
                 key: const ValueKey('back'),
                 margin: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 10,
+                  horizontal: 60,
+                  vertical: 60,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    width: 2,
+                  ),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -351,39 +372,64 @@ class _LessonScreenState extends State<LessonScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Stack(
                   children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      en.toString().toUpperCase(),
-                      style: AppTextStyles.lesson,
-                    ),
-                    const SizedBox(height: 12),
-                    if (img != null && img.toString().isNotEmpty)
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: WordImage(
-                            assetPath: img.toString(),
-                            fallbackText: en.toString(),
-                            maxHeight: 240,
-                            baseDir: _baseDir,
-                            baseUrl: _baseUrl,
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 8),
+
+                          Builder(
+                            builder: (ctx) {
+                              final id =
+                                  word['id']?.toString() ?? en.toString();
+                              final marked = _marked.contains(id);
+                              return IconButton(
+                                icon: Icon(
+                                  Icons.priority_high,
+                                  color: marked
+                                      ? Colors.red
+                                      : Theme.of(context).colorScheme.onSurface,
+                                ),
+                                onPressed: () => _toggleMarked(id),
+                              );
+                            },
                           ),
-                        ),
+
+                          Text(
+                            en.toString().toUpperCase(),
+                            style: AppTextStyles.lesson,
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          if (img != null && img.toString().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: WordImage(
+                                assetPath: img.toString(),
+                                fallbackText: en.toString(),
+                                maxHeight: 240,
+                                baseDir: _baseDir,
+                                baseUrl: _baseUrl,
+                              ),
+                            ),
+
+                          const SizedBox(height: 12),
+                          Text(pron.toString(), style: AppTextStyles.body),
+                        ],
                       ),
-                    const SizedBox(height: 12),
-                    Text(pron.toString(), style: AppTextStyles.body),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: () => setState(() => _showBack = false),
-                        ),
+                    ),
+
+                    Positioned(
+                      bottom: 12,
+                      right: 12,
+                      child: IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: () => setState(() => _showBack = false),
                       ),
                     ),
                   ],
@@ -392,13 +438,16 @@ class _LessonScreenState extends State<LessonScreen> {
             : Container(
                 key: const ValueKey('front'),
                 margin: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 30,
+                  horizontal: 60,
+                  vertical: 60,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    width: 2,
+                  ),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
@@ -407,56 +456,63 @@ class _LessonScreenState extends State<LessonScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Stack(
                   children: [
-                    const SizedBox(height: 8),
-                    // označiť ako problém
-                    Builder(
-                      builder: (ctx) {
-                        final id = word['id']?.toString() ?? en.toString();
-                        final marked = _marked.contains(id);
-                        return IconButton(
-                          icon: Icon(
-                            Icons.priority_high,
-                            color: marked ? Colors.red : Theme.of(context).colorScheme.onSurface,
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 8),
+
+                          // označiť ako problém
+                          Builder(
+                            builder: (ctx) {
+                              final id =
+                                  word['id']?.toString() ?? en.toString();
+                              final marked = _marked.contains(id);
+                              return IconButton(
+                                icon: Icon(
+                                  Icons.priority_high,
+                                  color: marked
+                                      ? Colors.red
+                                      : Theme.of(context).colorScheme.onSurface,
+                                ),
+                                onPressed: () => _toggleMarked(id),
+                              );
+                            },
                           ),
-                          onPressed: () => _toggleMarked(id),
-                          tooltip: marked
-                              ? 'Označené ako problém'
-                              : 'Označiť ako problém',
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      sk.toString().toUpperCase(),
-                      style: AppTextStyles.lesson,
-                      
-                    ),
-                    const SizedBox(height: 12),
-                    if (img != null && img.toString().isNotEmpty)
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: WordImage(
-                            assetPath: img.toString(),
-                            fallbackText: en.toString(),
-                            maxHeight: 240,
-                            baseDir: _baseDir,
-                            baseUrl: _baseUrl,
+
+                          const SizedBox(height: 8),
+                          Text(
+                            sk.toString().toUpperCase(),
+                            style: AppTextStyles.lesson,
                           ),
-                        ),
+
+                          const SizedBox(height: 12),
+
+                          if (img != null && img.toString().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: WordImage(
+                                assetPath: img.toString(),
+                                fallbackText: en.toString(),
+                                maxHeight: 240,
+                                baseDir: _baseDir,
+                                baseUrl: _baseUrl,
+                              ),
+                            ),
+                        ],
                       ),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: IconButton(
-                          icon: const Icon(Icons.rotate_right),
-                          onPressed: () => setState(() => _showBack = true),
-                        ),
+                    ),
+
+                    Positioned(
+                      bottom: 12,
+                      right: 12,
+                      child: IconButton(
+                        icon: const Icon(Icons.rotate_right),
+                        onPressed: () => setState(() => _showBack = true),
                       ),
                     ),
                   ],
@@ -475,7 +531,10 @@ class _LessonScreenState extends State<LessonScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
+            colors: [
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.surface,
+            ],
             stops: const [0.0, 0.15],
           ),
         ),
@@ -497,21 +556,36 @@ class _LessonScreenState extends State<LessonScreen> {
               children: [
                 // Test button (above pager) — enabled only when user visited all cards
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 30.0),
+                  padding: const EdgeInsets.fromLTRB(15.0, 60.0, 20, 10),
                   child: ElevatedButton(
                     onPressed: _canTest
                         ? () {
                             // navigate to QuizScreen, pass same args available to this LessonScreen
-                            final args = Map<String, dynamic>.from(widget.args ?? {});
+                            final args = Map<String, dynamic>.from(
+                              widget.args ?? {},
+                            );
                             // mark default test type if not provided
                             args['testType'] = args['testType'] ?? 'mcq';
-                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => QuizScreen(args: args),
+                              ),
+                            );
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
+                      backgroundColor: _canTest
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey.shade300,
                     ),
-                    child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface)),
+                    child: Text(
+                      'Otestuj sa',
+                      style: TextStyle(
+                        color: _canTest
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
                   ),
                 ),
 
@@ -533,10 +607,13 @@ class _LessonScreenState extends State<LessonScreen> {
                             _minScaleSeen = min(_minScaleSeen, details.scale);
                           },
                           onScaleEnd: (_) async {
-                            if (_minScaleSeen <= _galleryTriggerScale && !_galleryOpen) {
+                            if (_minScaleSeen <= _galleryTriggerScale &&
+                                !_galleryOpen) {
                               _galleryOpen = true;
                               // open gallery and await selected index (or null)
-                              final selected = await _showGalleryAndPick(initialIndex: _index);
+                              final selected = await _showGalleryAndPick(
+                                initialIndex: _index,
+                              );
                               _galleryOpen = false;
 
                               // guard any UI usage with mounted after async gap
@@ -550,231 +627,265 @@ class _LessonScreenState extends State<LessonScreen> {
                                 setState(() => _suppressVisitMark = true);
                                 _goTo(selected);
                               }
-                           }
-                           _minScaleSeen = 1.0;
-                         },
-                         child: PageView.builder(
-                           controller: _pageController,
-                           itemCount: total,
-                           onPageChanged: (i) => setState(() {
-                             _index = i;
-                             _showBack = false;
-                             _saveIndex(i); // save on page change
-                             if (!_suppressVisitMark) {
-                               _markVisited(i);
-                             } else {
-                               // reset suppression for next normal navigation
-                               _suppressVisitMark = false;
-                             }
-                           }),
-                           itemBuilder: (context, i) {
-                             final word = _words[i];
-                             return _buildCard(word);
-                           },
-                         ),
-                       ),
-                 ),
+                            }
+                            _minScaleSeen = 1.0;
+                          },
+                          child: PageView.builder(
+                            controller: _pageController,
+                            itemCount: total,
+                            onPageChanged: (i) => setState(() {
+                              _index = i;
+                              _showBack = false;
+                              _saveIndex(i); // save on page change
+                              if (!_suppressVisitMark) {
+                                _markVisited(i);
+                              } else {
+                                // reset suppression for next normal navigation
+                                _suppressVisitMark = false;
+                              }
+                            }),
+                            itemBuilder: (context, i) {
+                              final word = _words[i];
+                              return _buildCard(word);
+                            },
+                          ),
+                        ),
+                ),
 
-                 // Footer controls
-                 Padding(
-                   padding: const EdgeInsets.symmetric(vertical: 32.0),
-                   child: Column(
-                     children: [
-                       Text(
-                         total == 0 ? '0/0' : '${_index + 1}/$total',
-                         style: AppTextStyles.lesson,
-                       ),
-                       const SizedBox(height: 8),
-                       Row(
-                         mainAxisAlignment: MainAxisAlignment.center,
-                         children: [
-                           IconButton(
-                             icon: const Icon(Icons.arrow_left),
-                             onPressed: () => _goTo(_index - 1),
-                           ),
-                           const SizedBox(width: 8),
-                           // quick jump buttons: prev, current, next
-                           for (
-                             var i = max(0, _index - 1);
-                             i <= min(total - 1, _index + 1);
-                             i++
-                           )
-                             Padding(
-                               padding: const EdgeInsets.symmetric(
-                                 horizontal: 6,
-                               ),
-                               child: ElevatedButton(
-                                 style: ElevatedButton.styleFrom(
-                                   backgroundColor: i == _index
-                                       ? Theme.of(context).colorScheme.primary
-                                       : Colors.white,
-                                   elevation: 4,
-                                   shape: RoundedRectangleBorder(
-                                     borderRadius: BorderRadius.circular(12),
-                                   ),
-                                 ),
-                                 onPressed: () => _goTo(i),
-                                 child: Text(
-                                   '${i + 1}',
-                                   style: TextStyle(
-                                     color: i == _index
-                                         ? Theme.of(context).colorScheme.onPrimary
-                                         : Theme.of(context).colorScheme.onSurface,
-                                   ),
-                                 ),
-                               ),
-                             ),
-                           const SizedBox(width: 8),
-                           IconButton(
-                             icon: const Icon(Icons.arrow_right),
-                             onPressed: () => _goTo(_index + 1),
-                           ),
-                         ],
-                       ),
-                     ],
-                   ),
-                 ),
-               ],
-             ),
-           ),
-         ),
-       ),
-     );
-   }
+                // Footer controls
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        total == 0 ? '0/0' : '${_index + 1}/$total',
+                        style: AppTextStyles.lesson,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_left),
+                            onPressed: () => _goTo(_index - 1),
+                          ),
+                          const SizedBox(width: 8),
+                          // quick jump buttons: prev, current, next
+                          for (
+                            var i = max(0, _index - 1);
+                            i <= min(total - 1, _index + 1);
+                            i++
+                          )
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: i == _index
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.white,
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                onPressed: () => _goTo(i),
+                                child: Text(
+                                  '${i + 1}',
+                                  style: TextStyle(
+                                    color: i == _index
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_right),
+                            onPressed: () => _goTo(_index + 1),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-   // shows gallery dialog/grid and returns tapped index (or null)
-   Future<int?> _showGalleryAndPick({int initialIndex = 0}) async {
-     const cols = 3;
+  // shows gallery dialog/grid and returns tapped index (or null)
+  Future<int?> _showGalleryAndPick({int initialIndex = 0}) async {
+    const cols = 3;
 
-     // compute longest English string length in this subchapter
-     int maxEnLen = 0;
-     for (final w in _words) {
-       final en = (w['en'] ?? w['english'] ?? '').toString();
-       if (en.length > maxEnLen) maxEnLen = en.length;
-     }
+    // compute longest English string length in this subchapter
+    int maxEnLen = 0;
+    for (final w in _words) {
+      final en = (w['en'] ?? w['english'] ?? '').toString();
+      if (en.length > maxEnLen) maxEnLen = en.length;
+    }
 
-     double computeFontSize(int maxLen) {
-       if (maxLen <= 8) return 16.0;
-       if (maxLen <= 12) return 14.0;
-       if (maxLen <= 16) return 13.0;
-       if (maxLen <= 24) return 12.0;
-       return 11.0;
-     }
+    double computeFontSize(int maxLen) {
+      if (maxLen <= 8) return 16.0;
+      if (maxLen <= 12) return 14.0;
+      if (maxLen <= 16) return 13.0;
+      if (maxLen <= 24) return 12.0;
+      return 11.0;
+    }
 
-     final tileFontSize = computeFontSize(maxEnLen);
+    final tileFontSize = computeFontSize(maxEnLen);
 
-     if (!mounted) return null;
+    if (!mounted) return null;
 
-     final selected = await Navigator.of(context).push<int>(
-       MaterialPageRoute<int>(
-         fullscreenDialog: true,
-         builder: (ctx) {
-           double maxScaleSeen = 1.0;
-           const double returnTriggerScale = 1.15;
+    final selected = await Navigator.of(context).push<int>(
+      MaterialPageRoute<int>(
+        fullscreenDialog: true,
+        builder: (ctx) {
+          double maxScaleSeen = 1.0;
+          const double returnTriggerScale = 1.15;
 
-           return GestureDetector(
-             onScaleStart: (_) => maxScaleSeen = 1.0,
-             onScaleUpdate: (details) => maxScaleSeen = max(maxScaleSeen, details.scale),
-             onScaleEnd: (_) {
-               if (maxScaleSeen >= returnTriggerScale) {
-                 if (ctx.mounted) Navigator.of(ctx).pop(initialIndex);
-               }
-             },
-             child: Container(
-               decoration: BoxDecoration(
-                 gradient: LinearGradient(
-                   begin: Alignment.topCenter,
-                   end: Alignment.bottomCenter,
-                   colors: [Theme.of(ctx).colorScheme.secondary, Theme.of(ctx).colorScheme.surface],
-                   stops: const [0.0, 0.15],
-                 ),
-               ),
-               child: Scaffold(
-                 backgroundColor: Colors.transparent,
-                 appBar: AppBar(
-                   backgroundColor: Colors.transparent,
-                   elevation: 0,
-                   centerTitle: true,
-                   title: Text('Galéria', style: AppTextStyles.heading),
-                   foregroundColor: Theme.of(ctx).colorScheme.onSurface,
-                 ),
-                 body: SafeArea(
-                   child: Column(
-                     children: <Widget>[
-                       Expanded(
-                         child: GridView.count(
-                           crossAxisCount: cols,
-                           childAspectRatio: 1.4,
-                           padding: const EdgeInsets.all(6),
-                           children: List<Widget>.generate(_words.length, (i) {
-                             final w = _words[i];
-                             final en = (w['en'] ?? w['english'] ?? '').toString();
-                             final wid = (w['id']?.toString() ?? en);
-                             final isMarked = _marked.contains(wid);
+          return GestureDetector(
+            onScaleStart: (_) => maxScaleSeen = 1.0,
+            onScaleUpdate: (details) =>
+                maxScaleSeen = max(maxScaleSeen, details.scale),
+            onScaleEnd: (_) {
+              if (maxScaleSeen >= returnTriggerScale) {
+                if (ctx.mounted) Navigator.of(ctx).pop(initialIndex);
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Theme.of(ctx).colorScheme.secondary,
+                    Theme.of(ctx).colorScheme.surface,
+                  ],
+                  stops: const [0.0, 0.15],
+                ),
+              ),
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  centerTitle: true,
+                  title: Text('Galéria', style: AppTextStyles.heading),
+                  foregroundColor: Theme.of(ctx).colorScheme.onSurface,
+                ),
+                body: SafeArea(
+                  child: Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: GridView.count(
+                          crossAxisCount: cols,
+                          childAspectRatio: 1.4,
+                          padding: const EdgeInsets.all(6),
+                          children: List<Widget>.generate(_words.length, (i) {
+                            final w = _words[i];
+                            final en = (w['en'] ?? w['english'] ?? '')
+                                .toString();
+                            final wid = (w['id']?.toString() ?? en);
+                            final isMarked = _marked.contains(wid);
 
-                             return InkWell(
-                               onTap: () {
-                                 if (ctx.mounted) Navigator.of(ctx).pop(i);
-                               },
-                               child: Card(
-                                 margin: const EdgeInsets.all(4),
-                                 shape: RoundedRectangleBorder(
-                                   borderRadius: BorderRadius.circular(8),
-                                   side: BorderSide(
-                                     color: isMarked ? Theme.of(ctx).colorScheme.secondary : Colors.transparent,
-                                     width: isMarked ? 3.0 : 1.0,
-                                   ),
-                                 ),
-                                 child: Center(
-                                   child: Padding(
-                                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                     child: Text(
-                                       en,
-                                       textAlign: TextAlign.center,
-                                       maxLines: 2,
-                                       overflow: TextOverflow.ellipsis,
-                                       style: TextStyle(
-                                         fontSize: tileFontSize,
-                                         fontWeight: FontWeight.w600,
-                                         color: Theme.of(ctx).colorScheme.onSurface,
-                                       ),
-                                     ),
-                                   ),
-                                 ),
-                               ),
-                             );
-                           }),
-                         ),
-                       ),
+                            return InkWell(
+                              onTap: () {
+                                if (ctx.mounted) Navigator.of(ctx).pop(i);
+                              },
+                              child: Card(
+                                margin: const EdgeInsets.all(4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: BorderSide(
+                                    color: isMarked
+                                        ? Theme.of(ctx).colorScheme.secondary
+                                        : Colors.transparent,
+                                    width: isMarked ? 3.0 : 1.0,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0,
+                                      vertical: 4.0,
+                                    ),
+                                    child: Text(
+                                      en,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: tileFontSize,
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(
+                                          ctx,
+                                        ).colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
 
-                       Padding(
-                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                         child: ElevatedButton(
-                           onPressed: _canTest
-                               ? () {
-                                   if (!ctx.mounted) return;
-                                   final args = Map<String, dynamic>.from(widget.args ?? {});
-                                   args['testType'] = args['testType'] ?? 'mcq';
-                                   Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
-                                 }
-                               : null,
-                           style: ElevatedButton.styleFrom(
-                             minimumSize: const Size.fromHeight(44),
-                             backgroundColor: _canTest ? Theme.of(ctx).colorScheme.primary : Colors.grey.shade300,
-                           ),
-                           child: Text('Otestuj sa', style: TextStyle(color: _canTest ? Theme.of(ctx).colorScheme.onPrimary : Theme.of(ctx).colorScheme.onSurface)),
-                         ),
-                       ),
-                     ],
-                   ),
-                 ),
-               ),
-             ),
-           );
-         },
-       ),
-     );
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _canTest
+                              ? () {
+                                  if (!ctx.mounted) return;
+                                  final args = Map<String, dynamic>.from(
+                                    widget.args ?? {},
+                                  );
+                                  args['testType'] = args['testType'] ?? 'mcq';
+                                  Navigator.of(ctx).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => QuizScreen(args: args),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44),
+                            backgroundColor: _canTest
+                                ? Theme.of(ctx).colorScheme.primary
+                                : Colors.grey.shade300,
+                          ),
+                          child: Text(
+                            'Otestuj sa',
+                            style: TextStyle(
+                              color: _canTest
+                                  ? Theme.of(ctx).colorScheme.onPrimary
+                                  : Theme.of(ctx).colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
 
-     return selected;
-   }
- }
+    return selected;
+  }
+}
