@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flippy/theme/fonts.dart';
+import 'package:flippy/widgets/word_card.dart';
 
 // Generate a stable key base for a quiz from the same args structure used
 // across the app. Other screens can call this to read/write the same prefs.
@@ -18,6 +20,8 @@ String quizKeyFromArgs(Map<String, dynamic>? args, String testType) {
   return 'quiz_${safe}_$testType';
 }
 
+const int quizSize = 15;
+
 class QuizScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
   const QuizScreen({super.key, this.args});
@@ -27,7 +31,8 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  late final List<Map<String, dynamic>> _words;
+  late List<Map<String, dynamic>> _words; // bude prepísaný po príprave
+  late final List<Map<String, dynamic>> _allWords; // original full list from args
   late String _testType; // 'grammar' or 'mcq'
   int _index = 0;
   int _score = 0;
@@ -37,8 +42,10 @@ class _QuizScreenState extends State<QuizScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final Random _rnd = Random();
+  String? _selectedOption; // currently chosen MCQ option (for colouring after answer)
 
   List<String> _currentOptions = []; // for mcq
+  static const int _quizSize = quizSize; // desired number of items in a quiz
 
   @override
   void initState() {
@@ -46,13 +53,18 @@ class _QuizScreenState extends State<QuizScreen> {
     final args = widget.args ?? {};
     final rawWords = args['words'] ?? args['wordList'] ?? <dynamic>[];
     if (rawWords is List) {
-      _words = rawWords.map((e) => e is Map<String, dynamic> ? e : Map<String, dynamic>.from(e)).cast<Map<String,dynamic>>().toList();
+      _allWords = rawWords.map((e) => e is Map<String, dynamic> ? e : Map<String, dynamic>.from(e)).cast<Map<String, dynamic>>().toList();
+      _words = <Map<String,dynamic>>[]; // will be prepared below
     } else {
+      _allWords = <Map<String,dynamic>>[];
       _words = <Map<String,dynamic>>[];
     }
     _testType = (args['testType'] ?? 'mcq') as String;
     if (_testType != 'grammar' && _testType != 'mcq') _testType = 'mcq';
-    _loadProgress().then((_) {
+    // Prepare the actual quiz word list (weighted random sampling with replacement)
+    // prepare words (will reuse persisted sample if present), then load progress
+    _prepareQuizWords().then((_) async {
+      await _loadProgress();
       if (_words.isNotEmpty && _testType == 'mcq') _buildOptions();
     });
   }
@@ -68,6 +80,7 @@ class _QuizScreenState extends State<QuizScreen> {
       await prefs.setInt('${base}_index', _index);
       await prefs.setInt('${base}_score', _score);
       await prefs.setBool('${base}_answered', _answered);
+      await prefs.setBool('${base}_correct', _correct);
       if (_testType == 'grammar') await prefs.setString('${base}_input', _controller.text);
     } catch (_) {}
   }
@@ -79,14 +92,42 @@ class _QuizScreenState extends State<QuizScreen> {
       final idx = prefs.getInt('${base}_index');
       final sc = prefs.getInt('${base}_score');
       final ans = prefs.getBool('${base}_answered');
+      final cor = prefs.getBool('${base}_correct');
       final input = prefs.getString('${base}_input');
+
       if (!mounted) return;
-      setState(() {
-        if (idx != null && idx >= 0 && idx < _words.length) _index = idx;
-        if (sc != null) _score = sc;
-        if (ans != null) _answered = ans;
-        if (_testType == 'grammar' && input != null) _controller.text = input;
-      });
+
+      if (idx != null && idx >= 0 && idx < _words.length) {
+        // resume an in-progress run
+        setState(() {
+          _index = idx;
+          _score = sc ?? 0;
+          _answered = ans ?? false;
+          _correct = cor ?? false;
+          if (_testType == 'grammar' && input != null) _controller.text = input;
+        });
+      } else {
+        // No saved index -> treat as a fresh run. Clear any leftover persisted run state
+        try {
+          await prefs.remove('${base}_index');
+          await prefs.remove('${base}_answered');
+          await prefs.remove('${base}_correct');
+          await prefs.remove('${base}_input');
+          // ensure persisted sample is cleared for a fresh run so new sampling occurs
+          await prefs.remove('${base}_sample');
+          await prefs.setBool('${base}_done', false);
+          await prefs.setInt('${base}_score', 0);
+        } catch (_) {}
+
+        if (!mounted) return;
+        setState(() {
+          _index = 0;
+          _score = 0;
+          _answered = false;
+          _correct = false;
+          if (_testType == 'grammar') _controller.clear();
+        });
+      }
     } catch (_) {}
   }
 
@@ -99,6 +140,32 @@ class _QuizScreenState extends State<QuizScreen> {
 
   String _normalize(String s) => s.trim().toLowerCase();
 
+  // Normalize a string for grammar comparison: remove parenthetical content,
+  // split alternatives by '/', strip non-letter characters (keep a-z and spaces),
+  // collapse whitespace and lowercase.
+  String _normalizeForComparison(String s) {
+    var t = s.toLowerCase();
+    // replace any parentheses content with space
+    t = t.replaceAll(RegExp(r"\([^)]*\)"), ' ');
+    // remove any characters that are not a-z or whitespace
+    t = t.replaceAll(RegExp(r'[^a-z\s]'), ' ');
+    // collapse whitespace
+    t = t.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return t;
+  }
+
+  // From a correct-answer string produce a set of accepted normalized variants.
+  // Handles slash-separated alternatives and parenthetical parts.
+  Set<String> _acceptedVariants(String correctRaw) {
+    final out = <String>{};
+    final parts = correctRaw.split('/');
+    for (var p in parts) {
+      final norm = _normalizeForComparison(p);
+      if (norm.isNotEmpty) out.add(norm);
+    }
+    return out;
+  }
+
   String _correctAnswerFor(Map<String, dynamic> w) {
     final en = w['en'] ?? w['english'] ?? '';
     if (en is String) return en.trim();
@@ -109,13 +176,20 @@ class _QuizScreenState extends State<QuizScreen> {
   void _buildOptions() {
     final w = _words[_index];
     final correct = _correctAnswerFor(w);
-    final others = <String>[];
+
+    // Collect unique other answers (exclude the correct answer)
+    final othersSet = <String>{};
     for (var i = 0; i < _words.length; i++) {
       if (i == _index) continue;
       final o = _correctAnswerFor(_words[i]);
-      if (o.isNotEmpty && o != correct) others.add(o);
+      if (o.isNotEmpty && _normalize(o) != _normalize(correct)) {
+        othersSet.add(o);
+      }
     }
+
+    final others = othersSet.toList();
     others.shuffle(_rnd);
+
     final opts = <String>[];
     opts.add(correct);
     for (var i = 0; i < others.length && opts.length < 3; i++) {
@@ -132,7 +206,9 @@ class _QuizScreenState extends State<QuizScreen> {
     if (_answered) return;
     final guess = _controller.text;
     final correct = _correctAnswerFor(_words[_index]);
-    final ok = _normalize(guess) == _normalize(correct);
+    final accepted = _acceptedVariants(correct);
+    final guessNorm = _normalizeForComparison(guess);
+    final ok = accepted.contains(guessNorm);
     setState(() {
       _answered = true;
       _correct = ok;
@@ -141,10 +217,12 @@ class _QuizScreenState extends State<QuizScreen> {
     // hide keyboard
     _focusNode.unfocus();
     _saveProgress();
+    if (!ok) _markWordAsProblem(_words[_index]);
   }
 
   void _chooseMcq(String opt) {
     if (_answered) return;
+    _selectedOption = opt;
     final correct = _correctAnswerFor(_words[_index]);
     final ok = _normalize(opt) == _normalize(correct);
     setState(() {
@@ -153,33 +231,52 @@ class _QuizScreenState extends State<QuizScreen> {
       if (ok) _score++;
     });
     _saveProgress();
+    if (!ok) _markWordAsProblem(_words[_index]);
+  }
+
+  Future<void> _markWordAsProblem(Map<String, dynamic> w) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keyId = _safeIdFromArgs();
+      final mkKey = 'marked_words_$keyId';
+      final id = (w['id'] ?? w['en'] ?? w['english'] ?? '').toString();
+      if (id.isEmpty) return;
+      final list = prefs.getStringList(mkKey) ?? <String>[];
+      if (!list.contains(id)) {
+        list.add(id);
+        await prefs.setStringList(mkKey, list);
+      }
+    } catch (_) {}
   }
 
   void _next() {
     if (_index + 1 >= _words.length) {
-      // finished
-      showDialog<void>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Výsledok'),
-          content: Text('Skóre:  $_score/${_words.length}'),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Zavrieť')),
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
-          ],
-        ),
-      ).then((_) async {
-        // persist final score and mark as done so LessonOrQuizScreen can show 'Zopakovať' and stars
-        try {
-          final prefs = await SharedPreferences.getInstance();
-          final base = _progressKeyBase();
-          await prefs.setInt('${base}_score', _score);
-          await prefs.setBool('${base}_done', true);
-          // keep index/answered/input if you want resume behavior; remove them if you prefer a fresh restart
-          await prefs.remove('${base}_index');
-          await prefs.remove('${base}_answered');
-          await prefs.remove('${base}_input');
-        } catch (_) {}
+      // finished: persist final score first, then show dialog offering to just close
+      // or close and return to the previous screen so lesson_or_quiz can refresh.
+      _persistFinalScore().then((_) {
+        if (!mounted) return;
+        showDialog<void>(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Výsledok'),
+            content: Text('Skóre: $_score/${_words.length}'),
+            actions: [
+              // Zavrieť: close dialog and also close QuizScreen to return to LessonOrQuiz
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // close dialog
+                  if (mounted) Navigator.of(context).pop(); // pop QuizScreen
+                },
+                child: const Text('Zavrieť'),
+              ),
+              // OK: only close dialog, stay on QuizScreen
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       });
       return;
     }
@@ -187,6 +284,7 @@ class _QuizScreenState extends State<QuizScreen> {
       _index++;
       _answered = false;
       _correct = false;
+      _selectedOption = null;
       _controller.clear();
       if (_testType == 'mcq') _buildOptions();
     });
@@ -195,10 +293,188 @@ class _QuizScreenState extends State<QuizScreen> {
     _saveProgress();
   }
 
+  Future<void> _persistFinalScore() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final base = _progressKeyBase();
+      await prefs.setInt('${base}_score', _score);
+      await prefs.setBool('${base}_done', true);
+      // remove transient run state so next run starts fresh
+      await prefs.remove('${base}_index');
+      await prefs.remove('${base}_answered');
+      await prefs.remove('${base}_correct');
+      await prefs.remove('${base}_input');
+    } catch (_) {}
+  }
+
+  String _safeIdFromArgs() {
+    final a = widget.args ?? {};
+    String? signature;
+    final tb = a['textbook'] ?? a['book'] ?? a['textbookMap'];
+    if (tb is Map) {
+      final tbId = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
+
+      final chapterIds = <String>[];
+      final subIds = <String>[];
+
+      if (tb['chapters'] is List) {
+        for (final ch in tb['chapters']) {
+          if (ch is Map) {
+            final cid = (ch['id'] ?? ch['chapterId'] ?? '').toString();
+            if (cid.isNotEmpty) chapterIds.add(cid);
+            if (ch['subchapters'] is List) {
+              for (final sc in ch['subchapters']) {
+                if (sc is Map) {
+                  final sid = (sc['id'] ?? sc['subchapterId'] ?? '').toString();
+                  if (sid.isNotEmpty) subIds.add(sid);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      final wordIds = (a['words'] is List)
+          ? (a['words'] as List).map((w) => (w is Map ? (w['id']?.toString() ?? '') : '')).where((s) => s.isNotEmpty).toList()
+          : <String>[];
+
+      final partsList = <String>[];
+      if (tbId.isNotEmpty) partsList.add(tbId);
+      if (chapterIds.isNotEmpty) partsList.add(chapterIds.join('|'));
+      if (subIds.isNotEmpty) partsList.add(subIds.join('|'));
+      if (wordIds.isNotEmpty) partsList.add(wordIds.join('|'));
+
+      if (partsList.isNotEmpty) signature = partsList.join('::');
+    }
+
+    String keySource;
+    if (signature != null && signature.isNotEmpty) {
+      keySource = signature;
+    } else {
+      final subId = (a['subchapterId'] ?? a['id'] ?? a['subId'] ?? a['sub'] ?? '').toString();
+      final subTitle = (a['subchapterTitle'] ?? a['title'] ?? a['name'] ?? '').toString();
+
+      final chapterId = (a['chapterId'] ?? a['parentId'] ?? a['chapterId'] ?? '').toString();
+      final chapterTitle = (a['chapterTitle'] ?? a['chapter'] ?? '').toString();
+
+      final bookId = (a['bookId'] ?? a['courseId'] ?? '').toString();
+      final bookTitle = (a['bookTitle'] ?? a['book'] ?? '').toString();
+
+      final parts = [bookId, bookTitle, chapterId, chapterTitle, subId, subTitle]
+          .map((s) => s.toString().trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      final combinedKey = parts.isNotEmpty ? parts.join('::') : subTitle;
+      keySource = combinedKey;
+    }
+
+    final keyId = keySource.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    return keyId;
+  }
+
+  Future<void> _prepareQuizWords() async {
+    // If there are no source words, nothing to prepare
+    if (_allWords.isEmpty) return;
+
+    // Read marked/problematic words for this subchapter so we can bias selection
+    final prefs = await SharedPreferences.getInstance();
+    final keyId = _safeIdFromArgs();
+    final markedList = prefs.getStringList('marked_words_$keyId') ?? <String>[];
+    final markedSet = markedList.toSet();
+    // persist/load sample so other screens see the same generated list
+    final base = quizKeyFromArgs(widget.args, _testType);
+    final sampleKey = '${base}_sample';
+    final existingSample = prefs.getStringList(sampleKey);
+    if (existingSample != null && existingSample.isNotEmpty) {
+      // rebuild words list from persisted ids in the same order
+      final rebuilt = <Map<String, dynamic>>[];
+      for (final id in existingSample) {
+        final found = _allWords.firstWhere((w) {
+          final wid = (w['id'] ?? w['en'] ?? w['english'] ?? '').toString();
+          return wid == id;
+        }, orElse: () => <String, dynamic>{});
+        if (found.isNotEmpty) rebuilt.add(Map<String, dynamic>.from(found));
+      }
+      if (rebuilt.isNotEmpty) {
+        setState(() {
+          _words = rebuilt;
+          if (_index >= _words.length) _index = 0;
+        });
+        return;
+      }
+    }
+
+    // Build weights: marked words get higher weight
+    final weights = <int>[];
+    for (final w in _allWords) {
+      final id = (w['id'] ?? w['en'] ?? w['english'] ?? '').toString();
+      // bias on marked words (increased to 3 as requested)
+      weights.add(markedSet.contains(id) ? 3 : 1);
+    }
+
+    // Weighted sampling without replacement using Efraimidis–Spirakis method.
+    final selected = <Map<String, dynamic>>[];
+    final n = _allWords.length;
+    if (n > 0) {
+      // If weights are all non-positive, fallback to uniform indices
+      final keys = <MapEntry<double, int>>[];
+      for (var i = 0; i < n; i++) {
+        final w = (weights[i] <= 0) ? 1 : weights[i];
+        // generate key = U^(1/w) where U in (0,1]
+        final u = (_rnd.nextDouble() * 0.999999) + 1e-9;
+        final key = pow(u, 1 / w) as double;
+        keys.add(MapEntry(key, i));
+      }
+
+      // sort descending by key and pick top min(n, _quizSize)
+      keys.sort((a, b) => b.key.compareTo(a.key));
+      final take = keys.length < _quizSize ? keys.length : _quizSize;
+      final chosenIndices = keys.take(take).map((e) => e.value).toList();
+
+      // build selected unique words in chosen order
+      for (final idx in chosenIndices) {
+        selected.add(Map<String, dynamic>.from(_allWords[idx]));
+      }
+
+      // if we still need more items (quizSize > unique pool), fill by weighted random picks allowing duplicates
+      final totalWeight = weights.fold<int>(0, (p, e) => p + e);
+      while (selected.length < _quizSize) {
+        if (totalWeight <= 0) {
+          final idx = _rnd.nextInt(n);
+          selected.add(Map<String, dynamic>.from(_allWords[idx]));
+          continue;
+        }
+        var r = _rnd.nextInt(totalWeight);
+        var acc = 0;
+        var chosen = 0;
+        for (var j = 0; j < weights.length; j++) {
+          acc += weights[j];
+          if (r < acc) {
+            chosen = j;
+            break;
+          }
+        }
+        selected.add(Map<String, dynamic>.from(_allWords[chosen]));
+      }
+    }
+
+    // persist sampled ids so other screens (and future resumes) use same order
+    try {
+      final ids = selected.map((w) => (w['id'] ?? w['en'] ?? w['english'] ?? '').toString()).toList();
+      await prefs.setStringList(sampleKey, ids);
+    } catch (_) {}
+
+    setState(() {
+      _words = selected;
+      // clamp index if out of range after sampling
+      if (_index >= _words.length) _index = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final title = widget.args?['subchapterTitle'] ?? widget.args?['title'] ?? 'Test';
     if (_words.isEmpty) {
-      final title = widget.args?['subchapterTitle'] ?? widget.args?['title'] ?? 'Test';
       return Scaffold(
         appBar: AppBar(title: Text(title)),
         body: const Center(child: Text('Žiadne slovíčka v tejto lekcii')),
@@ -207,103 +483,172 @@ class _QuizScreenState extends State<QuizScreen> {
 
     final word = _words[_index];
     final sk = (word['sk'] ?? word['cz'] ?? '').toString();
+    final en = (word['en'] ?? word['english'] ?? '').toString();
     final img = word['image'] ?? '';
+    final correct = _correctAnswerFor(word);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.args?['subchapterTitle'] ?? widget.args?['title'] ?? 'Test'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 6,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (img != null && img.toString().isNotEmpty)
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: Image(
-                              image: img.toString().startsWith('assets/') ? AssetImage(img.toString()) : NetworkImage(img.toString()) as ImageProvider,
-                              height: 180,
-                              fit: BoxFit.contain,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
+            stops: const [0.0, 0.15],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+            title: Text(title, style: AppTextStyles.chapter),
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Container(
+                    key: ValueKey('quiz_card'),
+                    margin: const EdgeInsets.symmetric(horizontal: 22, vertical: 30),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 8),
+                          if (img != null && img.toString().isNotEmpty)
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: WordImage(
+                                  assetPath: img.toString(),
+                                  fallbackText: en.toString(),
+                                  maxHeight: 240,
+                                ),
+                              ),
                             ),
-                          ),
+                          const SizedBox(height: 8),
+                          Text(sk.toUpperCase(), style: AppTextStyles.lesson, textAlign: TextAlign.center),
+                          const SizedBox(height: 12),
+                          if (_answered)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    _correct ? 'Správne' : 'Nesprávne',
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: _testType == 'mcq'
+                                          ? Theme.of(context).colorScheme.secondary // accent for MCQ
+                                          : (_correct ? Colors.green.shade600 : Colors.red.shade600), // grammar uses green/red like MCQ options
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (_testType == 'grammar' && !_correct)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Text(
+                                        _correctAnswerFor(word),
+                                        style: AppTextStyles.body.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                if (_testType == 'grammar') ...[
+                  TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _submitGrammar(),
+                    decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Napíšte anglický preklad'),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _answered ? _next : _submitGrammar,
+                          style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(44), backgroundColor: Theme.of(context).colorScheme.primary),
+                          child: Text(_answered ? 'Ďalej' : 'Odoslať', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
                         ),
-                      Text(sk.toUpperCase(), style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
-                      const SizedBox(height: 12),
-                      if (_answered)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(_correct ? Icons.check_circle : Icons.cancel, color: _correct ? Colors.green : Colors.red),
-                            const SizedBox(width: 8),
-                            Text(_correct ? 'Správne' : 'Nesprávne', style: TextStyle(color: _correct ? Colors.green : Colors.red)),
-                          ],
-                        ),
+                      ),
                     ],
                   ),
-                ),
-              ),
-            ),
+                ] else ...[
+                  // MCQ
+                  ..._currentOptions.map((opt) {
+                    // determine visual state for this option
+                    final normOpt = _normalize(opt);
+                    final isCorrect = _normalize(correct) == normOpt;
+                    final isSelected = _selectedOption != null && _normalize(_selectedOption!) == normOpt;
 
-            const SizedBox(height: 12),
+                    Color bg;
+                    Color txt;
+                    if (!_answered) {
+                      bg = Theme.of(context).colorScheme.primary;
+                      txt = Theme.of(context).colorScheme.onPrimary;
+                    } else {
+                      if (isCorrect) {
+                        bg = Colors.green.shade600;
+                        txt = Colors.white;
+                      } else if (isSelected) {
+                        bg = Colors.red.shade600;
+                        txt = Colors.white;
+                      } else {
+                        bg = Colors.grey.shade200;
+                        txt = Theme.of(context).colorScheme.onSurface;
+                      }
+                    }
 
-            if (_testType == 'grammar') ...[
-              TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _submitGrammar(),
-                decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Napíšte anglický preklad'),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _answered ? _next : _submitGrammar,
-                      style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                      child: Text(_answered ? 'Ďalej' : 'Odoslať', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: ElevatedButton(
+                        onPressed: _answered ? _next : () => _chooseMcq(opt),
+                        style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(48), backgroundColor: bg, foregroundColor: txt),
+                        child: Text(opt, style: TextStyle(color: txt)),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 8),
+                  if (_answered)
+                    ElevatedButton(
+                      onPressed: _next,
+                      style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(44), backgroundColor: Theme.of(context).colorScheme.primary),
+                      child: Text('Ďalej', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
                     ),
-                  ),
                 ],
-              ),
-            ] else ...[
-              // MCQ
-              ..._currentOptions.map((opt) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6.0),
-                  child: ElevatedButton(
-                    onPressed: _answered ? (_next) : () => _chooseMcq(opt),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _answered
-                          ? ( _correct && _normalize(opt) == _normalize(_correctAnswerFor(word)) ? Colors.green : Colors.grey.shade300)
-                          : Theme.of(context).colorScheme.primary,
-                    ),
-                    child: Text(opt, style: TextStyle(color: _answered ? Colors.white : Theme.of(context).colorScheme.onPrimary)),
-                  ),
-                );
-              }),
-              const SizedBox(height: 8),
-              if (_answered)
-                ElevatedButton(
-                  onPressed: _next,
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                  child: Text('Ďalej', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
-                ),
-            ],
-            const SizedBox(height: 8),
-            Text('$_score / ${_words.length}', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
-          ],
+                const SizedBox(height: 8),
+                Text('$_score / ${_words.length}', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+          ),
         ),
       ),
     );

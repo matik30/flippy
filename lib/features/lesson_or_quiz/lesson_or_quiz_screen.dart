@@ -30,6 +30,9 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
   // whether full quiz run was completed
   bool _grammarDone = false;
   bool _mcqDone = false;
+  // whether a quiz run was started but not finished (paused)
+  bool _grammarPaused = false;
+  bool _mcqPaused = false;
 
   @override
   void initState() {
@@ -139,17 +142,22 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
 
       final grammar = prefs.getInt('${grammarBase}_score') ?? 0;
       final grammarDone = prefs.getBool('${grammarBase}_done') ?? false;
+      final grammarIndex = prefs.getInt('${grammarBase}_index') ?? 0;
       final mcq = prefs.getInt('${mcqBase}_score') ?? 0;
       final mcqDone = prefs.getBool('${mcqBase}_done') ?? false;
+      final mcqIndex = prefs.getInt('${mcqBase}_index') ?? 0;
 
       if (!mounted) return;
       setState(() {
         _visitedCount = visited.length;
+        // zobrazujeme počet zdrojových slov — to zodpovedá sekcii "Slovíčka"
         _totalWords = words.length;
         _grammarScore = grammar;
         _mcqScore = mcq;
         _grammarDone = grammarDone;
         _mcqDone = mcqDone;
+        _grammarPaused = !grammarDone && grammarIndex > 0;
+        _mcqPaused = !mcqDone && mcqIndex > 0;
       });
     } catch (_) {}
   }
@@ -157,6 +165,8 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
   @override
   Widget build(BuildContext context) {
     final title = _args['subchapterTitle'] ?? _args['title'] ?? 'Vyberte';
+    // Počet položiek, ktorý sa používa v teste: ak je menej zdrojových slov než quizSize, použije sa ich počet
+    final int quizDisplayCount = _totalWords > 0 ? (_totalWords < quizSize ? _totalWords : quizSize) : 0;
 
     return Scaffold(
       body: Container(
@@ -341,7 +351,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                           children: [
                                             const Text('Skóre', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                             const SizedBox(height: 8),
-                                            Text('$_grammarScore/$_totalWords', style: const TextStyle(fontSize: 20)),
+                                            Text('$_grammarScore/$quizDisplayCount', style: const TextStyle(fontSize: 20)),
                                           ],
                                         ),
                                       ),
@@ -355,7 +365,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: List.generate(3, (i) {
-                                            final pct = _totalWords > 0 ? (_grammarScore / _totalWords) * 100.0 : 0.0;
+                                            final pct = quizDisplayCount > 0 ? (_grammarScore / quizDisplayCount) * 100.0 : 0.0;
                                             int filled = 0;
                                             if (pct == 0) {filled = 0;}
                                             else if (pct <= 33) {filled = 1;}
@@ -370,17 +380,39 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                         const SizedBox(height: 12),
                                         ElevatedButton(
                                           onPressed: _canTest
-                                              ? () {
+                                              ? () async {
                                                   final args = Map<String, dynamic>.from(_args);
                                                   args['testType'] = 'grammar';
-                                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args))).then((_) => _loadProgress());
+                                                  final base = quizKeyFromArgs(_args, 'grammar');
+                                                  // capture navigator before any async gap
+                                                  final navigator = Navigator.of(context);
+
+                                                  if (!_grammarPaused) {
+                                                    // fresh run or 'Zopakovať' - clear previous run state
+                                                    try {
+                                                      final prefs = await SharedPreferences.getInstance();
+                                                      await prefs.remove('${base}_index');
+                                                      await prefs.remove('${base}_answered');
+                                                      await prefs.remove('${base}_correct');
+                                                      await prefs.remove('${base}_input');
+                                                      await prefs.setInt('${base}_score', 0);
+                                                      await prefs.setBool('${base}_done', false);
+                                                    } catch (_) {}
+                                                  }
+
+                                                  if (!mounted) return;
+                                                  await navigator.push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
+                                                  if (!mounted) return;
+                                                  _loadProgress();
                                                 }
                                               : null,
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
-                                            foregroundColor: _canTest ? Theme.of(context).colorScheme.onSurface : AppColors.text,
+                                            foregroundColor: _canTest ? Theme.of(context).colorScheme.onPrimary : AppColors.text,
                                           ),
-                                          child: Text(_grammarDone ? 'Zopakovať' : 'Spustiť'),
+                                          child: Text(
+                                            _grammarDone ? 'Zopakovať' : (_grammarPaused ? 'Pokračovať' : 'Spustiť'),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -449,7 +481,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                           children: [
                                             const Text('Skóre', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                             const SizedBox(height: 8),
-                                            Text('$_mcqScore/$_totalWords', style: const TextStyle(fontSize: 20)),
+                                            Text('$_mcqScore/$quizDisplayCount', style: const TextStyle(fontSize: 20)),
                                           ],
                                         ),
                                       ),
@@ -462,7 +494,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: List.generate(3, (i) {
-                                            final pct = _totalWords > 0 ? (_mcqScore / _totalWords) * 100.0 : 0.0;
+                                            final pct = quizDisplayCount > 0 ? (_mcqScore / quizDisplayCount) * 100.0 : 0.0;
                                             int filled = 0;
                                             if (pct == 0) {filled = 0;}
                                             else if (pct <= 33) {filled = 1;}
@@ -477,17 +509,38 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                         const SizedBox(height: 12),
                                         ElevatedButton(
                                           onPressed: _canTest
-                                              ? () {
+                                              ? () async {
                                                   final args = Map<String, dynamic>.from(_args);
                                                   args['testType'] = 'mcq';
-                                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args))).then((_) => _loadProgress());
+                                                  final base = quizKeyFromArgs(_args, 'mcq');
+                                                  // capture navigator before async work
+                                                  final navigator = Navigator.of(context);
+
+                                                  if (!_mcqPaused) {
+                                                    try {
+                                                      final prefs = await SharedPreferences.getInstance();
+                                                      await prefs.remove('${base}_index');
+                                                      await prefs.remove('${base}_answered');
+                                                      await prefs.remove('${base}_correct');
+                                                      await prefs.remove('${base}_input');
+                                                      await prefs.setInt('${base}_score', 0);
+                                                      await prefs.setBool('${base}_done', false);
+                                                    } catch (_) {}
+                                                  }
+
+                                                  if (!mounted) return;
+                                                  await navigator.push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
+                                                  if (!mounted) return;
+                                                  _loadProgress();
                                                 }
                                               : null,
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: _canTest ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
-                                            foregroundColor: _canTest ? Theme.of(context).colorScheme.onSurface: AppColors.text,
+                                            foregroundColor: _canTest ? Theme.of(context).colorScheme.onPrimary : AppColors.text,
                                           ),
-                                          child: Text(_mcqDone ? 'Zopakovať' : 'Spustiť'),
+                                          child: Text(
+                                            _mcqDone ? 'Zopakovať' : (_mcqPaused ? 'Pokračovať' : 'Spustiť'),
+                                          ),
                                         ),
                                       ],
                                     ),

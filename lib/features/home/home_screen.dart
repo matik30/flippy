@@ -46,10 +46,8 @@ Future<Map<String, dynamic>> loadTextbook(String path) async {
 }
 
 Future<dynamic> _readJsonFileUtf8(String path) async {
-  // Read as bytes and decode as UTF-8 to avoid platform-dependent encodings
   final bytes = await io.File(path).readAsBytes();
   var s = utf8.decode(bytes);
-  // Strip UTF-8 BOM if present
   if (s.isNotEmpty && s.codeUnitAt(0) == 0xFEFF) {
     s = s.substring(1);
   }
@@ -148,7 +146,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        // use theme colors so the FAB updates when theme changes
         backgroundColor: Theme.of(context).colorScheme.primary,
         onPressed: () {
           showDialog(context: context, builder: (_) => const ScanDialog());
@@ -160,7 +157,6 @@ class _HomePageState extends State<HomePage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            // use theme colors for gradient so it reacts to theme changes
             colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
             stops: const [0.0, 0.15],
           ),
@@ -174,19 +170,12 @@ class _HomePageState extends State<HomePage> {
             centerTitle: true,
             title: Text('Učebnice', style: AppTextStyles.chapter),
             actions: [
-              // menu with import manager and theme selector
               PopupMenuButton<String>(
                 icon: const Icon(Icons.menu),
                 onSelected: (v) async {
                   if (v == 'import') return _openImportManager();
                   if (v == 'theme') {
-                    // Obtain the ThemeNotifier synchronously (no async gap)
                     final tn = Provider.of<ThemeNotifier>(context, listen: false);
-
-                    // Show the dialog and await the selection. We do not use
-                    // the surrounding `context` after this await (we already
-                    // captured `tn`), so this avoids using BuildContext across
-                    // an async gap.
                     final sel = await showDialog<String>(
                       context: context,
                       builder: (dialogCtx) => SimpleDialog(
@@ -234,9 +223,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                     );
+                    );
 
-                     if (sel != null) await tn.setThemeByKey(sel);
+                    if (sel != null) await tn.setThemeByKey(sel);
                   }
                 },
                 itemBuilder: (menuCtx) => [
@@ -276,8 +265,8 @@ class _HomePageState extends State<HomePage> {
                 return const Center(child: Text('Žiadne učebnice'));
               }
 
-              return GridView.builder(                
-                padding: const EdgeInsets.only(top:50, left:20, right: 20),
+              return GridView.builder(
+                padding: const EdgeInsets.all(20),
                 itemCount: books.length,
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
@@ -285,38 +274,27 @@ class _HomePageState extends State<HomePage> {
                   mainAxisSpacing: 20,
                   crossAxisSpacing: 20,
                 ),
-                // Use the local builder context (gridCtx) instead of capturing
-                // the surrounding `context` to avoid using a BuildContext
-                // across the async gap of the inner FutureBuilder.
                 itemBuilder: (gridCtx, i) {
                   final book = books[i];
                   final cover = book['coverImage'];
 
                   return FutureBuilder<ImageInfo>(
                     future: loadImageInfo(cover),
-                    // Use the builder's local context (tileCtx) and use that
-                    // when navigating so we don't rely on an outer context
-                    // captured across async gaps.
                     builder: (tileCtx, img) {
                       if (!img.hasData) return const SizedBox.shrink();
 
                       final info = img.data!;
-                      final aspect =
-                          info.image.width / info.image.height;
+                      final aspect = info.image.width / info.image.height;
 
                       return GestureDetector(
                         onTap: () {
-                          // Use the local tileCtx (the BuildContext passed to
-                          // this builder) for navigation so we don't reference
-                          // the outer context after an async boundary.
                           tileCtx.go('/chapters', extra: {'textbook': book});
                         },
                         child: AspectRatio(
                           aspectRatio: aspect,
                           child: Container(
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Theme.of(tileCtx).colorScheme.onSurface, width: 2),
+                              border: Border.all(color: Theme.of(tileCtx).colorScheme.onSurface, width: 2),
                               borderRadius: BorderRadius.circular(13),
                               image: DecorationImage(
                                 image: cover is String && !cover.startsWith('assets/') && io.File(cover).existsSync()
@@ -348,8 +326,7 @@ class _ImportedManagerDialog extends StatefulWidget {
       _ImportedManagerDialogState();
 }
 
-class _ImportedManagerDialogState
-    extends State<_ImportedManagerDialog> {
+class _ImportedManagerDialogState extends State<_ImportedManagerDialog> {
   List<String> _paths = [];
   final Map<String, String> _titles = {};
   bool _changed = false;

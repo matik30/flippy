@@ -25,6 +25,9 @@ class _LessonScreenState extends State<LessonScreen> {
   String? _baseDir; // Base directory for relative image paths from JSON
   String? _baseUrl; // Base URL for server images
 
+  // original route args (saved so we construct the same quiz key as other screens)
+  Map<String, dynamic>? _routeArgs;
+
   // kľúč pre zapamätanie pozície v lekcii
   String? _saveKey;
 
@@ -121,6 +124,9 @@ class _LessonScreenState extends State<LessonScreen> {
     final routeArgs =
         widget.args ??
         (ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?);
+    // persist a local copy of the route args so we can use the exact same
+    // argument map when launching QuizScreen (ensures quiz persistence keys match)
+    _routeArgs = routeArgs != null ? Map<String, dynamic>.from(routeArgs) : null;
     if (routeArgs != null) {
       // podporujeme oba názvy: "subchapterTitle" (chapters_screen) alebo "title"
       _title =
@@ -500,12 +506,38 @@ class _LessonScreenState extends State<LessonScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 30.0),
                   child: ElevatedButton(
                     onPressed: _canTest
-                        ? () {
-                            // navigate to QuizScreen, pass same args available to this LessonScreen
-                            final args = Map<String, dynamic>.from(widget.args ?? {});
-                            // mark default test type if not provided
-                            args['testType'] = args['testType'] ?? 'mcq';
-                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
+                        ? () async {
+                            final args = <String, dynamic>{
+                              // use the original route args as base so QuizScreen computes
+                              // the same quiz key as LessonOrQuizScreen
+                              ...?_routeArgs,
+                              'words': _words,
+                              'testType': 'mcq',
+                              'subchapterTitle': _title,
+                            };
+
+                            final navigator = Navigator.of(context);
+                            final base = quizKeyFromArgs(_routeArgs ?? widget.args ?? {}, 'mcq');
+
+                            try {
+                              final prefs = await SharedPreferences.getInstance();
+                              final hasIndex = prefs.getInt('${base}_index') != null;
+                              if (!hasIndex) {
+                                // fresh run: clear previous run state
+                                await prefs.remove('${base}_index');
+                                await prefs.remove('${base}_answered');
+                                await prefs.remove('${base}_correct');
+                                await prefs.remove('${base}_input');
+                                await prefs.setInt('${base}_score', 0);
+                                await prefs.setBool('${base}_done', false);
+                              }
+                            } catch (_) {}
+
+                            // push quiz; when it returns, pop this LessonScreen so
+                            // LessonOrQuizScreen (the previous route) can refresh in its .then
+                            await navigator.push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
+                            if (!mounted) return;
+                            navigator.pop();
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
@@ -753,8 +785,9 @@ class _LessonScreenState extends State<LessonScreen> {
                            onPressed: _canTest
                                ? () {
                                    if (!ctx.mounted) return;
-                                   final args = Map<String, dynamic>.from(widget.args ?? {});
+                                   final args = Map<String, dynamic>.from(_routeArgs ?? widget.args ?? {});
                                    args['testType'] = args['testType'] ?? 'mcq';
+                                   args['words'] = _words;
                                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
                                  }
                                : null,

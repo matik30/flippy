@@ -2,8 +2,7 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
-//import 'package:flippy/theme/colors.dart';
-//import 'package:flippy/theme/fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class WordImage extends StatelessWidget {
   final String assetPath;
@@ -30,135 +29,100 @@ class WordImage extends StatelessWidget {
     }
   }
 
-  bool _isNetworkImage() {
-    // Check if it's a network image (starts with http:// or https://)
-    return assetPath.startsWith('http://') || assetPath.startsWith('https://');
+  Future<bool> _fileExists(String p) async {
+    try {
+      final file = io.File(p);
+      return await file.exists();
+    } catch (_) {
+      return false;
+    }
   }
 
-  bool _isServerImage() {
-    // Check if it's a server image (starts with uploads/)
-    return assetPath.startsWith('uploads/');
+  String _buildServerUrl() {
+    final cleanBaseUrl = baseUrl!.endsWith('/') ? baseUrl!.substring(0, baseUrl!.length - 1) : baseUrl!;
+    return '$cleanBaseUrl/$assetPath';
   }
 
-  String _resolveImagePath() {
-    // If it's already a network URL, return as is
-    if (_isNetworkImage()) {
-      return assetPath;
-    }
+  Future<String?> _detectImageSource() async {
+    // 1) direct network URL
+    if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) return assetPath;
 
-    // If it's a server image and baseUrl is provided, construct URL
-    if (_isServerImage() && baseUrl != null && baseUrl!.isNotEmpty) {
-      // Combine baseUrl with the path
-      final cleanBaseUrl = baseUrl!.endsWith('/') ? baseUrl!.substring(0, baseUrl!.length - 1) : baseUrl;
-      return '$cleanBaseUrl/$assetPath';
-    }
+    // 2) server-relative path (uploads/) and baseUrl provided
+    if (assetPath.startsWith('uploads/') && baseUrl != null && baseUrl!.isNotEmpty) return _buildServerUrl();
 
-    // If it's an asset path, return as is
-    if (assetPath.startsWith('assets/')) {
-      return assetPath;
-    }
-
-    // If baseDir is provided and path is relative, combine them for local files
+    // 3) local file (baseDir provided or direct path) - check asynchronously
     if (baseDir != null && baseDir!.isNotEmpty) {
-      return path.join(baseDir!, assetPath);
+      final resolved = path.join(baseDir!, assetPath);
+      if (await _fileExists(resolved)) return 'file:$resolved';
+    } else {
+      // if assetPath looks like a filesystem path, try it
+      if (assetPath.contains('/') || assetPath.contains('\\')) {
+        final resolved = assetPath;
+        if (await _fileExists(resolved)) return 'file:$resolved';
+      }
     }
 
-    // Otherwise return the path as is
-    return assetPath;
-  }
+    // 4) asset bundled with app
+    if (assetPath.startsWith('assets/') && await _assetExists()) return 'asset:$assetPath';
 
-  bool _isFileImage() {
-    final resolvedPath = _resolveImagePath();
-
-    // Check if it's NOT an asset and NOT a network URL and exists as a file
-    if (!resolvedPath.startsWith('assets/') && !_isNetworkImage() && !resolvedPath.startsWith('http://') && !resolvedPath.startsWith('https://')) {
-      final file = io.File(resolvedPath);
-      return file.existsSync();
-    }
-    return false;
+    // none found
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Check if it's a network image (either direct URL or server path)
-    if (_isNetworkImage() || _isServerImage()) {
-      final imageUrl = _resolveImagePath();
-      return Image.network(
-        imageUrl,
-        fit: BoxFit.contain,
-        height: maxHeight,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-      );
-    }
-
-    // Check if it's a file image
-    if (_isFileImage()) {
-      final resolvedPath = _resolveImagePath();
-      return Image.file(
-        io.File(resolvedPath),
-        fit: BoxFit.contain,
-        height: maxHeight,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-      );
-    }
-
-    // Otherwise try to load as asset
-    return FutureBuilder<bool>(
-      future: _assetExists(),
+    return FutureBuilder<String?>(
+      future: _detectImageSource(),
       builder: (context, snap) {
-        final exists = snap.data == true;
-        if (exists) {
-          return Image.asset(
-            assetPath,
+        if (snap.connectionState == ConnectionState.waiting) {
+          // avoid blocking layout; show small loader
+          return SizedBox(
+            height: maxHeight ?? 120,
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final src = snap.data;
+        if (src == null) {
+          // no image available
+          return const SizedBox.shrink();
+        }
+
+        if (src.startsWith('http://') || src.startsWith('https://')) {
+          return CachedNetworkImage(
+            imageUrl: src,
+            fit: BoxFit.contain,
+            height: maxHeight,
+            placeholder: (ctx, url) => SizedBox(
+              height: maxHeight ?? 120,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (ctx, url, err) => const SizedBox.shrink(),
+          );
+        }
+
+        if (src.startsWith('file:')) {
+          final filePath = src.substring(5);
+          return Image.file(
+            io.File(filePath),
             fit: BoxFit.contain,
             height: maxHeight,
             errorBuilder: (_, __, ___) => const SizedBox.shrink(),
           );
         }
-        // changed: return nothing instead of visual placeholder when asset missing
+
+        if (src.startsWith('asset:')) {
+          final asset = src.substring(6);
+          return Image.asset(
+            asset,
+            fit: BoxFit.contain,
+            height: maxHeight,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          );
+        }
+
         return const SizedBox.shrink();
-        },
+      },
     );
   }
-
-  /*Widget _placeholderCard() {
-        // kept for compatibility but not used by build anymore
-    return Container(
-      padding: const EdgeInsets.all(12),
-      constraints:
-          BoxConstraints(maxHeight: maxHeight ?? 320, maxWidth: 420),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('!', style: AppTextStyles.lesson.copyWith(fontSize: 18)),
-          const SizedBox(height: 8),
-          Text(
-            fallbackText.toUpperCase(),
-            style: AppTextStyles.heading,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Icon(Icons.image_not_supported, size: 56, color: Theme.of(context).colorScheme.onSurface),
-        ],
-      ),
-    );
-  }*/
 }
