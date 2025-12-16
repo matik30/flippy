@@ -126,7 +126,9 @@ class _LessonScreenState extends State<LessonScreen> {
         (ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?);
     // persist a local copy of the route args so we can use the exact same
     // argument map when launching QuizScreen (ensures quiz persistence keys match)
-    _routeArgs = routeArgs != null ? Map<String, dynamic>.from(routeArgs) : null;
+    _routeArgs = routeArgs != null
+        ? Map<String, dynamic>.from(routeArgs)
+        : null;
     if (routeArgs != null) {
       // podporujeme oba názvy: "subchapterTitle" (chapters_screen) alebo "title"
       _title =
@@ -359,9 +361,9 @@ class _LessonScreenState extends State<LessonScreen> {
         child: _showBack
             ? Container(
                 key: const ValueKey('back'),
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 60,
-                  vertical: 60,
+                margin: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.20,
+                  vertical: MediaQuery.of(context).size.height * 0.08,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -380,53 +382,58 @@ class _LessonScreenState extends State<LessonScreen> {
                 ),
                 child: Stack(
                   children: [
-                    Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 56),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 8),
 
-                          Builder(
-                            builder: (ctx) {
-                              final id =
-                                  word['id']?.toString() ?? en.toString();
-                              final marked = _marked.contains(id);
-                              return IconButton(
-                                icon: Icon(
-                                  Icons.priority_high,
-                                  color: marked
-                                      ? Colors.red
-                                      : Theme.of(context).colorScheme.onSurface,
-                                ),
-                                onPressed: () => _toggleMarked(id),
-                              );
-                            },
-                          ),
-
-                          Text(
-                            en.toString().toUpperCase(),
-                            style: AppTextStyles.lesson,
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          if (img != null && img.toString().isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: WordImage(
-                                assetPath: img.toString(),
-                                fallbackText: en.toString(),
-                                maxHeight: 240,
-                                baseDir: _baseDir,
-                                baseUrl: _baseUrl,
-                              ),
+                            Builder(
+                              builder: (ctx) {
+                                final id =
+                                    word['id']?.toString() ?? en.toString();
+                                final marked = _marked.contains(id);
+                                return IconButton(
+                                  icon: Icon(
+                                    Icons.priority_high,
+                                    color: marked
+                                        ? Colors.red
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                  ),
+                                  onPressed: () => _toggleMarked(id),
+                                );
+                              },
                             ),
 
-                          const SizedBox(height: 12),
-                          Text(pron.toString(), style: AppTextStyles.body),
-                        ],
+                            Text(
+                              en.toString().toUpperCase(),
+                              style: AppTextStyles.lesson,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            if (img != null && img.toString().isNotEmpty)
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  child: WordImage(
+                                    assetPath: img.toString(),
+                                    fallbackText: en.toString(),
+                                    baseDir: _baseDir,
+                                    baseUrl: _baseUrl,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 12),
+                            Text(pron.toString(), style: AppTextStyles.body),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -443,9 +450,9 @@ class _LessonScreenState extends State<LessonScreen> {
               )
             : Container(
                 key: const ValueKey('front'),
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 60,
-                  vertical: 60,
+                margin: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.20,
+                  vertical: MediaQuery.of(context).size.height * 0.08,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -464,52 +471,57 @@ class _LessonScreenState extends State<LessonScreen> {
                 ),
                 child: Stack(
                   children: [
-                    Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 56),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 8),
 
-                          // označiť ako problém
-                          Builder(
-                            builder: (ctx) {
-                              final id =
-                                  word['id']?.toString() ?? en.toString();
-                              final marked = _marked.contains(id);
-                              return IconButton(
-                                icon: Icon(
-                                  Icons.priority_high,
-                                  color: marked
-                                      ? Colors.red
-                                      : Theme.of(context).colorScheme.onSurface,
-                                ),
-                                onPressed: () => _toggleMarked(id),
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 8),
-                          Text(
-                            sk.toString().toUpperCase(),
-                            style: AppTextStyles.lesson,
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          if (img != null && img.toString().isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: WordImage(
-                                assetPath: img.toString(),
-                                fallbackText: en.toString(),
-                                maxHeight: 240,
-                                baseDir: _baseDir,
-                                baseUrl: _baseUrl,
-                              ),
+                            Builder(
+                              builder: (ctx) {
+                                final id =
+                                    word['id']?.toString() ?? sk.toString();
+                                final marked = _marked.contains(id);
+                                return IconButton(
+                                  icon: Icon(
+                                    Icons.priority_high,
+                                    color: marked
+                                        ? Colors.red
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                  ),
+                                  onPressed: () => _toggleMarked(id),
+                                );
+                              },
                             ),
-                        ],
+
+                            const SizedBox(height: 8),
+                            Text(
+                              sk.toString().toUpperCase(),
+                              style: AppTextStyles.lesson,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            if (img != null && img.toString().isNotEmpty)
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  child: WordImage(
+                                    assetPath: img.toString(),
+                                    fallbackText: sk.toString(),
+                                    baseDir: _baseDir,
+                                    baseUrl: _baseUrl,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -551,65 +563,84 @@ class _LessonScreenState extends State<LessonScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             centerTitle: true,
-            title: Text(
-              _title.isEmpty ? 'Lekcia' : _title,
-              style: AppTextStyles.chapter,
+            title: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _title.isEmpty ? 'Lekcia' : _title,
+                style: AppTextStyles.chapter,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
+
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
           body: SafeArea(
             child: Column(
               children: [
+                const SizedBox(height: 16),
                 // Test button (above pager) — enabled only when user visited all cards
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(15.0, 60.0, 20, 10),
-                  child: ElevatedButton(
-                    onPressed: _canTest
-                        ? () async {
-                            final args = <String, dynamic>{
-                              // use the original route args as base so QuizScreen computes
-                              // the same quiz key as LessonOrQuizScreen
-                              ...?_routeArgs,
-                              'words': _words,
-                              'testType': 'mcq',
-                              'subchapterTitle': _title,
-                            };
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    child: ElevatedButton(
+                      onPressed: _canTest
+                          ? () async {
+                              final args = <String, dynamic>{
+                                // use the original route args as base so QuizScreen computes
+                                // the same quiz key as LessonOrQuizScreen
+                                ...?_routeArgs,
+                                'words': _words,
+                                'testType': 'mcq',
+                                'subchapterTitle': _title,
+                              };
 
-                            final navigator = Navigator.of(context);
-                            final base = quizKeyFromArgs(_routeArgs ?? widget.args ?? {}, 'mcq');
+                              final navigator = Navigator.of(context);
+                              final base = quizKeyFromArgs(
+                                _routeArgs ?? widget.args ?? {},
+                                'mcq',
+                              );
 
-                            try {
-                              final prefs = await SharedPreferences.getInstance();
-                              final hasIndex = prefs.getInt('${base}_index') != null;
-                              if (!hasIndex) {
-                                // fresh run: clear previous run state
-                                await prefs.remove('${base}_index');
-                                await prefs.remove('${base}_answered');
-                                await prefs.remove('${base}_correct');
-                                await prefs.remove('${base}_input');
-                                await prefs.setInt('${base}_score', 0);
-                                await prefs.setBool('${base}_done', false);
-                              }
-                            } catch (_) {}
+                              try {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                final hasIndex =
+                                    prefs.getInt('${base}_index') != null;
+                                if (!hasIndex) {
+                                  // fresh run: clear previous run state
+                                  await prefs.remove('${base}_index');
+                                  await prefs.remove('${base}_answered');
+                                  await prefs.remove('${base}_correct');
+                                  await prefs.remove('${base}_input');
+                                  await prefs.setInt('${base}_score', 0);
+                                  await prefs.setBool('${base}_done', false);
+                                }
+                              } catch (_) {}
 
-                            // push quiz; when it returns, pop this LessonScreen so
-                            // LessonOrQuizScreen (the previous route) can refresh in its .then
-                            await navigator.push(MaterialPageRoute(builder: (_) => QuizScreen(args: args)));
-                            if (!mounted) return;
-                            navigator.pop();
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _canTest
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey.shade300,
-                    ),
-                    child: Text(
-                      'Otestuj sa',
-                      style: TextStyle(
-                        color: _canTest
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurface,
+                              // push quiz; when it returns, pop this LessonScreen so
+                              // LessonOrQuizScreen (the previous route) can refresh in its .then
+                              await navigator.push(
+                                MaterialPageRoute(
+                                  builder: (_) => QuizScreen(args: args),
+                                ),
+                              );
+                              if (!mounted) return;
+                              navigator.pop();
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _canTest
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey.shade300,
+                      ),
+                      child: Text(
+                        'Otestuj sa',
+                        style: TextStyle(
+                          color: _canTest
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ),
