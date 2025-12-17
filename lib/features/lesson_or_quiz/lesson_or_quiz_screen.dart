@@ -281,7 +281,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(context).colorScheme.primary,
-                                        foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                                       ),
                                       child: const Text('Spustiť'),
                                     ),
