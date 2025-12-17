@@ -11,15 +11,15 @@ class AppColors {
 class AppColorsRed {
   static const Color background = Color(0xFFFFFFF9);
   static const Color primary = Color(0xFFF24D41);
-  static const Color secondary = Color(0xFF8F352D);
-  static const Color accent = Color.fromARGB(255, 83, 22, 18);
+  static const Color secondary = Color.fromARGB(255, 185, 58, 46);
+  static const Color accent = Color.fromARGB(255, 163, 46, 37);
   static const Color text = Color(0xFF332625); 
 }
 
 class AppColorsGreen {
   static const Color background = Color(0xFFF9FFF4);
   static const Color primary = Color(0xFF17F54B);
-  static const Color secondary = Color(0xFF468F57);
+  static const Color secondary = Color.fromARGB(255, 80, 168, 101);
   static const Color accent = Color(0xFF38C258);
   static const Color text = Color(0xFF19181C); 
 }

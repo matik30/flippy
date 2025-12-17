@@ -13,10 +13,18 @@ String quizKeyFromArgs(Map<String, dynamic>? args, String testType) {
   if (tb is Map) {
     part = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
   }
-  final subId = (a['subchapterId'] ?? a['id'] ?? a['subId'] ?? a['sub'] ?? '').toString();
-  final subTitle = (a['subchapterTitle'] ?? a['title'] ?? a['name'] ?? '').toString();
-  final combined = [part, subId, subTitle].where((s) => s.isNotEmpty).join('::');
-  final safe = combined.isEmpty ? 'default' : combined.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+  final subId = (a['subchapterId'] ?? a['id'] ?? a['subId'] ?? a['sub'] ?? '')
+      .toString();
+  final subTitle = (a['subchapterTitle'] ?? a['title'] ?? a['name'] ?? '')
+      .toString();
+  final combined = [
+    part,
+    subId,
+    subTitle,
+  ].where((s) => s.isNotEmpty).join('::');
+  final safe = combined.isEmpty
+      ? 'default'
+      : combined.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
   return 'quiz_${safe}_$testType';
 }
 
@@ -32,7 +40,8 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   late List<Map<String, dynamic>> _words; // bude prepísaný po príprave
-  late final List<Map<String, dynamic>> _allWords; // original full list from args
+  late final List<Map<String, dynamic>>
+  _allWords; // original full list from args
   late String _testType; // 'grammar' or 'mcq'
   int _index = 0;
   int _score = 0;
@@ -42,7 +51,8 @@ class _QuizScreenState extends State<QuizScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final Random _rnd = Random();
-  String? _selectedOption; // currently chosen MCQ option (for colouring after answer)
+  String?
+  _selectedOption; // currently chosen MCQ option (for colouring after answer)
 
   List<String> _currentOptions = []; // for mcq
   static const int _quizSize = quizSize; // desired number of items in a quiz
@@ -53,11 +63,16 @@ class _QuizScreenState extends State<QuizScreen> {
     final args = widget.args ?? {};
     final rawWords = args['words'] ?? args['wordList'] ?? <dynamic>[];
     if (rawWords is List) {
-      _allWords = rawWords.map((e) => e is Map<String, dynamic> ? e : Map<String, dynamic>.from(e)).cast<Map<String, dynamic>>().toList();
-      _words = <Map<String,dynamic>>[]; // will be prepared below
+      _allWords = rawWords
+          .map(
+            (e) => e is Map<String, dynamic> ? e : Map<String, dynamic>.from(e),
+          )
+          .cast<Map<String, dynamic>>()
+          .toList();
+      _words = <Map<String, dynamic>>[]; // will be prepared below
     } else {
-      _allWords = <Map<String,dynamic>>[];
-      _words = <Map<String,dynamic>>[];
+      _allWords = <Map<String, dynamic>>[];
+      _words = <Map<String, dynamic>>[];
     }
     _testType = (args['testType'] ?? 'mcq') as String;
     if (_testType != 'grammar' && _testType != 'mcq') _testType = 'mcq';
@@ -81,7 +96,9 @@ class _QuizScreenState extends State<QuizScreen> {
       await prefs.setInt('${base}_score', _score);
       await prefs.setBool('${base}_answered', _answered);
       await prefs.setBool('${base}_correct', _correct);
-      if (_testType == 'grammar') await prefs.setString('${base}_input', _controller.text);
+      if (_testType == 'grammar') {
+        await prefs.setString('${base}_input', _controller.text);
+      }
     } catch (_) {}
   }
 
@@ -312,7 +329,8 @@ class _QuizScreenState extends State<QuizScreen> {
     String? signature;
     final tb = a['textbook'] ?? a['book'] ?? a['textbookMap'];
     if (tb is Map) {
-      final tbId = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '').toString();
+      final tbId = (tb['id'] ?? tb['textbookId'] ?? tb['bookId'] ?? '')
+          .toString();
 
       final chapterIds = <String>[];
       final subIds = <String>[];
@@ -335,7 +353,10 @@ class _QuizScreenState extends State<QuizScreen> {
       }
 
       final wordIds = (a['words'] is List)
-          ? (a['words'] as List).map((w) => (w is Map ? (w['id']?.toString() ?? '') : '')).where((s) => s.isNotEmpty).toList()
+          ? (a['words'] as List)
+                .map((w) => (w is Map ? (w['id']?.toString() ?? '') : ''))
+                .where((s) => s.isNotEmpty)
+                .toList()
           : <String>[];
 
       final partsList = <String>[];
@@ -351,19 +372,27 @@ class _QuizScreenState extends State<QuizScreen> {
     if (signature != null && signature.isNotEmpty) {
       keySource = signature;
     } else {
-      final subId = (a['subchapterId'] ?? a['id'] ?? a['subId'] ?? a['sub'] ?? '').toString();
-      final subTitle = (a['subchapterTitle'] ?? a['title'] ?? a['name'] ?? '').toString();
+      final subId =
+          (a['subchapterId'] ?? a['id'] ?? a['subId'] ?? a['sub'] ?? '')
+              .toString();
+      final subTitle = (a['subchapterTitle'] ?? a['title'] ?? a['name'] ?? '')
+          .toString();
 
-      final chapterId = (a['chapterId'] ?? a['parentId'] ?? a['chapterId'] ?? '').toString();
+      final chapterId =
+          (a['chapterId'] ?? a['parentId'] ?? a['chapterId'] ?? '').toString();
       final chapterTitle = (a['chapterTitle'] ?? a['chapter'] ?? '').toString();
 
       final bookId = (a['bookId'] ?? a['courseId'] ?? '').toString();
       final bookTitle = (a['bookTitle'] ?? a['book'] ?? '').toString();
 
-      final parts = [bookId, bookTitle, chapterId, chapterTitle, subId, subTitle]
-          .map((s) => s.toString().trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
+      final parts = [
+        bookId,
+        bookTitle,
+        chapterId,
+        chapterTitle,
+        subId,
+        subTitle,
+      ].map((s) => s.toString().trim()).where((s) => s.isNotEmpty).toList();
       final combinedKey = parts.isNotEmpty ? parts.join('::') : subTitle;
       keySource = combinedKey;
     }
@@ -460,7 +489,9 @@ class _QuizScreenState extends State<QuizScreen> {
 
     // persist sampled ids so other screens (and future resumes) use same order
     try {
-      final ids = selected.map((w) => (w['id'] ?? w['en'] ?? w['english'] ?? '').toString()).toList();
+      final ids = selected
+          .map((w) => (w['id'] ?? w['en'] ?? w['english'] ?? '').toString())
+          .toList();
       await prefs.setStringList(sampleKey, ids);
     } catch (_) {}
 
@@ -473,10 +504,22 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.args?['subchapterTitle'] ?? widget.args?['title'] ?? 'Test';
+    final title =
+        widget.args?['subchapterTitle'] ?? widget.args?['title'] ?? 'Test';
     if (_words.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(title)),
+        appBar: AppBar(
+          title: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.isEmpty ? 'Lekcia' : title,
+              style: AppTextStyles.chapter,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
         body: const Center(child: Text('Žiadne slovíčka v tejto lekcii')),
       );
     }
@@ -493,7 +536,10 @@ class _QuizScreenState extends State<QuizScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
+            colors: [
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.surface,
+            ],
             stops: const [0.0, 0.15],
           ),
         ),
@@ -503,7 +549,16 @@ class _QuizScreenState extends State<QuizScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             centerTitle: true,
-            title: Text(title, style: AppTextStyles.chapter),
+            title: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title.isEmpty ? 'Lekcia' : title,
+                style: AppTextStyles.chapter,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
           body: Padding(
@@ -511,14 +566,25 @@ class _QuizScreenState extends State<QuizScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Text(
+                  '$_score / ${_words.length}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+                ),
                 Expanded(
                   child: Container(
                     key: ValueKey('quiz_card'),
-                    margin: const EdgeInsets.symmetric(horizontal: 22, vertical: 30),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 30,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        width: 2,
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black12,
@@ -536,7 +602,9 @@ class _QuizScreenState extends State<QuizScreen> {
                           if (img != null && img.toString().isNotEmpty)
                             Flexible(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
                                 child: WordImage(
                                   assetPath: img.toString(),
                                   fallbackText: en.toString(),
@@ -545,7 +613,11 @@ class _QuizScreenState extends State<QuizScreen> {
                               ),
                             ),
                           const SizedBox(height: 8),
-                          Text(sk.toUpperCase(), style: AppTextStyles.lesson, textAlign: TextAlign.center),
+                          Text(
+                            sk.toUpperCase(),
+                            style: AppTextStyles.lesson,
+                            textAlign: TextAlign.center,
+                          ),
                           const SizedBox(height: 12),
                           if (_answered)
                             Padding(
@@ -554,19 +626,30 @@ class _QuizScreenState extends State<QuizScreen> {
                                 children: [
                                   Text(
                                     _correct ? 'Správne' : 'Nesprávne',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: _testType == 'mcq'
-                                          ? Theme.of(context).colorScheme.secondary // accent for MCQ
-                                          : (_correct ? Colors.green.shade600 : Colors.red.shade600), // grammar uses green/red like MCQ options
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(
+                                          color: _testType == 'mcq'
+                                              ? Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary // accent for MCQ
+                                              : (_correct
+                                                    ? Colors.green.shade600
+                                                    : Colors
+                                                          .red
+                                                          .shade600), // grammar uses green/red like MCQ options
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                   if (_testType == 'grammar' && !_correct)
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
                                         _correctAnswerFor(word),
-                                        style: AppTextStyles.body.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                                        style: AppTextStyles.body.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                        ),
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
@@ -587,7 +670,35 @@ class _QuizScreenState extends State<QuizScreen> {
                     focusNode: _focusNode,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _submitGrammar(),
-                    decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Napíšte anglický preklad'),
+                    decoration: InputDecoration(
+                      hintText: 'Napíšte anglický preklad',
+                      filled: true,
+                      fillColor: const Color.fromARGB(255, 255, 255, 255),
+
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide
+                            .none,
+                      ),
+
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.black),
+                      ),
+
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 2,
+                        ),
+                      ),
+
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -595,8 +706,18 @@ class _QuizScreenState extends State<QuizScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _answered ? _next : _submitGrammar,
-                          style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(44), backgroundColor: Theme.of(context).colorScheme.primary),
-                          child: Text(_answered ? 'Ďalej' : 'Odoslať', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                          ),
+                          child: Text(
+                            _answered ? 'Ďalej' : 'Odoslať',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -607,7 +728,9 @@ class _QuizScreenState extends State<QuizScreen> {
                     // determine visual state for this option
                     final normOpt = _normalize(opt);
                     final isCorrect = _normalize(correct) == normOpt;
-                    final isSelected = _selectedOption != null && _normalize(_selectedOption!) == normOpt;
+                    final isSelected =
+                        _selectedOption != null &&
+                        _normalize(_selectedOption!) == normOpt;
 
                     Color bg;
                     Color txt;
@@ -631,7 +754,11 @@ class _QuizScreenState extends State<QuizScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
                       child: ElevatedButton(
                         onPressed: _answered ? _next : () => _chooseMcq(opt),
-                        style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(48), backgroundColor: bg, foregroundColor: txt),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                          backgroundColor: bg,
+                          foregroundColor: txt,
+                        ),
                         child: Text(opt, style: TextStyle(color: txt)),
                       ),
                     );
@@ -640,12 +767,19 @@ class _QuizScreenState extends State<QuizScreen> {
                   if (_answered)
                     ElevatedButton(
                       onPressed: _next,
-                      style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(44), backgroundColor: Theme.of(context).colorScheme.primary),
-                      child: Text('Ďalej', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(44),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      child: Text(
+                        'Ďalej',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
                     ),
                 ],
                 const SizedBox(height: 8),
-                Text('$_score / ${_words.length}', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
           ),

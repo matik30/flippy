@@ -184,7 +184,16 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             centerTitle: true,
-            title: Text(title, style: AppTextStyles.chapter),
+            title: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title.isEmpty ? 'Lekcia' : title,
+                style: AppTextStyles.chapter,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
           body: SafeArea(
