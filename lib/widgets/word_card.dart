@@ -39,16 +39,24 @@ class WordImage extends StatelessWidget {
   }
 
   String _buildServerUrl() {
-    final cleanBaseUrl = baseUrl!.endsWith('/') ? baseUrl!.substring(0, baseUrl!.length - 1) : baseUrl!;
+    final cleanBaseUrl = baseUrl!.endsWith('/')
+        ? baseUrl!.substring(0, baseUrl!.length - 1)
+        : baseUrl!;
     return '$cleanBaseUrl/$assetPath';
   }
 
   Future<String?> _detectImageSource() async {
     // 1) direct network URL
-    if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) return assetPath;
+    if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) {
+      return assetPath;
+    }
 
     // 2) server-relative path (uploads/) and baseUrl provided
-    if (assetPath.startsWith('uploads/') && baseUrl != null && baseUrl!.isNotEmpty) return _buildServerUrl();
+    if (assetPath.startsWith('uploads/') &&
+        baseUrl != null &&
+        baseUrl!.isNotEmpty) {
+      return _buildServerUrl();
+    }
 
     // 3) local file (baseDir provided or direct path) - check asynchronously
     if (baseDir != null && baseDir!.isNotEmpty) {
@@ -63,7 +71,9 @@ class WordImage extends StatelessWidget {
     }
 
     // 4) asset bundled with app
-    if (assetPath.startsWith('assets/') && await _assetExists()) return 'asset:$assetPath';
+    if (assetPath.startsWith('assets/') && await _assetExists()) {
+      return 'asset:$assetPath';
+    }
 
     // none found
     return null;

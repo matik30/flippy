@@ -37,7 +37,8 @@ class _QrScanPageState extends State<QrScanPage> {
       // -> https://pekiskol.alwaysdata.net/generator_v2.php
       String baseUrl = uri.toString();
       final lastSlash = baseUrl.lastIndexOf('/');
-      if (lastSlash > 8) { // after "https://"
+      if (lastSlash > 8) {
+        // after "https://"
         baseUrl = baseUrl.substring(0, lastSlash);
       }
 
@@ -68,8 +69,8 @@ class _QrScanPageState extends State<QrScanPage> {
     }
   }
 
-  void _onDetect(Barcode barcode) {
-    final raw = barcode.rawValue;
+  void _onDetect(BarcodeCapture barcode) {
+    final raw = barcode.barcodes.firstOrNull?.rawValue;
     if (raw == null || _handling) return;
 
     _handling = true;
@@ -83,10 +84,7 @@ class _QrScanPageState extends State<QrScanPage> {
     final result = await showDialog<_QrResult>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => _QrProcessingDialog(
-        raw: raw,
-        handleQr: _handleQr,
-      ),
+      builder: (_) => _QrProcessingDialog(raw: raw, handleQr: _handleQr),
     );
 
     if (!mounted) return;
@@ -103,12 +101,10 @@ class _QrScanPageState extends State<QrScanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Naskenuj QR učebnice'),
-      ),
+      appBar: AppBar(title: const Text('Naskenuj QR učebnice')),
       body: MobileScanner(
         controller: _cameraController,
-        onDetect: (barcode, _) => _onDetect(barcode),
+        onDetect: (BarcodeCapture capture) => _onDetect(capture),
       ),
     );
   }
@@ -120,10 +116,7 @@ class _QrProcessingDialog extends StatefulWidget {
   final String raw;
   final Future<String?> Function(String) handleQr;
 
-  const _QrProcessingDialog({
-    required this.raw,
-    required this.handleQr,
-  });
+  const _QrProcessingDialog({required this.raw, required this.handleQr});
 
   @override
   State<_QrProcessingDialog> createState() => _QrProcessingDialogState();
@@ -167,45 +160,36 @@ class _QrProcessingDialogState extends State<_QrProcessingDialog> {
                 ],
               )
             : _error == null
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 24),
-                      const Icon(Icons.check_circle,
-                          size: 64, color: Colors.green),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Kniha bola pridaná',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(_QrResult.success);
-                        },
-                        child: const Text('Zavrieť'),
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 24),
-                      const Icon(Icons.error,
-                          size: 64, color: Colors.red),
-                      const SizedBox(height: 20),
-                      Text(
-                        _error!,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () =>
-                            Navigator.of(context).pop(_QrResult.error),
-                        child: const Text('Skúsiť znova'),
-                      ),
-                    ],
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 24),
+                  const Icon(Icons.check_circle, size: 64, color: Colors.green),
+                  const SizedBox(height: 20),
+                  const Text('Kniha bola pridaná', textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(_QrResult.success);
+                    },
+                    child: const Text('Zavrieť'),
                   ),
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 24),
+                  const Icon(Icons.error, size: 64, color: Colors.red),
+                  const SizedBox(height: 20),
+                  Text(_error!, textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(_QrResult.error),
+                    child: const Text('Skúsiť znova'),
+                  ),
+                ],
+              ),
       ),
     );
   }
