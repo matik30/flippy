@@ -102,42 +102,45 @@ class ScanDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Čo chceš urobiť?', style: AppTextStyles.chapter),
-            const SizedBox(height: 20),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  child: Padding(
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('Čo chceš urobiť?', style: AppTextStyles.chapter),
+        const SizedBox(height: 20),
 
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-                context.go('/qr');
-              },
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Otvoriť skener'),
-            ),
-
-            const SizedBox(height: 10),
-
-            ElevatedButton.icon(
-              onPressed: () => _pickFileAndSave(context),
-              icon: const Icon(Icons.upload_file),
-              label: const Text('Importovať JSON súbor'),
-            ),
-
-            const SizedBox(height: 10),
-
-            OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.close),
-              label: const Text('Zrušiť'),
-            ),
-          ],
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop();
+            context.go('/qr');
+          },
+          icon: const Icon(Icons.qr_code_scanner),
+          label: const Text('   Otvoriť skener  '),
         ),
-      ),
-    );
+
+        const SizedBox(height: 10),
+
+        ElevatedButton.icon(
+          onPressed: () => _pickFileAndSave(context),
+          icon: const Icon(Icons.upload_file),
+          label: const Text('Importovať JSON'),
+        ),
+
+        const SizedBox(height: 20),
+
+        Align(
+          alignment: Alignment.bottomRight,
+          child: TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Zavrieť'),
+          ),
+        ),
+      ],
+    ),
+  ),
+);
+
   }
 }

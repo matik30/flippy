@@ -272,6 +272,7 @@ class _HomePageState extends State<HomePage> {
                     const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 20,
+                  childAspectRatio: 0.8,
                   crossAxisSpacing: 20,
                 ),
                 itemBuilder: (gridCtx, i) {
@@ -283,16 +284,11 @@ class _HomePageState extends State<HomePage> {
                     builder: (tileCtx, img) {
                       if (!img.hasData) return const SizedBox.shrink();
 
-                      final info = img.data!;
-                      final aspect = info.image.width / info.image.height;
-
                       return GestureDetector(
                         onTap: () {
                           tileCtx.go('/chapters', extra: {'textbook': book});
                         },
-                        child: AspectRatio(
-                          aspectRatio: aspect,
-                          child: Container(
+                        child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(color: Theme.of(tileCtx).colorScheme.onSurface, width: 2),
                               borderRadius: BorderRadius.circular(13),
@@ -304,7 +300,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
-                        ),
+                        
                       );
                     },
                   );
