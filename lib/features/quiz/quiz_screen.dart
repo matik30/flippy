@@ -561,15 +561,24 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
+          body: Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.10,
+              vertical: MediaQuery.of(context).size.height * 0.15,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  '$_score / ${_words.length}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+                Transform.translate(
+                  offset: const Offset(0, -70), // 👈 move UP
+                  child: Text(
+                    'Skóre: $_score / ${_words.length}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Container(
@@ -598,6 +607,13 @@ class _QuizScreenState extends State<QuizScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Text(
+                            'Cvičenie ${_index + 1}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           if (img != null && img.toString().isNotEmpty)
                             Flexible(
@@ -624,35 +640,38 @@ class _QuizScreenState extends State<QuizScreen> {
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Column(
                                 children: [
-                                  Text(
-                                    _correct ? 'Správne' : 'Nesprávne',
-                                    style: Theme.of(context).textTheme.bodyLarge
-                                        ?.copyWith(
-                                          color: _testType == 'mcq'
-                                              ? Theme.of(context)
-                                                    .colorScheme
-                                                    .secondary // accent for MCQ
-                                              : (_correct
-                                                    ? Colors.green.shade600
-                                                    : Colors
-                                                          .red
-                                                          .shade600), // grammar uses green/red like MCQ options
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                  ),
-                                  if (_testType == 'grammar' && !_correct)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(
-                                        _correctAnswerFor(word),
-                                        style: AppTextStyles.body.copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                  if (_testType == 'grammar') ...[
+                                    // Result text (Správne / Nesprávne)
+                                    Text(
+                                      _correct ? 'Správne' : 'Nesprávne',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.copyWith(
+                                            color: _correct
+                                                ? Colors.green.shade600
+                                                : Colors.red.shade600,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
+
+                                    // Correct answer shown ONLY if grammar & wrong
+                                    if (!_correct)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 8.0,
+                                        ),
+                                        child: Text(
+                                          _correctAnswerFor(word),
+                                          style: AppTextStyles.body.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -665,119 +684,163 @@ class _QuizScreenState extends State<QuizScreen> {
                 const SizedBox(height: 12),
 
                 if (_testType == 'grammar') ...[
-                  TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _submitGrammar(),
-                    decoration: InputDecoration(
-                      hintText: 'Napíšte anglický preklad',
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 255, 255, 255),
-
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide
-                            .none,
-                      ),
-
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                      ),
-
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _answered ? _next : _submitGrammar,
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(44),
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primary,
-                          ),
-                          child: Text(
-                            _answered ? 'Ďalej' : 'Odoslať',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 22),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _controller,
+                          focusNode: _focusNode,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _submitGrammar(),
+                          decoration: InputDecoration(
+                            hintText: 'Napíšte anglický preklad',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _answered ? _next : _submitGrammar,
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(44),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                            ),
+                            child: Text(
+                              _answered ? 'Ďalej' : 'Odoslať',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ] else ...[
-                  // MCQ
-                  ..._currentOptions.map((opt) {
-                    // determine visual state for this option
-                    final normOpt = _normalize(opt);
-                    final isCorrect = _normalize(correct) == normOpt;
-                    final isSelected =
-                        _selectedOption != null &&
-                        _normalize(_selectedOption!) == normOpt;
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 22),
+                    child: Column(
+                      children: [
+                        // MCQ options
+                        ..._currentOptions.map((opt) {
+                          final normOpt = _normalize(opt);
+                          final isCorrect = _normalize(correct) == normOpt;
+                          final isSelected =
+                              _selectedOption != null &&
+                              _normalize(_selectedOption!) == normOpt;
 
-                    Color bg;
-                    Color txt;
-                    if (!_answered) {
-                      bg = Theme.of(context).colorScheme.primary;
-                      txt = Theme.of(context).colorScheme.onPrimary;
-                    } else {
-                      if (isCorrect) {
-                        bg = Colors.green.shade600;
-                        txt = Colors.white;
-                      } else if (isSelected) {
-                        bg = Colors.red.shade600;
-                        txt = Colors.white;
-                      } else {
-                        bg = Colors.grey.shade200;
-                        txt = Theme.of(context).colorScheme.onSurface;
-                      }
-                    }
+                          Color bg;
+                          Color txt;
+                          IconData? icon;
+                          Color? iconColor;
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: ElevatedButton(
-                        onPressed: _answered ? _next : () => _chooseMcq(opt),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                          backgroundColor: bg,
-                          foregroundColor: txt,
-                        ),
-                        child: Text(opt, style: TextStyle(color: txt)),
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 8),
-                  if (_answered)
-                    ElevatedButton(
-                      onPressed: _next,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(44),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                      ),
-                      child: Text(
-                        'Ďalej',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
+                          if (!_answered) {
+                            bg = Theme.of(context).colorScheme.primary;
+                            txt = Theme.of(context).colorScheme.onPrimary;
+                          } else {
+                            if (isCorrect) {
+                              bg = Colors.green.shade600;
+                              txt = Colors.white;
+                              icon = Icons.check_circle;
+                              iconColor = Colors.white;
+                            } else if (isSelected) {
+                              bg = Colors.red.shade600;
+                              txt = Colors.white;
+                              icon = Icons.cancel;
+                              iconColor = Colors.white;
+                            } else {
+                              bg = Colors.grey.shade200;
+                              txt = Theme.of(context).colorScheme.onSurface;
+                            }
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: SizedBox(
+                              width:
+                                  double.infinity, // 👈 same width as quiz card
+                              child: ElevatedButton(
+                                onPressed: _answered
+                                    ? _next
+                                    : () => _chooseMcq(opt),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(48),
+                                  backgroundColor: bg,
+                                  foregroundColor: txt,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        opt,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(color: txt),
+                                      ),
+                                    ),
+                                    if (icon != null) ...[
+                                      const SizedBox(width: 10),
+                                      Icon(icon, color: iconColor),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+
+                        const SizedBox(height: 8),
+
+                        // Next button
+                        if (_answered)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _next,
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(44),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                              ),
+                              child: Text(
+                                'Ďalej',
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
+                  ),
                 ],
                 const SizedBox(height: 8),
               ],
