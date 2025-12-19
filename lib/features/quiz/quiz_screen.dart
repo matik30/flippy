@@ -584,7 +584,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   child: Container(
                     key: ValueKey('quiz_card'),
                     margin: const EdgeInsets.symmetric(
-                      horizontal: 22,
+                      horizontal: 60,
                       vertical: 30,
                     ),
                     decoration: BoxDecoration(
@@ -637,7 +637,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           const SizedBox(height: 12),
                           if (_answered)
                             Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
+                              padding: const EdgeInsets.only(top: 0),
                               child: Column(
                                 children: [
                                   if (_testType == 'grammar') ...[
@@ -685,7 +685,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
                 if (_testType == 'grammar') ...[
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 22),
+                    margin: const EdgeInsets.symmetric(horizontal: 70),
                     child: Column(
                       children: [
                         TextField(
@@ -742,7 +742,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   ),
                 ] else ...[
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 22),
+                    margin: const EdgeInsets.symmetric(horizontal: 70),
                     child: Column(
                       children: [
                         // MCQ options
@@ -763,15 +763,15 @@ class _QuizScreenState extends State<QuizScreen> {
                             txt = Theme.of(context).colorScheme.onPrimary;
                           } else {
                             if (isCorrect) {
-                              bg = Colors.green.shade600;
-                              txt = Colors.white;
+                              bg = Colors.grey.shade200;
+                              txt = Theme.of(context).colorScheme.onSurface;
                               icon = Icons.check_circle;
-                              iconColor = Colors.white;
+                              iconColor = Colors.green.shade600;
                             } else if (isSelected) {
-                              bg = Colors.red.shade600;
-                              txt = Colors.white;
+                              bg = Colors.grey.shade200;
+                              txt = Theme.of(context).colorScheme.onSurface;
                               icon = Icons.cancel;
-                              iconColor = Colors.white;
+                              iconColor = Colors.red.shade600;
                             } else {
                               bg = Colors.grey.shade200;
                               txt = Theme.of(context).colorScheme.onSurface;
@@ -781,8 +781,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6.0),
                             child: SizedBox(
-                              width:
-                                  double.infinity, // 👈 same width as quiz card
+                              width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: _answered
                                     ? _next
@@ -815,29 +814,35 @@ class _QuizScreenState extends State<QuizScreen> {
                         }),
 
                         const SizedBox(height: 8),
-
-                        // Next button
-                        if (_answered)
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _next,
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(44),
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary,
-                              ),
-                              child: Text(
-                                'Ďalej',
-                                style: TextStyle(
-                                  color: Theme.of(
+                        // Next button (space ALWAYS reserved)
+                        SizedBox(
+                          height: 44,
+                          width: double.infinity,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 150),
+                            opacity: _answered ? 1.0 : 0.0,
+                            child: IgnorePointer(
+                              ignoring: !_answered,
+                              child: ElevatedButton(
+                                onPressed: _answered ? _next : null,
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(44),
+                                  backgroundColor: Theme.of(
                                     context,
-                                  ).colorScheme.onPrimary,
+                                  ).colorScheme.primary,
+                                ),
+                                child: Text(
+                                  'Ďalej',
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),
