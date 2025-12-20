@@ -563,7 +563,7 @@ class _QuizScreenState extends State<QuizScreen> {
           ),
           body: Container(
             margin: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.10,
+              horizontal: MediaQuery.of(context).size.width * 0.05,
               vertical: MediaQuery.of(context).size.height * 0.15,
             ),
             child: Column(
@@ -572,7 +572,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 Transform.translate(
                   offset: const Offset(0, -70), // 👈 move UP
                   child: Text(
-                    'Skóre: $_score / ${_words.length}',
+                    '${_index+1} / ${_words.length}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 23,
@@ -584,8 +584,8 @@ class _QuizScreenState extends State<QuizScreen> {
                   child: Container(
                     key: ValueKey('quiz_card'),
                     margin: const EdgeInsets.symmetric(
-                      horizontal: 60,
-                      vertical: 30,
+                      horizontal: 50,
+                      vertical: 0,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -606,14 +606,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Cvičenie ${_index + 1}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        children: [                        
                           const SizedBox(height: 8),
                           if (img != null && img.toString().isNotEmpty)
                             Flexible(
@@ -672,6 +665,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                         ),
                                       ),
                                   ],
+                                  
                                 ],
                               ),
                             ),
@@ -685,7 +679,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
                 if (_testType == 'grammar') ...[
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 70),
+                    margin: const EdgeInsets.symmetric(horizontal: 50),
                     child: Column(
                       children: [
                         TextField(
@@ -694,7 +688,8 @@ class _QuizScreenState extends State<QuizScreen> {
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _submitGrammar(),
                           decoration: InputDecoration(
-                            hintText: 'Napíšte anglický preklad',
+                            hintText: 'Napíšte preklad',
+                            helperStyle:TextStyle(),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
@@ -787,7 +782,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                     ? _next
                                     : () => _chooseMcq(opt),
                                 style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(48),
+                                  minimumSize: const Size.fromHeight(36),
                                   backgroundColor: bg,
                                   foregroundColor: txt,
                                 ),
@@ -816,7 +811,7 @@ class _QuizScreenState extends State<QuizScreen> {
                         const SizedBox(height: 8),
                         // Next button (space ALWAYS reserved)
                         SizedBox(
-                          height: 44,
+                          height: 30,
                           width: double.infinity,
                           child: AnimatedOpacity(
                             duration: const Duration(milliseconds: 150),
