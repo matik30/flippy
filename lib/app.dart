@@ -25,9 +25,9 @@ class FlippyApp extends StatelessWidget {
 final _router = GoRouter(
   initialLocation: '/splash',
   routes: [
-    GoRoute(path: '/splash', builder: (_, __) => const SplashPage()),
-    GoRoute(path: '/', builder: (_, __) => const HomePage()),
-    GoRoute(path: '/qr', builder: (_, __) => const QrScanPage()),
+    GoRoute(path: '/splash', builder: (_, _) => const SplashPage()),
+    GoRoute(path: '/', builder: (_, _) => const HomePage()),
+    GoRoute(path: '/qr', builder: (_, _) => const QrScanPage()),
     GoRoute(
       path: '/chapters',
       builder: (ctx, state) {

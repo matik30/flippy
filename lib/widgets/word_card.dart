@@ -117,7 +117,7 @@ class WordImage extends StatelessWidget {
             io.File(filePath),
             fit: BoxFit.contain,
             height: maxHeight,
-            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
           );
         }
 
@@ -127,7 +127,7 @@ class WordImage extends StatelessWidget {
             asset,
             fit: BoxFit.contain,
             height: maxHeight,
-            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
           );
         }
 
