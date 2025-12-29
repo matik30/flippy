@@ -19,6 +19,12 @@ class _QrScanPageState extends State<QrScanPage> {
   final MobileScannerController _cameraController = MobileScannerController();
   bool _handling = false;
 
+  @override
+  void dispose() {
+    _cameraController.dispose();
+    super.dispose();
+  }
+
   Future<String?> _handleQr(String raw) async {
     try {
       final uri = Uri.parse(raw);
@@ -28,36 +34,29 @@ class _QrScanPageState extends State<QrScanPage> {
         return 'Server vrátil ${response.statusCode}';
       }
 
-      // validate JSON
-      final body = response.body;
-      final jsonData = jsonDecode(body);
+      final jsonData = jsonDecode(response.body);
 
-      // Extract base URL from the source URL
-      // Example: https://pekiskol.alwaysdata.net/generator_v2.php/api/textbook.json
-      // -> https://pekiskol.alwaysdata.net/generator_v2.php
+      // extract base URL
       String baseUrl = uri.toString();
       final lastSlash = baseUrl.lastIndexOf('/');
       if (lastSlash > 8) {
-        // after "https://"
         baseUrl = baseUrl.substring(0, lastSlash);
       }
 
-      // Add base URL to JSON metadata
-      if (jsonData is Map<String, dynamic>) {
-        if (jsonData['textbook'] is Map<String, dynamic>) {
-          jsonData['textbook']['serverBaseUrl'] = baseUrl;
-        }
+      if (jsonData is Map<String, dynamic> &&
+          jsonData['textbook'] is Map<String, dynamic>) {
+        jsonData['textbook']['serverBaseUrl'] = baseUrl;
       }
 
-      // save to application documents directory
       final docsDir = await getApplicationDocumentsDirectory();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final filename = 'imported_$timestamp.json';
-      final filePath = '${docsDir.path}/$filename';
-      final f = io.File(filePath);
-      await f.writeAsString(jsonEncode(jsonData), encoding: const Utf8Codec());
+      final filePath =
+          '${docsDir.path}/imported_${DateTime.now().millisecondsSinceEpoch}.json';
 
-      // record in imported_textbooks list
+      await io.File(filePath).writeAsString(
+        jsonEncode(jsonData),
+        encoding: utf8,
+      );
+
       final prefs = await SharedPreferences.getInstance();
       final imported = prefs.getStringList('imported_textbooks') ?? <String>[];
       imported.add(filePath);
@@ -69,9 +68,11 @@ class _QrScanPageState extends State<QrScanPage> {
     }
   }
 
-  void _onDetect(BarcodeCapture barcode) {
-    final raw = barcode.barcodes.firstOrNull?.rawValue;
-    if (raw == null || _handling) return;
+  void _onDetect(BarcodeCapture capture) {
+    if (_handling) return;
+
+    final raw = capture.barcodes.first.rawValue;
+    if (raw == null) return;
 
     _handling = true;
     _processQr(raw);
@@ -81,16 +82,21 @@ class _QrScanPageState extends State<QrScanPage> {
     await _cameraController.stop();
     if (!mounted) return;
 
+    final router = GoRouter.of(context);
+
     final result = await showDialog<_QrResult>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => _QrProcessingDialog(raw: raw, handleQr: _handleQr),
+      builder: (_) => _QrProcessingDialog(
+        raw: raw,
+        handleQr: _handleQr,
+      ),
     );
 
     if (!mounted) return;
 
     if (result == _QrResult.success) {
-      GoRouter.of(context).go('/?r=${DateTime.now().millisecondsSinceEpoch}');
+      router.go('/?r=${DateTime.now().millisecondsSinceEpoch}');
     } else {
       await _cameraController.start();
     }
@@ -100,11 +106,25 @@ class _QrScanPageState extends State<QrScanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final router = GoRouter.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Naskenuj QR učebnice')),
+      appBar: AppBar(
+        title: const Text('Naskenuj QR učebnice'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () async {
+              await _cameraController.stop();
+              if (!mounted) return;
+              router.go('/');
+            },
+          ),
+        ],
+      ),
       body: MobileScanner(
         controller: _cameraController,
-        onDetect: (BarcodeCapture capture) => _onDetect(capture),
+        onDetect: _onDetect,
       ),
     );
   }
@@ -116,7 +136,10 @@ class _QrProcessingDialog extends StatefulWidget {
   final String raw;
   final Future<String?> Function(String) handleQr;
 
-  const _QrProcessingDialog({required this.raw, required this.handleQr});
+  const _QrProcessingDialog({
+    required this.raw,
+    required this.handleQr,
+  });
 
   @override
   State<_QrProcessingDialog> createState() => _QrProcessingDialogState();
@@ -149,9 +172,9 @@ class _QrProcessingDialogState extends State<_QrProcessingDialog> {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: _loading
-            ? Column(
+            ? const Column(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   SizedBox(height: 24),
                   CircularProgressIndicator(),
                   SizedBox(height: 20),
@@ -160,36 +183,41 @@ class _QrProcessingDialogState extends State<_QrProcessingDialog> {
                 ],
               )
             : _error == null
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 24),
-                  const Icon(Icons.check_circle, size: 64, color: Colors.green),
-                  const SizedBox(height: 20),
-                  const Text('Kniha bola pridaná', textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(_QrResult.success);
-                    },
-                    child: const Text('Zavrieť'),
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 24),
+                      const Icon(Icons.check_circle,
+                          size: 64, color: Colors.green),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Kniha bola pridaná',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () =>
+                            Navigator.of(context).pop(_QrResult.success),
+                        child: const Text('Zavrieť'),
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 24),
+                      const Icon(Icons.error,
+                          size: 64, color: Colors.red),
+                      const SizedBox(height: 20),
+                      Text(_error!, textAlign: TextAlign.center),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () =>
+                            Navigator.of(context).pop(_QrResult.error),
+                        child: const Text('Skúsiť znova'),
+                      ),
+                    ],
                   ),
-                ],
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 24),
-                  const Icon(Icons.error, size: 64, color: Colors.red),
-                  const SizedBox(height: 20),
-                  Text(_error!, textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(_QrResult.error),
-                    child: const Text('Skúsiť znova'),
-                  ),
-                ],
-              ),
       ),
     );
   }

@@ -506,6 +506,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final title =
         widget.args?['subchapterTitle'] ?? widget.args?['title'] ?? 'Test';
+
     if (_words.isEmpty) {
       return Scaffold(
         appBar: AppBar(
@@ -529,6 +530,15 @@ class _QuizScreenState extends State<QuizScreen> {
     final en = (word['en'] ?? word['english'] ?? '').toString();
     final img = word['image'] ?? '';
     final correct = _correctAnswerFor(word);
+
+    // Compute MediaQuery once and use a stable top margin so the card does not
+    // shrink down when the keyboard appears. Also add bottom padding equal to
+    // viewInsets.bottom so the keyboard pushes content up and the text field
+    // stays just above the keyboard.
+    final mq = MediaQuery.of(context);
+    final horizontalMargin = mq.size.width * 0.05;
+    final topMargin = max(mq.size.height * 0.12, 60.0);
+    final bottomInset = mq.viewInsets.bottom;
 
     return Scaffold(
       body: Container(
@@ -561,11 +571,16 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
+          // keep default resizeToAvoidBottomInset (true) so system adjusts layout;
+          // we also add padding below content equal to the keyboard inset so the
+          // text field ends up just above the keyboard instead of the card
+          // collapsing.
           body: Container(
             margin: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.05,
-              vertical: MediaQuery.of(context).size.height * 0.15,
+              horizontal: horizontalMargin,
+              vertical: topMargin,
             ),
+            padding: EdgeInsets.only(bottom: bottomInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -811,27 +826,31 @@ class _QuizScreenState extends State<QuizScreen> {
                         const SizedBox(height: 8),
                         // Next button (space ALWAYS reserved)
                         SizedBox(
-                          height: 30,
+                          height: 40,
                           width: double.infinity,
                           child: AnimatedOpacity(
                             duration: const Duration(milliseconds: 150),
                             opacity: _answered ? 1.0 : 0.0,
                             child: IgnorePointer(
                               ignoring: !_answered,
-                              child: ElevatedButton(
-                                onPressed: _answered ? _next : null,
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(44),
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.primary,
-                                ),
-                                child: Text(
-                                  'Ďalej',
-                                  style: TextStyle(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimary,
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                  onPressed: _answered ? _next : null,
+                                  style: ElevatedButton.styleFrom(
+                                    shape: const CircleBorder(),
+                                    padding: const EdgeInsets.all(8),
+                                    backgroundColor: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
+                                    minimumSize: const Size(40, 40),
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_forward,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary,
+                                    size: 20,
                                   ),
                                 ),
                               ),
