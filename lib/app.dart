@@ -8,6 +8,7 @@ import 'features/lessons/lesson_screen.dart';
 import 'features/scan/qr_scan_page.dart';
 import 'theme/theme_notifier.dart';
 
+// Hlavná aplikácia Flippy a konfigurácia rout (GoRouter).
 class FlippyApp extends StatelessWidget {
   const FlippyApp({super.key});
 
@@ -22,6 +23,8 @@ class FlippyApp extends StatelessWidget {
   }
 }
 
+// Konfigurácia GoRouter — počiatočná lokácia a definícia jednotlivých trás
+// Každá trasa má krátky komentár s vysvetlením čo očakáva v `state.extra` alebo args.
 final _router = GoRouter(
   initialLocation: '/splash',
   routes: [
@@ -47,5 +50,3 @@ final _router = GoRouter(
     ),
   ],
 );
-
-// theme and fonts handled by ThemeNotifier and theme files

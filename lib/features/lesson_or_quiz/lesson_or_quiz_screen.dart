@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
 
+/// Obrazovka pre výber medzi lekciou a kvízom pre zvolenú podkapitolu.
 class LessonOrQuizScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
   const LessonOrQuizScreen({super.key, this.args});
@@ -14,23 +15,24 @@ class LessonOrQuizScreen extends StatefulWidget {
   State<LessonOrQuizScreen> createState() => _LessonOrQuizScreenState();
 }
 
+/// Hlavný widget, ktorý prijíma `args` s dátami o učebnici/kapitole/podkapitole.
 class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
   late final Map<String, dynamic> _args;
   bool _canTest = false;
-  // expansion state for items
+  // stav rozbalenia položiek
   bool _expandedSlovicka = false;
   bool _expandedGrammar = false;
   bool _expandedMcq = false;
 
-  // progress / score state
+  // progress údaje
   int _visitedCount = 0;
   int _totalWords = 0;
   int _grammarScore = 0;
   int _mcqScore = 0;
-  // whether full quiz run was completed
+  // či bol celý kvíz dokončený
   bool _grammarDone = false;
   bool _mcqDone = false;
-  // whether a quiz run was started but not finished (paused)
+  // či bol kvíz spustený, ale nedokončený (pozastavený)
   bool _grammarPaused = false;
   bool _mcqPaused = false;
 
@@ -45,12 +47,12 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // recompute when returning to this screen
+    // prekalkulovať pri návrate na túto obrazovku
     _computeCanTest();
   }
 
   String _computeVisitedKey() {
-    // Mirror LessonScreen logic: try to build signature from textbook map
+    // vytvorí jedinečný kľúč pre ukladanie navštívených slov podľa učebnice/kapitoly/podkapitoly
     final routeArgs = _args;
     String? signature;
     final tb = routeArgs['textbook'] ?? routeArgs['book'] ?? routeArgs['textbookMap'];
@@ -136,7 +138,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
 
       final words = (_args['words'] is List) ? (_args['words'] as List) : <dynamic>[];
 
-      // read persisted quiz scores/done flags using the same key base as QuizScreen
+      // načítanie skóre a stavu kvízov
       final grammarBase = quizKeyFromArgs(_args, 'grammar');
       final mcqBase = quizKeyFromArgs(_args, 'mcq');
 
@@ -150,7 +152,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
       if (!mounted) return;
       setState(() {
         _visitedCount = visited.length;
-        // zobrazujeme počet zdrojových slov — to zodpovedá sekcii "Slovíčka"
+        // zobrazuje počet zdrojových slov — to zodpovedá sekcii "Slovíčka"
         _totalWords = words.length;
         _grammarScore = grammar;
         _mcqScore = mcq;
@@ -203,7 +205,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
               padding: const EdgeInsets.all(20.0),
               child: ListView(
                 children: [
-                  // Slovíčka (styled like chapters list item)
+                  // Slovíčka
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
@@ -217,10 +219,10 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                           borderRadius: BorderRadius.circular(12),
                           onTap: () => setState(() {
                             if (_expandedSlovicka) {
-                              // already open -> close it
+                              // otvorené -> zatvoriť
                               _expandedSlovicka = false;
                             } else {
-                              // open this one and collapse others
+                              // otvoriť toto a zavrieť ostatné
                               _expandedSlovicka = true;
                               _expandedGrammar = false;
                               _expandedMcq = false;
@@ -303,7 +305,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                     ),
                   ),
 
-                  // Test - Gramatika (styled like chapters list item)
+                  // Test - Gramatika
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
@@ -367,7 +369,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  // right: stars + button
+                                  // vpravo: hviezdičky + tlačidlo
                                   Expanded(
                                     child: Column(
                                       children: [
@@ -393,11 +395,10 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                                   final args = Map<String, dynamic>.from(_args);
                                                   args['testType'] = 'grammar';
                                                   final base = quizKeyFromArgs(_args, 'grammar');
-                                                  // capture navigator before any async gap
                                                   final navigator = Navigator.of(context);
 
                                                   if (!_grammarPaused) {
-                                                    // fresh run or 'Zopakovať' - clear previous run state
+                                                    // nový test, vymazať predchádzajúci progress
                                                     try {
                                                       final prefs = await SharedPreferences.getInstance();
                                                       await prefs.remove('${base}_index');
@@ -434,7 +435,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                     ),
                   ),
 
-                  // Test - MCQ (styled like chapters list item)
+                  // Test - MCQ
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
@@ -522,7 +523,7 @@ class _LessonOrQuizScreenState extends State<LessonOrQuizScreen> {
                                                   final args = Map<String, dynamic>.from(_args);
                                                   args['testType'] = 'mcq';
                                                   final base = quizKeyFromArgs(_args, 'mcq');
-                                                  // capture navigator before async work
+                                                  // zachytiť navigátor pred asynchrónnou prácou
                                                   final navigator = Navigator.of(context);
 
                                                   if (!_mcqPaused) {

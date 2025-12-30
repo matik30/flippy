@@ -6,8 +6,11 @@ import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/word_card.dart';
 import 'package:flippy/features/quiz/quiz_screen.dart';
 
+// Obrazovka lekcie — zobrazuje kartičky slovíčok, galériu a umožňuje spustiť test (kvíz).
+// Obsahuje persistenciu pozície, označovanie slovíčok a sledovanie navštívených položiek.
+
 class LessonScreen extends StatefulWidget {
-  // získané dáta z GoRouter (routerConfig passes args via state.extra)
+  // získané dáta z GoRouter
   final Map<String, dynamic>? args;
   const LessonScreen({super.key, this.args});
 
@@ -22,10 +25,10 @@ class _LessonScreenState extends State<LessonScreen> {
 
   List<Map<String, dynamic>> _words = [];
   String _title = '';
-  String? _baseDir; // Base directory for relative image paths from JSON
-  String? _baseUrl; // Base URL for server images
+  String? _baseDir;
+  String? _baseUrl;
 
-  // original route args (saved so we construct the same quiz key as other screens)
+  // pôvodné route args (uložené aby sme vytvorili rovnaký quiz kľúč ako iné obrazovky)
   Map<String, dynamic>? _routeArgs;
 
   // kľúč pre zapamätanie pozície v lekcii
@@ -37,15 +40,15 @@ class _LessonScreenState extends State<LessonScreen> {
   // kľúč pre uchovanie označených slovíčok (per-subchapter)
   late String _markedKey;
 
-  // visited indices for enabling the test; persisted per subchapter
+  // navštívené indexy pre povolenie testu; uchovávané per subchapter
   Set<int> _visited = <int>{};
   late String _visitedKey;
-  bool _suppressVisitMark = false; // prevent marking when jumping from gallery
+  bool _suppressVisitMark = false; // neoznačovať pri skákaní z galérie
 
-  // pinch / gallery state
+  // stav galérie
   double _minScaleSeen = 1.0;
   bool _galleryOpen = false;
-  // trigger when user pinches fingers together (scale goes below this)
+  // prah pre otvorenie galérie
   static const double _galleryTriggerScale = 0.85;
 
   Future<void> _loadMarked() async {
@@ -83,7 +86,7 @@ class _LessonScreenState extends State<LessonScreen> {
     _pageController = PageController();
   }
 
-  // persist current index
+  // Uloží aktuálny index
   Future<void> _saveIndex(int i) async {
     if (_saveKey == null) return;
     try {
@@ -105,9 +108,9 @@ class _LessonScreenState extends State<LessonScreen> {
           if (_pageController.hasClients) {
             _pageController.jumpToPage(saved);
           }
-          // mark the saved page as visited so UI (test button) updates immediately
+          // označiť uloženú stránku ako navštívenú
           if (mounted) {
-            // do not honor suppression here — saved position should count as visited
+            // neoznačovať pri skákaní z galérie
             _markVisited(saved);
           }
         });
@@ -120,12 +123,11 @@ class _LessonScreenState extends State<LessonScreen> {
     super.didChangeDependencies();
     if (_inited) return;
 
-    // prefer widget.args (GoRouter) a fallback na ModalRoute (compat)
+    // Získanie argumentov z trasy alebo widgetu
     final routeArgs =
         widget.args ??
         (ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?);
-    // persist a local copy of the route args so we can use the exact same
-    // argument map when launching QuizScreen (ensures quiz persistence keys match)
+    // uložené aby sme vytvorili rovnaký quiz kľúč ako iné obrazovky
     _routeArgs = routeArgs != null
         ? Map<String, dynamic>.from(routeArgs)
         : null;
@@ -142,21 +144,19 @@ class _LessonScreenState extends State<LessonScreen> {
         }).toList();
       }
 
-      // Try to build a stable signature from textbook -> chapters -> subchapters -> words ids.
-      // The combination of these ids should be unique per specific imported/book copy.
+      // Vytvorenie jedinečného podpisu pre aktuálny kvíz
       String? signature;
       final tb =
           routeArgs['textbook'] ??
           routeArgs['book'] ??
           routeArgs['textbookMap'];
       if (tb is Map) {
-        // Extract base directory from __file__ if it exists
         final filePath = tb['__file__'];
         if (filePath is String && filePath.isNotEmpty) {
           _baseDir = path.dirname(filePath);
         }
 
-        // Extract base URL from textbook (automatically saved from QR scan)
+        // základná URL pre načítanie obrázkov
         final serverUrl = tb['serverBaseUrl'] ?? tb['baseUrl'];
         if (serverUrl is String && serverUrl.isNotEmpty) {
           _baseUrl = serverUrl;
@@ -186,7 +186,7 @@ class _LessonScreenState extends State<LessonScreen> {
           }
         }
 
-        // word ids for the current subchapter (from loaded _words)
+        // získanie id všetkých slovíčok v lekcii
         final wordIds = _words
             .map((w) => (w['id']?.toString() ?? ''))
             .where((s) => s.isNotEmpty)
@@ -201,7 +201,7 @@ class _LessonScreenState extends State<LessonScreen> {
         if (partsList.isNotEmpty) signature = partsList.join('::');
       }
 
-      // Fallback: previous heuristic using available id/title pieces
+      // vytvorenie kľúčov pre persistenciu
       String keySource;
       if (signature != null && signature.isNotEmpty) {
         keySource = signature;
@@ -254,14 +254,14 @@ class _LessonScreenState extends State<LessonScreen> {
       _markedKey = 'marked_words_$keyId';
       _visitedKey = 'visited_$keyId';
 
-      // load saved index (after words are set)
+      // načítanie uloženého indexu a skok naň
       _loadSavedIndexAndJump();
-      // load marked words for this subchapter
+      // načítanie označených slovíčok pre túto podkapitolu
       _loadMarked();
-      // load visited indices
+      // načítanie navštívených indexov
       _loadVisited();
 
-      // ensure the currently displayed page counts as visited (covers initial display)
+      // zabezpečenie, že aktuálne zobrazená stránka sa počíta ako navštívená (pokrytie počiatočného zobrazenia)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         if (_words.isNotEmpty &&
@@ -282,9 +282,7 @@ class _LessonScreenState extends State<LessonScreen> {
       if (!mounted) return;
       setState(() => _visited = loaded);
 
-      // After we loaded persisted visited indices, ensure the currently
-      // displayed page is counted as visited — this avoids a race where
-      // _markVisited was called earlier but then overwritten by this load.
+      // zabezpečenie, že aktuálne zobrazená stránka sa počíta ako navštívená (pokrytie počiatočného zobrazenia)
       if (_words.isNotEmpty &&
           !_visited.contains(_index) &&
           !_suppressVisitMark) {
@@ -311,7 +309,7 @@ class _LessonScreenState extends State<LessonScreen> {
 
   bool get _canTest {
     if (_words.isEmpty) return false;
-    // user must have visited every index at least once
+    // používateľ musí navštíviť každú položku aspoň raz
     return _visited.length >= _words.length;
   }
 
@@ -326,9 +324,7 @@ class _LessonScreenState extends State<LessonScreen> {
     );
     setState(() => _index = idx);
     _saveIndex(idx);
-    // If this navigation isn't coming from the gallery (suppression), mark
-    // the target page as visited immediately so the test button can enable
-    // without requiring an extra user interaction.
+    // zabezpečenie, že aktuálne zobrazená stránka sa počíta ako navštívená
     if (!_suppressVisitMark) {
       _markVisited(idx);
     }
@@ -580,7 +576,7 @@ class _LessonScreenState extends State<LessonScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 16),
-                // Test button (above pager) — enabled only when user visited all cards
+                // Test button (funckia je povolená len ak sú všetky položky navštívené)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: SizedBox(
@@ -588,8 +584,7 @@ class _LessonScreenState extends State<LessonScreen> {
                       onPressed: _canTest
                           ? () async {
                               final args = <String, dynamic>{
-                                // use the original route args as base so QuizScreen computes
-                                // the same quiz key as LessonOrQuizScreen
+                                // prenesenie pôvodných argumentov pre konzistenciu kľúčov
                                 ...?_routeArgs,
                                 'words': _words,
                                 'testType': 'mcq',
@@ -608,7 +603,7 @@ class _LessonScreenState extends State<LessonScreen> {
                                 final hasIndex =
                                     prefs.getInt('${base}_index') != null;
                                 if (!hasIndex) {
-                                  // fresh run: clear previous run state
+                                  // prvý pokus o test v tejto lekcii — vymazať všetky staré dáta
                                   await prefs.remove('${base}_index');
                                   await prefs.remove('${base}_answered');
                                   await prefs.remove('${base}_correct');
@@ -618,8 +613,7 @@ class _LessonScreenState extends State<LessonScreen> {
                                 }
                               } catch (_) {}
 
-                              // push quiz; when it returns, pop this LessonScreen so
-                              // LessonOrQuizScreen (the previous route) can refresh in its .then
+                              // spustenie quiz obrazovky a čakanie na návrat
                               await navigator.push(
                                 MaterialPageRoute(
                                   builder: (_) => QuizScreen(args: args),
@@ -646,9 +640,9 @@ class _LessonScreenState extends State<LessonScreen> {
                   ),
                 ),
 
-                // Card pager
+                // Kartičky slovíčok v PageView
                 Expanded(
-                  // wrap pager with GestureDetector to detect pinch and open gallery
+                  // ak je prázdna lekcia, zobrazí sa len text "No words"
                   child: total == 0
                       ? const Center(
                           child: Text(
@@ -667,20 +661,20 @@ class _LessonScreenState extends State<LessonScreen> {
                             if (_minScaleSeen <= _galleryTriggerScale &&
                                 !_galleryOpen) {
                               _galleryOpen = true;
-                              // open gallery and await selected index (or null)
+                              // otvorenie galérie
                               final selected = await _showGalleryAndPick(
                                 initialIndex: _index,
                               );
                               _galleryOpen = false;
 
-                              // guard any UI usage with mounted after async gap
+                              // zabezpečenie, že aktuálne zobrazená stránka sa počíta ako navštívená
                               if (!mounted) {
                                 _minScaleSeen = 1.0;
                                 return;
                               }
 
                               if (selected != null) {
-                                // jump to selected card but do not mark as visited (gallery jump)
+                                // neoznačovať pri skákaní z galérie
                                 setState(() => _suppressVisitMark = true);
                                 _goTo(selected);
                               }
@@ -693,11 +687,12 @@ class _LessonScreenState extends State<LessonScreen> {
                             onPageChanged: (i) => setState(() {
                               _index = i;
                               _showBack = false;
-                              _saveIndex(i); // save on page change
+                              _saveIndex(i); // uloženie pozície
+                              // zabezpečenie, že aktuálne zobrazená stránka sa počíta ako navštívená
                               if (!_suppressVisitMark) {
                                 _markVisited(i);
                               } else {
-                                // reset suppression for next normal navigation
+                                // reset potlačenie označenia
                                 _suppressVisitMark = false;
                               }
                             }),
@@ -727,7 +722,7 @@ class _LessonScreenState extends State<LessonScreen> {
                             onPressed: () => _goTo(_index - 1),
                           ),
                           const SizedBox(width: 8),
-                          // quick jump buttons: prev, current, next
+                          // zobrazenie tlačidiel pre aktuálnu, predchádzajúcu a nasledujúcu stránku
                           for (
                             var i = max(0, _index - 1);
                             i <= min(total - 1, _index + 1);
@@ -780,11 +775,11 @@ class _LessonScreenState extends State<LessonScreen> {
     );
   }
 
-  // shows gallery dialog/grid and returns tapped index (or null)
+  // Zobrazenie galérie a výber položky
   Future<int?> _showGalleryAndPick({int initialIndex = 0}) async {
     const cols = 3;
 
-    // compute longest English string length in this subchapter
+    // výpočet maximálnej dĺžky anglického slova pre úpravu veľkosti písma
     int maxEnLen = 0;
     for (final w in _words) {
       final en = (w['en'] ?? w['english'] ?? '').toString();

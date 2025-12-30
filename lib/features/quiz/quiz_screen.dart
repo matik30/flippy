@@ -4,8 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/word_card.dart';
 
-// Generate a stable key base for a quiz from the same args structure used
-// across the app. Other screens can call this to read/write the same prefs.
+// Obrazovka kvízu — zobrazuje otázky (grammar alebo mcq), hodnotí odpovede
+// a ukladá priebeh (index, skóre) do SharedPreferences.
+
+// Generuje stabilný kľúč pre kvíz z rovnakých argumentov, aké používa
 String quizKeyFromArgs(Map<String, dynamic>? args, String testType) {
   final a = args ?? {};
   final tb = a['textbook'] ?? a['book'] ?? a['textbookMap'];
@@ -30,6 +32,7 @@ String quizKeyFromArgs(Map<String, dynamic>? args, String testType) {
 
 const int quizSize = 15;
 
+// Widget QuizScreen prijíma `args` s dátami (words, testType, atď.)
 class QuizScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
   const QuizScreen({super.key, this.args});
@@ -41,8 +44,8 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   late List<Map<String, dynamic>> _words; // bude prepísaný po príprave
   late final List<Map<String, dynamic>>
-  _allWords; // original full list from args
-  late String _testType; // 'grammar' or 'mcq'
+  _allWords; // pôvodný úplný zoznam z args
+  late String _testType; // 'grammar' alebo 'mcq'
   int _index = 0;
   int _score = 0;
   bool _answered = false;
@@ -51,11 +54,10 @@ class _QuizScreenState extends State<QuizScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final Random _rnd = Random();
-  String?
-  _selectedOption; // currently chosen MCQ option (for colouring after answer)
+  String? _selectedOption; // aktuálne vybraná možnosť MCQ (pre farbenie po odpovedi)
 
-  List<String> _currentOptions = []; // for mcq
-  static const int _quizSize = quizSize; // desired number of items in a quiz
+  List<String> _currentOptions = []; // pre mcq
+  static const int _quizSize = quizSize; // požadovaný počet položiek v kvíze
 
   @override
   void initState() {
@@ -76,8 +78,7 @@ class _QuizScreenState extends State<QuizScreen> {
     }
     _testType = (args['testType'] ?? 'mcq') as String;
     if (_testType != 'grammar' && _testType != 'mcq') _testType = 'mcq';
-    // Prepare the actual quiz word list (weighted random sampling with replacement)
-    // prepare words (will reuse persisted sample if present), then load progress
+    // Príprava slov pre kvíz (náhodný výber až do quizSize)
     _prepareQuizWords().then((_) async {
       await _loadProgress();
       if (_words.isNotEmpty && _testType == 'mcq') _buildOptions();
@@ -115,7 +116,7 @@ class _QuizScreenState extends State<QuizScreen> {
       if (!mounted) return;
 
       if (idx != null && idx >= 0 && idx < _words.length) {
-        // resume an in-progress run
+        // obnoviť prebiehajúci beh
         setState(() {
           _index = idx;
           _score = sc ?? 0;
@@ -124,13 +125,13 @@ class _QuizScreenState extends State<QuizScreen> {
           if (_testType == 'grammar' && input != null) _controller.text = input;
         });
       } else {
-        // No saved index -> treat as a fresh run. Clear any leftover persisted run state
+        // žiadny prebiehajúci beh, začať odznova
         try {
           await prefs.remove('${base}_index');
           await prefs.remove('${base}_answered');
           await prefs.remove('${base}_correct');
           await prefs.remove('${base}_input');
-          // ensure persisted sample is cleared for a fresh run so new sampling occurs
+          // vyčistiť vzorku
           await prefs.remove('${base}_sample');
           await prefs.setBool('${base}_done', false);
           await prefs.setInt('${base}_score', 0);
@@ -157,22 +158,21 @@ class _QuizScreenState extends State<QuizScreen> {
 
   String _normalize(String s) => s.trim().toLowerCase();
 
-  // Normalize a string for grammar comparison: remove parenthetical content,
-  // split alternatives by '/', strip non-letter characters (keep a-z and spaces),
-  // collapse whitespace and lowercase.
+  // Normalizuje reťazec na porovnanie: odstráni obsah v zátvorkách,
+  // rozdelí alternatívy podľa '/', odstráni znaky, ktoré nie sú písmená (ponechá a-z a medzery),
+  // zmenší medzery a prevedie na malé písmená.
   String _normalizeForComparison(String s) {
     var t = s.toLowerCase();
-    // replace any parentheses content with space
+    // nahradí obsah v zátvorkách medzerou
     t = t.replaceAll(RegExp(r"\([^)]*\)"), ' ');
-    // remove any characters that are not a-z or whitespace
+    // odstráni znaky, ktoré nie sú a-z alebo medzery
     t = t.replaceAll(RegExp(r'[^a-z\s]'), ' ');
-    // collapse whitespace
+    // zmenší medzery
     t = t.replaceAll(RegExp(r'\s+'), ' ').trim();
     return t;
   }
 
-  // From a correct-answer string produce a set of accepted normalized variants.
-  // Handles slash-separated alternatives and parenthetical parts.
+  // Vracia množinu akceptovaných variantov správnej odpovede
   Set<String> _acceptedVariants(String correctRaw) {
     final out = <String>{};
     final parts = correctRaw.split('/');
@@ -190,11 +190,12 @@ class _QuizScreenState extends State<QuizScreen> {
     return en.toString().trim();
   }
 
+  // Vytvorí možnosti pre MCQ (správna + náhodné nesprávne)
   void _buildOptions() {
     final w = _words[_index];
     final correct = _correctAnswerFor(w);
 
-    // Collect unique other answers (exclude the correct answer)
+    // zozbiera jedinečné iné odpovede (vylúčiť správnu odpoveď)
     final othersSet = <String>{};
     for (var i = 0; i < _words.length; i++) {
       if (i == _index) continue;
@@ -219,6 +220,7 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() => _currentOptions = opts);
   }
 
+  // Spracuje odpoveď pre režim 'grammar' (porovnanie, uloženie stavu)
   void _submitGrammar() {
     if (_answered) return;
     final guess = _controller.text;
@@ -231,12 +233,13 @@ class _QuizScreenState extends State<QuizScreen> {
       _correct = ok;
       if (ok) _score++;
     });
-    // hide keyboard
+    // skryť klávesnicu
     _focusNode.unfocus();
     _saveProgress();
     if (!ok) _markWordAsProblem(_words[_index]);
   }
 
+  // Spracuje výber pre MCQ režim, upraví skóre a uloží priebeh
   void _chooseMcq(String opt) {
     if (_answered) return;
     _selectedOption = opt;
@@ -266,10 +269,11 @@ class _QuizScreenState extends State<QuizScreen> {
     } catch (_) {}
   }
 
+  // Pokračuje na ďalšiu otázku alebo ukončí kvíz a zobrazí výsledok
   void _next() {
     if (_index + 1 >= _words.length) {
-      // finished: persist final score first, then show dialog offering to just close
-      // or close and return to the previous screen so lesson_or_quiz can refresh.
+      // ukončené: najprv uložiť konečné skóre, potom zobraziť dialóg ponúkajúci
+      // buď len zatvoriť, alebo zatvoriť a vrátiť sa na predchádzajúcu obrazovku
       _persistFinalScore().then((_) {
         if (!mounted) return;
         showDialog<void>(
@@ -278,15 +282,15 @@ class _QuizScreenState extends State<QuizScreen> {
             title: const Text('Výsledok'),
             content: Text('Skóre: $_score/${_words.length}'),
             actions: [
-              // Zavrieť: close dialog and also close QuizScreen to return to LessonOrQuiz
+              // Zavrieť: zatvoriť dialóg a vrátiť sa na predchádzajúcu obrazovku
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // close dialog
-                  if (mounted) Navigator.of(context).pop(); // pop QuizScreen
+                  Navigator.of(context).pop(); // zatvoriť dialóg
+                  if (mounted) Navigator.of(context).pop(); // zatvoriť QuizScreen
                 },
                 child: const Text('Zavrieť'),
               ),
-              // OK: only close dialog, stay on QuizScreen
+              // OK: iba zatvoriť dialóg
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text('OK'),
@@ -305,18 +309,19 @@ class _QuizScreenState extends State<QuizScreen> {
       _controller.clear();
       if (_testType == 'mcq') _buildOptions();
     });
-    // ensure keyboard focus for grammar
+    // zabezpečiť zobrazenie klávesnice pre gramatiku
     if (_testType == 'grammar') FocusScope.of(context).requestFocus(_focusNode);
     _saveProgress();
   }
 
+  // Uloží konečné skóre a označí kvíz ako dokončený v prefs
   Future<void> _persistFinalScore() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final base = _progressKeyBase();
       await prefs.setInt('${base}_score', _score);
       await prefs.setBool('${base}_done', true);
-      // remove transient run state so next run starts fresh
+      // vyčistiť priebeh
       await prefs.remove('${base}_index');
       await prefs.remove('${base}_answered');
       await prefs.remove('${base}_correct');
@@ -324,6 +329,7 @@ class _QuizScreenState extends State<QuizScreen> {
     } catch (_) {}
   }
 
+  // Vytvorí stabilný identifikátor pre učebnicu/podkapitolu/zoznam slov
   String _safeIdFromArgs() {
     final a = widget.args ?? {};
     String? signature;
@@ -401,21 +407,22 @@ class _QuizScreenState extends State<QuizScreen> {
     return keyId;
   }
 
+  // Pripraví zoznam slov pre kvíz (vážený výber, uloží vzorku do prefs)
   Future<void> _prepareQuizWords() async {
-    // If there are no source words, nothing to prepare
+    // Ak nie sú žiadne zdrojové slová, nič sa nepripraví
     if (_allWords.isEmpty) return;
 
-    // Read marked/problematic words for this subchapter so we can bias selection
+    // Načítanie označených/problémových slov pre túto podkapitolu, aby sme mohli ovplyvniť výber
     final prefs = await SharedPreferences.getInstance();
     final keyId = _safeIdFromArgs();
     final markedList = prefs.getStringList('marked_words_$keyId') ?? <String>[];
     final markedSet = markedList.toSet();
-    // persist/load sample so other screens see the same generated list
+    // Najprv skontrolovať, či už existuje uložená vzorka
     final base = quizKeyFromArgs(widget.args, _testType);
     final sampleKey = '${base}_sample';
     final existingSample = prefs.getStringList(sampleKey);
     if (existingSample != null && existingSample.isNotEmpty) {
-      // rebuild words list from persisted ids in the same order
+      // obnoviť uloženú vzorku podľa ID
       final rebuilt = <Map<String, dynamic>>[];
       for (final id in existingSample) {
         final found = _allWords.firstWhere((w) {
@@ -433,39 +440,39 @@ class _QuizScreenState extends State<QuizScreen> {
       }
     }
 
-    // Build weights: marked words get higher weight
+    // Vytvorenie váženého zoznamu hmotností pre výber slov
     final weights = <int>[];
     for (final w in _allWords) {
       final id = (w['id'] ?? w['en'] ?? w['english'] ?? '').toString();
-      // bias on marked words (increased to 3 as requested)
+      // označené slová majú vyššiu váhu (3 vs 1)
       weights.add(markedSet.contains(id) ? 3 : 1);
     }
 
-    // Weighted sampling without replacement using Efraimidis–Spirakis method.
+    // Vážený náhodný výber slov do kvízu
     final selected = <Map<String, dynamic>>[];
     final n = _allWords.length;
     if (n > 0) {
-      // If weights are all non-positive, fallback to uniform indices
+      // Algoritmus váženého náhodného výberu bez opakovania (Efraimidis-Spirakis)
       final keys = <MapEntry<double, int>>[];
       for (var i = 0; i < n; i++) {
         final w = (weights[i] <= 0) ? 1 : weights[i];
-        // generate key = U^(1/w) where U in (0,1]
+        // generovať kľúč pre vážený výber
         final u = (_rnd.nextDouble() * 0.999999) + 1e-9;
         final key = pow(u, 1 / w) as double;
         keys.add(MapEntry(key, i));
       }
 
-      // sort descending by key and pick top min(n, _quizSize)
+      // zoradenie podľa najväčších kľúčov
       keys.sort((a, b) => b.key.compareTo(a.key));
       final take = keys.length < _quizSize ? keys.length : _quizSize;
       final chosenIndices = keys.take(take).map((e) => e.value).toList();
 
-      // build selected unique words in chosen order
+      // pridať vybrané položky do výsledného zoznamu
       for (final idx in chosenIndices) {
         selected.add(Map<String, dynamic>.from(_allWords[idx]));
       }
 
-      // if we still need more items (quizSize > unique pool), fill by weighted random picks allowing duplicates
+      // ak je stále potrebné doplniť položky (napr. málo slov), použiť jednoduchý náhodný výber
       final totalWeight = weights.fold<int>(0, (p, e) => p + e);
       while (selected.length < _quizSize) {
         if (totalWeight <= 0) {
@@ -487,7 +494,7 @@ class _QuizScreenState extends State<QuizScreen> {
       }
     }
 
-    // persist sampled ids so other screens (and future resumes) use same order
+    // Uloženie vzorky do SharedPreferences pre budúce obnovenie
     try {
       final ids = selected
           .map((w) => (w['id'] ?? w['en'] ?? w['english'] ?? '').toString())
@@ -497,11 +504,12 @@ class _QuizScreenState extends State<QuizScreen> {
 
     setState(() {
       _words = selected;
-      // clamp index if out of range after sampling
+      // reset index ak je mimo rozsahu
       if (_index >= _words.length) _index = 0;
     });
   }
 
+  // Hlavná build metóda — vykreslí UI kvízu (karta + možnosti)
   @override
   Widget build(BuildContext context) {
     final title =
@@ -531,10 +539,7 @@ class _QuizScreenState extends State<QuizScreen> {
     final img = word['image'] ?? '';
     final correct = _correctAnswerFor(word);
 
-    // Compute MediaQuery once and use a stable top margin so the card does not
-    // shrink down when the keyboard appears. Also add bottom padding equal to
-    // viewInsets.bottom so the keyboard pushes content up and the text field
-    // stays just above the keyboard.
+    // Rozmery a odsadenia
     final mq = MediaQuery.of(context);
     final horizontalMargin = mq.size.width * 0.05;
     final topMargin = max(mq.size.height * 0.12, 60.0);
@@ -571,10 +576,7 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
-          // keep default resizeToAvoidBottomInset (true) so system adjusts layout;
-          // we also add padding below content equal to the keyboard inset so the
-          // text field ends up just above the keyboard instead of the card
-          // collapsing.
+          // Obsah kvízu
           body: Container(
             margin: EdgeInsets.symmetric(
               horizontal: horizontalMargin,
@@ -649,7 +651,7 @@ class _QuizScreenState extends State<QuizScreen> {
                               child: Column(
                                 children: [
                                   if (_testType == 'grammar') ...[
-                                    // Result text (Správne / Nesprávne)
+                                    // Správne / Nesprávne
                                     Text(
                                       _correct ? 'Správne' : 'Nesprávne',
                                       style: Theme.of(context)
@@ -663,7 +665,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                           ),
                                     ),
 
-                                    // Correct answer shown ONLY if grammar & wrong
+                                    // Správna odpoveď
                                     if (!_correct)
                                       Padding(
                                         padding: const EdgeInsets.only(
@@ -824,7 +826,7 @@ class _QuizScreenState extends State<QuizScreen> {
                         }),
 
                         const SizedBox(height: 8),
-                        // Next button (space ALWAYS reserved)
+                        // Tlačidlo Ďalej (rezervovaný priestor)
                         SizedBox(
                           height: 40,
                           width: double.infinity,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-//import 'package:flippy/theme/colors.dart';
+
+// Definície štýlov písma používané v aplikácii (nadpisy, kapitoly, lekcie, telo).
 
 class AppTextStyles {
   static const TextStyle heading = TextStyle(

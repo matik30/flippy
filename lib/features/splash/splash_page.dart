@@ -1,3 +1,5 @@
+// Úvodná splash obrazovka s animáciou loga a automatickým presmerovaním na domov.
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flippy/theme/colors.dart';
@@ -16,14 +18,15 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   void initState() {
+    // Inicializuje opakujúcu animáciu a naplánuje presmerovanie na domov po 5s
     super.initState();
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 5),
     )..repeat();
 
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) context.go('/');
     });
   }
@@ -34,6 +37,7 @@ class _SplashPageState extends State<SplashPage>
     super.dispose();
   }
 
+  // Vytvorí rozloženie splash obrazovky s animovaným kruhom a logom
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +52,7 @@ class _SplashPageState extends State<SplashPage>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Gradient CircularProgressIndicator with rotation animation
+                  // Animovaný kruh okolo loga
                   SizedBox(
                     width: 140,
                     height: 140,

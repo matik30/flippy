@@ -1,3 +1,6 @@
+// Komponenta WordImage zobrazuje obrázok slovíčka z rôznych zdrojov
+// (sieť, súbor alebo asset). Detekuje dostupný zdroj a renderuje vhodný widget.
+
 import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,8 +11,8 @@ class WordImage extends StatelessWidget {
   final String assetPath;
   final String fallbackText;
   final double? maxHeight;
-  final String? baseDir; // Base directory for relative image paths
-  final String? baseUrl; // Base URL for server images
+  final String? baseDir; // základný adresár pre relatívne cesty k obrázkom
+  final String? baseUrl; // základná URL pre obrázky na serveri
 
   const WordImage({
     super.key,
@@ -45,47 +48,50 @@ class WordImage extends StatelessWidget {
     return '$cleanBaseUrl/$assetPath';
   }
 
+  // Zistí zdroj obrázka (http, server-relative, lokálny súbor alebo asset)
   Future<String?> _detectImageSource() async {
-    // 1) direct network URL
+    // 1) priamy sieťový URL
     if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) {
       return assetPath;
     }
 
-    // 2) server-relative path (uploads/) and baseUrl provided
+    // 2) relatívna cesta na serveri (uploads/) a poskytnuté baseUrl
     if (assetPath.startsWith('uploads/') &&
         baseUrl != null &&
         baseUrl!.isNotEmpty) {
       return _buildServerUrl();
     }
 
-    // 3) local file (baseDir provided or direct path) - check asynchronously
+    // 3) lokálny súbor (baseDir poskytnutý alebo priamy cestný) - kontrola asynchrónne
     if (baseDir != null && baseDir!.isNotEmpty) {
       final resolved = path.join(baseDir!, assetPath);
       if (await _fileExists(resolved)) return 'file:$resolved';
     } else {
-      // if assetPath looks like a filesystem path, try it
+      // priama cesta na súbor
       if (assetPath.contains('/') || assetPath.contains('\\')) {
         final resolved = assetPath;
         if (await _fileExists(resolved)) return 'file:$resolved';
       }
     }
 
-    // 4) asset bundled with app
+    // 4) asset v balíku
     if (assetPath.startsWith('assets/') && await _assetExists()) {
       return 'asset:$assetPath';
     }
 
-    // none found
+    // žiadny zdroj nenájdený
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Slovensky: V build metóde sa čaká na detekciu zdroja a potom sa zobrazí príslušný widget
+    // (CachedNetworkImage, Image.file alebo Image.asset).
     return FutureBuilder<String?>(
       future: _detectImageSource(),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          // avoid blocking layout; show small loader
+          // čakanie na detekciu zdroja
           return SizedBox(
             height: maxHeight ?? 120,
             child: const Center(child: CircularProgressIndicator()),
@@ -94,7 +100,7 @@ class WordImage extends StatelessWidget {
 
         final src = snap.data;
         if (src == null) {
-          // no image available
+          // žiadny obrázok k dispozícii
           return const SizedBox.shrink();
         }
 

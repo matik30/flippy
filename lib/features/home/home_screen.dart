@@ -14,6 +14,8 @@ import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/scan_dialog.dart';
 import 'package:flippy/theme/theme_notifier.dart';
 
+
+// Načíta cesty k JSON súborom z AssetManifest alebo alternatívne z index.json
 Map<String, dynamic> _parseManifest(String s) => jsonDecode(s) as Map<String, dynamic>;
 
 Future<List<String>> loadJsonPaths() async {
@@ -39,12 +41,14 @@ Future<List<String>> loadJsonPaths() async {
   }
 }
 
+// Načíta metadáta učebnice z asset JSON (vracia 'textbook' objekt)
 Future<Map<String, dynamic>> loadTextbook(String path) async {
   final jsonString = await rootBundle.loadString(path);
   final jsonData = jsonDecode(jsonString);
   return jsonData['textbook'];
 }
 
+// Načíta JSON súbor z disku a vráti dekódovaný obsah (UTF-8, ošetrenie BOM)
 Future<dynamic> _readJsonFileUtf8(String path) async {
   final bytes = await io.File(path).readAsBytes();
   var s = utf8.decode(bytes);
@@ -54,6 +58,7 @@ Future<dynamic> _readJsonFileUtf8(String path) async {
   return jsonDecode(s);
 }
 
+// Načíta všetky učebnice vrátane importovaných z aplikácie
 Future<List<Map<String, dynamic>>> loadAllTextbooks() async {
   final paths = await loadJsonPaths();
   final textbooks = await Future.wait(paths.map(loadTextbook));
@@ -69,7 +74,7 @@ Future<List<Map<String, dynamic>>> loadAllTextbooks() async {
         if (tb is Map<String, dynamic>) {
           final m = Map<String, dynamic>.from(tb);
           m['__imported__'] = true;
-          m['__source__'] = path; // provide a stable source identifier for imported books
+          m['__source__'] = path; // pre prípadnú identifikáciu zdroja
           m['__file__'] = path;
           textbooks.insert(0, m);
         }
@@ -80,6 +85,8 @@ Future<List<Map<String, dynamic>>> loadAllTextbooks() async {
   return textbooks;
 }
 
+
+// Načíta ImageInfo pre danú cestu (asset alebo súbor), s ošetrením chýb
 Future<ImageInfo> loadImageInfo(String path) async {
   final completer = Completer<ImageInfo>();
   ImageProvider provider;
@@ -113,6 +120,8 @@ Future<ImageInfo> loadImageInfo(String path) async {
   return completer.future;
 }
 
+// Domovská obrazovka — načítanie a zobrazenie dostupných učebníc,
+// vrátane podpory importovaných súborov a správy importov.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -314,6 +323,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+// Dialóg pre správu importovaných učebníc
 class _ImportedManagerDialog extends StatefulWidget {
   const _ImportedManagerDialog();
 

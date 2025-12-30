@@ -1,9 +1,12 @@
+// Obrazovka s prehľadom kapitol učebnice a výberom podkapitol (lekcií).
+
 import 'package:flutter/material.dart';
 import 'package:flippy/theme/colors.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flippy/features/lesson_or_quiz/lesson_or_quiz_screen.dart';
 
+// Trieda BookScreen — vstupný widget prijímajúci dáta učebnice (mapu).
 class BookScreen extends StatefulWidget {
   final Map<String, dynamic> book;
 
@@ -20,9 +23,8 @@ class _BookScreenState extends State<BookScreen> {
   @override
   void initState() {
     super.initState();
-    // Normalize incoming payload: callers may pass either the textbook map
-    // directly or a wrapper like { 'textbook': <map> } (Home was changed to
-    // send the textbook under that key). Accept both.
+    // Normalizuje prichádzajúci payload: volajúce strany môžu poslať buď priamo mapu učebnice
+    // alebo obal ako { 'textbook': <map> } (Home bol zmenený tak, aby posielal učebnicu pod týmto kľúčom).
     final raw = widget.book;
     if (raw.containsKey('textbook') && raw['textbook'] is Map) {
       data = Map<String, dynamic>.from(raw['textbook'] as Map);
@@ -30,7 +32,7 @@ class _BookScreenState extends State<BookScreen> {
       data = Map<String, dynamic>.from(raw);
     }
 
-    // Safely obtain chapters list (may be null) and initialize expansion state
+    // Inicializuje stav rozbalenia kapitol (všetky zatvorené).
     final chaptersList = (data['chapters'] as List<dynamic>?) ?? <dynamic>[];
     expanded = List<bool>.filled(chaptersList.length, false);
   }
@@ -95,11 +97,11 @@ class _BookScreenState extends State<BookScreen> {
                     InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () => setState(() {
-                        // if this chapter is already open, close it
+                        // ak je táto kapitola už otvorená, zatvor ju
                         if (expanded[index]) {
                           expanded[index] = false;
                         } else {
-                          // close all chapters, then open the tapped one
+                          // zatvor všetky kapitoly, potom otvor tú, na ktorú sa kliklo
                           for (var i = 0; i < expanded.length; i++) {
                             expanded[i] = false;
                           }
@@ -113,15 +115,6 @@ class _BookScreenState extends State<BookScreen> {
                         ),
                         child: Row(
                           children: [
-                            /*Text(
-                              chapter["id"].toString(),
-                              style: TextStyle(
-                                color: isOpen ? Colors.white : AppColors.text,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 12),*/
                             Expanded(
                               child: Text(
                                 chapter["title"] ?? '',
@@ -147,7 +140,7 @@ class _BookScreenState extends State<BookScreen> {
                       Container(
                         decoration: BoxDecoration(
                           color: AppColors
-                              .background, // subtle surface color from theme
+                              .background,
                           borderRadius: const BorderRadius.vertical(
                             bottom: Radius.circular(12),
                           ),
@@ -158,12 +151,11 @@ class _BookScreenState extends State<BookScreen> {
                                 in (chapter["subchapters"] as List<dynamic>))
                               InkWell(
                                 onTap: () {
-                                  // open intermediary screen where user chooses
-                                  // between Slovíčka (LessonScreen) and Test (QuizScreen)
+                                  // Otvorí sa medziobrazovka, kde si používateľ vyberie
+                                  // medzi Slovíčka (LessonScreen) a Test (QuizScreen)
                                   Navigator.of(context).push(MaterialPageRoute(
                                     builder: (_) =>
-                                        // import lazily to avoid import cycles
-                                        // pass same payload as before
+                                        // importuje sa len keď je to potrebné, aby sa predišlo cyklickým importom
                                         LessonOrQuizScreen(
                                       args: {
                                         'textbook': data,
@@ -207,3 +199,6 @@ class _BookScreenState extends State<BookScreen> {
     );
   }
 }
+
+// _BookScreenState — normalizuje payload, udržiava stav rozbalenia kapitol
+// a vykresľuje zoznam kapitol s možnosťou rozbalenia podkapitol (lekcií).

@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// Stránka pre skenovanie QR kódov a import učebnice.
 class QrScanPage extends StatefulWidget {
   const QrScanPage({super.key});
 
@@ -25,6 +26,7 @@ class _QrScanPageState extends State<QrScanPage> {
     super.dispose();
   }
 
+  /// Spracuje text z QR kódu — stiahne JSON, pridá serverBaseUrl a uloží ho do interného súboru
   Future<String?> _handleQr(String raw) async {
     try {
       final uri = Uri.parse(raw);
@@ -36,7 +38,7 @@ class _QrScanPageState extends State<QrScanPage> {
 
       final jsonData = jsonDecode(response.body);
 
-      // extract base URL
+      // Pridanie serverBaseUrl do JSON dát
       String baseUrl = uri.toString();
       final lastSlash = baseUrl.lastIndexOf('/');
       if (lastSlash > 8) {
@@ -68,6 +70,7 @@ class _QrScanPageState extends State<QrScanPage> {
     }
   }
 
+  /// Volané pri detekcii barcode z kamery
   void _onDetect(BarcodeCapture capture) {
     if (_handling) return;
 
@@ -78,6 +81,7 @@ class _QrScanPageState extends State<QrScanPage> {
     _processQr(raw);
   }
 
+  /// Zastaví kameru, ukáže dialóg spracovania a podľa výsledku buď reštartuje kameru alebo naviguje domov
   Future<void> _processQr(String raw) async {
     await _cameraController.stop();
     if (!mounted) return;
@@ -108,6 +112,7 @@ class _QrScanPageState extends State<QrScanPage> {
   Widget build(BuildContext context) {
     final router = GoRouter.of(context);
 
+    /// Vykreslí UI skenera s AppBar (tlačidlo zatvoriť) a MobileScanner
     return Scaffold(
       appBar: AppBar(
         title: const Text('Naskenuj QR učebnice'),
@@ -132,6 +137,7 @@ class _QrScanPageState extends State<QrScanPage> {
 
 enum _QrResult { success, error }
 
+/// Dialóg, ktorý zobrazuje priebeh spracovania QR (načítavam / úspech / chyba)
 class _QrProcessingDialog extends StatefulWidget {
   final String raw;
   final Future<String?> Function(String) handleQr;

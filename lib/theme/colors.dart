@@ -1,5 +1,8 @@
+// Farby a paleta použitá v aplikácii (hlavný a alternatívne motívy).
+
 import 'package:flutter/material.dart';
 
+// Hlavné farby aplikácie (základný modrý motív)
 class AppColors {
   static const Color background = Color(0xFFF9FAFB);
   static const Color primary = Color(0xFF1E3A8A);
@@ -8,6 +11,7 @@ class AppColors {
   static const Color text = Color(0xFF1F2937); 
 }
 
+// Alternatívny červený motív
 class AppColorsRed {
   static const Color background = Color(0xFFFFFFF9);
   static const Color primary = Color(0xFFF24D41);
@@ -16,6 +20,7 @@ class AppColorsRed {
   static const Color text = Color(0xFF332625); 
 }
 
+// Alternatívny zelený motív
 class AppColorsGreen {
   static const Color background = Color(0xFFF9FFF4);
   static const Color primary = Color(0xFF17F54B);
@@ -24,6 +29,7 @@ class AppColorsGreen {
   static const Color text = Color(0xFF19181C); 
 }
 
+// Alternatívny oranžový motív
 class AppColorsOrange {
   static const Color background = Color(0xFFFFFAF0);
   static const Color primary = Color(0xFFF48656);
@@ -32,6 +38,7 @@ class AppColorsOrange {
   static const Color text = Color(0xFF191714); 
 }
 
+// Alternatívny tyrkysový motív
 class AppColorsTurquise {
   static const Color background = Color(0xFFF5FFFC);
   static const Color primary = Color(0xFF00FAB3);
