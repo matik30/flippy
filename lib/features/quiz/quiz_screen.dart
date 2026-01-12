@@ -278,24 +278,77 @@ class _QuizScreenState extends State<QuizScreen> {
         if (!mounted) return;
         showDialog<void>(
           context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Výsledok'),
-            content: Text('Skóre: $_score/${_words.length}'),
-            actions: [
-              // Zavrieť: zatvoriť dialóg a vrátiť sa na predchádzajúcu obrazovku
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // zatvoriť dialóg
-                  if (mounted) Navigator.of(context).pop(); // zatvoriť QuizScreen
-                },
-                child: const Text('Zavrieť'),
+          builder: (_) => Dialog(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            elevation: 8,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _score >= (_words.length * 0.7)
+                        ? Icons.emoji_events
+                        : Icons.sentiment_satisfied,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Výsledok',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Skóre: $_score/${_words.length}',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          if (mounted) Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                        ),
+                        child: const Text('Zavrieť'),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                        ),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              // OK: iba zatvoriť dialóg
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+            ),
           ),
         );
       });
@@ -448,7 +501,7 @@ class _QuizScreenState extends State<QuizScreen> {
       weights.add(markedSet.contains(id) ? 3 : 1);
     }
 
-    // Vážený náhodný výber slov do kvízu
+    // Vážený náhodný výber slov do kvíza
     final selected = <Map<String, dynamic>>[];
     final n = _allWords.length;
     if (n > 0) {
@@ -543,332 +596,350 @@ class _QuizScreenState extends State<QuizScreen> {
     final mq = MediaQuery.of(context);
     final horizontalMargin = mq.size.width * 0.05;
     final topMargin = max(mq.size.height * 0.12, 60.0);
-    final bottomInset = mq.viewInsets.bottom;
+    // final bottomInset = mq.viewInsets.bottom; // už netreba
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.secondary,
-              Theme.of(context).colorScheme.surface,
-            ],
-            stops: const [0.0, 0.15],
-          ),
-        ),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            centerTitle: true,
-            title: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                title.isEmpty ? 'Lekcia' : title,
-                style: AppTextStyles.chapter,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            foregroundColor: Theme.of(context).colorScheme.onSurface,
-          ),
-          // Obsah kvízu
-          body: Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: horizontalMargin,
-              vertical: topMargin,
-            ),
-            padding: EdgeInsets.only(bottom: bottomInset),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Transform.translate(
-                  offset: const Offset(0, -70), // 👈 move UP
-                  child: Text(
-                    '${_index+1} / ${_words.length}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+      resizeToAvoidBottomInset: true, // umožní automatické posúvanie pri klávesnici
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-                Expanded(
+                child: IntrinsicHeight(
                   child: Container(
-                    key: ValueKey('quiz_card'),
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 0,
-                    ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        width: 2,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).colorScheme.secondary,
+                          Theme.of(context).colorScheme.surface,
+                        ],
+                        stops: const [0.0, 0.15],
                       ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [                        
-                          const SizedBox(height: 8),
-                          if (img != null && img.toString().isNotEmpty)
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                child: WordImage(
-                                  assetPath: img.toString(),
-                                  fallbackText: en.toString(),
-                                  maxHeight: 240,
+                    child: Scaffold(
+                      backgroundColor: Colors.transparent,
+                      appBar: AppBar(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        centerTitle: true,
+                        title: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            title.isEmpty ? 'Lekcia' : title,
+                            style: AppTextStyles.chapter,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      // Obsah kvízu
+                      body: Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: horizontalMargin,
+                          vertical: topMargin,
+                        ),
+                        padding: EdgeInsets.only(bottom: 0), // viewInsets už je vyššie
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Transform.translate(
+                              offset: const Offset(0, -70), // 👈 move UP
+                              child: Text(
+                                '${_index+1} / ${_words.length}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                          const SizedBox(height: 8),
-                          Text(
-                            sk.toUpperCase(),
-                            style: AppTextStyles.lesson,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          if (_answered)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 0),
-                              child: Column(
-                                children: [
-                                  if (_testType == 'grammar') ...[
-                                    // Správne / Nesprávne
-                                    Text(
-                                      _correct ? 'Správne' : 'Nesprávne',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.copyWith(
-                                            color: _correct
-                                                ? Colors.green.shade600
-                                                : Colors.red.shade600,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                            Expanded(
+                              child: Container(
+                                key: ValueKey('quiz_card'),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 50,
+                                  vertical: 0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                    width: 2,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 8,
+                                      offset: Offset(0, 4),
                                     ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [                        
+                                      const SizedBox(height: 8),
+                                      if (img != null && img.toString().isNotEmpty)
+                                        Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 20,
+                                            ),
+                                            child: WordImage(
+                                              assetPath: img.toString(),
+                                              fallbackText: en.toString(),
+                                              maxHeight: 240,
+                                            ),
+                                          ),
+                                        ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        sk.toUpperCase(),
+                                        style: AppTextStyles.lesson,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      if (_answered)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 0),
+                                          child: Column(
+                                            children: [
+                                              if (_testType == 'grammar') ...[
+                                                // Správne / Nesprávne
+                                                Text(
+                                                  _correct ? 'Správne' : 'Nesprávne',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge
+                                                      ?.copyWith(
+                                                        color: _correct
+                                                            ? Colors.green.shade600
+                                                            : Colors.red.shade600,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                ),
 
-                                    // Správna odpoveď
-                                    if (!_correct)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 8.0,
+                                                // Správna odpoveď
+                                                if (!_correct)
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(
+                                                      top: 8.0,
+                                                    ),
+                                                    child: Text(
+                                                      _correctAnswerFor(word),
+                                                      style: AppTextStyles.body.copyWith(
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).colorScheme.onSurface,
+                                                      ),
+                                                      textAlign: TextAlign.center,
+                                                    ),
+                                                  ),
+                                              ],
+                                              
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            if (_testType == 'grammar') ...[
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 50),
+                                child: Column(
+                                  children: [
+                                    TextField(
+                                      controller: _controller,
+                                      focusNode: _focusNode,
+                                      textInputAction: TextInputAction.done,
+                                      onSubmitted: (_) => _submitGrammar(),
+                                      decoration: InputDecoration(
+                                        hintText: 'Napíšte preklad',
+                                        helperStyle:TextStyle(),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: Colors.black),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: _answered ? _next : _submitGrammar,
+                                        style: ElevatedButton.styleFrom(
+                                          minimumSize: const Size.fromHeight(44),
+                                          backgroundColor: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
                                         ),
                                         child: Text(
-                                          _correctAnswerFor(word),
-                                          style: AppTextStyles.body.copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
+                                          _answered ? 'Ďalej' : 'Odoslať',
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.onPrimary,
                                           ),
-                                          textAlign: TextAlign.center,
                                         ),
                                       ),
+                                    ),
                                   ],
-                                  
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                if (_testType == 'grammar') ...[
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 50),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _controller,
-                          focusNode: _focusNode,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _submitGrammar(),
-                          decoration: InputDecoration(
-                            hintText: 'Napíšte preklad',
-                            helperStyle:TextStyle(),
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.black),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.primary,
-                                width: 2,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _answered ? _next : _submitGrammar,
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(44),
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                            ),
-                            child: Text(
-                              _answered ? 'Ďalej' : 'Odoslať',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ] else ...[
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 70),
-                    child: Column(
-                      children: [
-                        // MCQ options
-                        ..._currentOptions.map((opt) {
-                          final normOpt = _normalize(opt);
-                          final isCorrect = _normalize(correct) == normOpt;
-                          final isSelected =
-                              _selectedOption != null &&
-                              _normalize(_selectedOption!) == normOpt;
-
-                          Color bg;
-                          Color txt;
-                          IconData? icon;
-                          Color? iconColor;
-
-                          if (!_answered) {
-                            bg = Theme.of(context).colorScheme.primary;
-                            txt = Theme.of(context).colorScheme.onPrimary;
-                          } else {
-                            if (isCorrect) {
-                              bg = Colors.grey.shade200;
-                              txt = Theme.of(context).colorScheme.onSurface;
-                              icon = Icons.check_circle;
-                              iconColor = Colors.green.shade600;
-                            } else if (isSelected) {
-                              bg = Colors.grey.shade200;
-                              txt = Theme.of(context).colorScheme.onSurface;
-                              icon = Icons.cancel;
-                              iconColor = Colors.red.shade600;
-                            } else {
-                              bg = Colors.grey.shade200;
-                              txt = Theme.of(context).colorScheme.onSurface;
-                            }
-                          }
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6.0),
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: _answered
-                                    ? _next
-                                    : () => _chooseMcq(opt),
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(36),
-                                  backgroundColor: bg,
-                                  foregroundColor: txt,
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
+                              ),
+                            ] else ...[
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 70),
+                                child: Column(
                                   children: [
-                                    Flexible(
-                                      child: Text(
-                                        opt,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(color: txt),
+                                    // MCQ options
+                                    ..._currentOptions.map((opt) {
+                                      final normOpt = _normalize(opt);
+                                      final isCorrect = _normalize(correct) == normOpt;
+                                      final isSelected =
+                                          _selectedOption != null &&
+                                          _normalize(_selectedOption!) == normOpt;
+
+                                      Color bg;
+                                      Color txt;
+                                      IconData? icon;
+                                      Color? iconColor;
+
+                                      if (!_answered) {
+                                        bg = Theme.of(context).colorScheme.primary;
+                                        txt = Theme.of(context).colorScheme.onPrimary;
+                                      } else {
+                                        if (isCorrect) {
+                                          bg = Colors.grey.shade200;
+                                          txt = Theme.of(context).colorScheme.onSurface;
+                                          icon = Icons.check_circle;
+                                          iconColor = Colors.green.shade600;
+                                        } else if (isSelected) {
+                                          bg = Colors.grey.shade200;
+                                          txt = Theme.of(context).colorScheme.onSurface;
+                                          icon = Icons.cancel;
+                                          iconColor = Colors.red.shade600;
+                                        } else {
+                                          bg = Colors.grey.shade200;
+                                          txt = Theme.of(context).colorScheme.onSurface;
+                                        }
+                                      }
+
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            onPressed: _answered
+                                                ? _next
+                                                : () => _chooseMcq(opt),
+                                            style: ElevatedButton.styleFrom(
+                                              minimumSize: const Size.fromHeight(36),
+                                              backgroundColor: bg,
+                                              foregroundColor: txt,
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    opt,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(color: txt),
+                                                  ),
+                                                ),
+                                                if (icon != null) ...[
+                                                  const SizedBox(width: 10),
+                                                  Icon(icon, color: iconColor),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+
+                                    const SizedBox(height: 8),
+                                    // Tlačidlo Ďalej (rezervovaný priestor)
+                                    SizedBox(
+                                      height: 40,
+                                      width: double.infinity,
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(milliseconds: 150),
+                                        opacity: _answered ? 1.0 : 0.0,
+                                        child: IgnorePointer(
+                                          ignoring: !_answered,
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: ElevatedButton(
+                                              onPressed: _answered ? _next : null,
+                                              style: ElevatedButton.styleFrom(
+                                                shape: const CircleBorder(),
+                                                padding: const EdgeInsets.all(8),
+                                                backgroundColor: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                                minimumSize: const Size(40, 40),
+                                              ),
+                                              child: Icon(
+                                                Icons.arrow_forward,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    if (icon != null) ...[
-                                      const SizedBox(width: 10),
-                                      Icon(icon, color: iconColor),
-                                    ],
                                   ],
                                 ),
                               ),
-                            ),
-                          );
-                        }),
-
-                        const SizedBox(height: 8),
-                        // Tlačidlo Ďalej (rezervovaný priestor)
-                        SizedBox(
-                          height: 40,
-                          width: double.infinity,
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 150),
-                            opacity: _answered ? 1.0 : 0.0,
-                            child: IgnorePointer(
-                              ignoring: !_answered,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: ElevatedButton(
-                                  onPressed: _answered ? _next : null,
-                                  style: ElevatedButton.styleFrom(
-                                    shape: const CircleBorder(),
-                                    padding: const EdgeInsets.all(8),
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                    minimumSize: const Size(40, 40),
-                                  ),
-                                  child: Icon(
-                                    Icons.arrow_forward,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary,
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                            ],
+                            const SizedBox(height: 8),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+                      ),
+                    ), // Scaffold
+                  ), // Container
+                ), // IntrinsicHeight
+              ), // ConstrainedBox
+            ); // SingleChildScrollView
+          }, // builder
+        ), // LayoutBuilder
+      ), // SafeArea
+    ); // Scaffold
   }
-}
+} // koniec triedy _QuizScreenState

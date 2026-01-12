@@ -49,7 +49,7 @@ class _LessonScreenState extends State<LessonScreen> {
   double _minScaleSeen = 1.0;
   bool _galleryOpen = false;
   // prah pre otvorenie galérie
-  static const double _galleryTriggerScale = 0.85;
+  static const double _galleryTriggerScale = 0.98;
 
   Future<void> _loadMarked() async {
     try {
