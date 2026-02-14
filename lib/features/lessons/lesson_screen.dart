@@ -48,8 +48,9 @@ class _LessonScreenState extends State<LessonScreen> {
   // stav galérie
   double _minScaleSeen = 1.0;
   bool _galleryOpen = false;
+  bool _isPinching = false;
   // prah pre otvorenie galérie
-  static const double _galleryTriggerScale = 0.98;
+  static const double _galleryTriggerScale = 0.97;
 
   Future<void> _loadMarked() async {
     try {
@@ -653,12 +654,20 @@ class _LessonScreenState extends State<LessonScreen> {
                       : GestureDetector(
                           onScaleStart: (_) {
                             _minScaleSeen = 1.0;
+                            _isPinching = false;
                           },
                           onScaleUpdate: (details) {
-                            _minScaleSeen = min(_minScaleSeen, details.scale);
+                            if (details.pointerCount > 1) {
+                              _isPinching = true;
+                              _minScaleSeen = min(
+                                _minScaleSeen,
+                                details.scale,
+                              );
+                            }
                           },
                           onScaleEnd: (_) async {
-                            if (_minScaleSeen <= _galleryTriggerScale &&
+                            if (_isPinching &&
+                                _minScaleSeen <= _galleryTriggerScale &&
                                 !_galleryOpen) {
                               _galleryOpen = true;
                               // otvorenie galérie
@@ -670,6 +679,7 @@ class _LessonScreenState extends State<LessonScreen> {
                               // zabezpečenie, že aktuálne zobrazená stránka sa počíta ako navštívená
                               if (!mounted) {
                                 _minScaleSeen = 1.0;
+                                _isPinching = false;
                                 return;
                               }
 
@@ -680,9 +690,13 @@ class _LessonScreenState extends State<LessonScreen> {
                               }
                             }
                             _minScaleSeen = 1.0;
+                            _isPinching = false;
                           },
                           child: PageView.builder(
                             controller: _pageController,
+                            physics: _isPinching
+                                ? const NeverScrollableScrollPhysics()
+                                : const PageScrollPhysics(),
                             itemCount: total,
                             onPageChanged: (i) => setState(() {
                               _index = i;
@@ -714,55 +728,68 @@ class _LessonScreenState extends State<LessonScreen> {
                         style: AppTextStyles.lesson,
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_left),
-                            onPressed: () => _goTo(_index - 1),
-                          ),
-                          const SizedBox(width: 8),
-                          // zobrazenie tlačidiel pre aktuálnu, predchádzajúcu a nasledujúcu stránku
-                          for (
-                            var i = max(0, _index - 1);
-                            i <= min(total - 1, _index + 1);
-                            i++
-                          )
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                              ),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: i == _index
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Colors.white,
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                onPressed: () => _goTo(i),
-                                child: Text(
-                                  '${i + 1}',
-                                  style: TextStyle(
-                                    color: i == _index
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
-                                  ),
-                                ),
-                              ),
+                      GestureDetector(
+                        onHorizontalDragEnd: (details) {
+                          if (details.primaryVelocity != null) {
+                            if (details.primaryVelocity! > 0) {
+                              // swipe doprava -> predchádzajúca stránka
+                              _goTo(_index - 1);
+                            } else if (details.primaryVelocity! < 0) {
+                              // swipe doľava -> ďalšia stránka
+                              _goTo(_index + 1);
+                            }
+                          }
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_left),
+                              onPressed: () => _goTo(_index - 1),
                             ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.arrow_right),
-                            onPressed: () => _goTo(_index + 1),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            // zobrazenie tlačidiel pre aktuálnu, predchádzajúcu a nasledujúcu stránku
+                            for (
+                              var i = max(0, _index - 1);
+                              i <= min(total - 1, _index + 1);
+                              i++
+                            )
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: i == _index
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.white,
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: () => _goTo(i),
+                                  child: Text(
+                                    '${i + 1}',
+                                    style: TextStyle(
+                                      color: i == _index
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_right),
+                              onPressed: () => _goTo(_index + 1),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/word_card.dart';
+import 'package:confetti/confetti.dart';
 
 // Obrazovka kvízu — zobrazuje otázky (grammar alebo mcq), hodnotí odpovede
 // a ukladá priebeh (index, skóre) do SharedPreferences.
@@ -55,6 +56,7 @@ class _QuizScreenState extends State<QuizScreen> {
   final FocusNode _focusNode = FocusNode();
   final Random _rnd = Random();
   String? _selectedOption; // aktuálne vybraná možnosť MCQ (pre farbenie po odpovedi)
+  late ConfettiController _confettiController; // controller pre konfetti animáciu
 
   List<String> _currentOptions = []; // pre mcq
   static const int _quizSize = quizSize; // požadovaný počet položiek v kvíze
@@ -62,6 +64,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
     final args = widget.args ?? {};
     final rawWords = args['words'] ?? args['wordList'] ?? <dynamic>[];
     if (rawWords is List) {
@@ -153,6 +156,7 @@ class _QuizScreenState extends State<QuizScreen> {
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -231,7 +235,10 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() {
       _answered = true;
       _correct = ok;
-      if (ok) _score++;
+      if (ok) {
+        _score++;
+        _confettiController.play(); // spustenie konfetti pri správnej odpovedi
+      }
     });
     // skryť klávesnicu
     _focusNode.unfocus();
@@ -248,7 +255,10 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() {
       _answered = true;
       _correct = ok;
-      if (ok) _score++;
+      if (ok) {
+        _score++;
+        _confettiController.play(); // spustenie konfetti pri správnej odpovedi
+      }
     });
     _saveProgress();
     if (!ok) _markWordAsProblem(_words[_index]);
@@ -598,11 +608,13 @@ class _QuizScreenState extends State<QuizScreen> {
     final topMargin = max(mq.size.height * 0.12, 60.0);
     // final bottomInset = mq.viewInsets.bottom; // už netreba
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true, // umožní automatické posúvanie pri klávesnici
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
+    return Stack(
+      children: [
+        Scaffold(
+          resizeToAvoidBottomInset: true, // umožní automatické posúvanie pri klávesnici
+          body: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
             return SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -940,6 +952,30 @@ class _QuizScreenState extends State<QuizScreen> {
           }, // builder
         ), // LayoutBuilder
       ), // SafeArea
-    ); // Scaffold
+    ), // Scaffold
+        
+        // Konfetti animácia pri správnej odpovedi
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirection: pi / 2, // smerom nadol
+            blastDirectionality: BlastDirectionality.explosive, // výbušný efekt
+            emissionFrequency: 0.05,
+            numberOfParticles: 20,
+            gravity: 0.3,
+            shouldLoop: false,
+            colors: const [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple,
+              Colors.yellow,
+            ],
+          ),
+        ),
+      ],
+    ); // Stack
   }
 } // koniec triedy _QuizScreenState
