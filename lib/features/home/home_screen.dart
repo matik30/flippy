@@ -14,25 +14,26 @@ import 'package:flippy/theme/fonts.dart';
 import 'package:flippy/widgets/scan_dialog.dart';
 import 'package:flippy/theme/theme_notifier.dart';
 
-
 // Načíta cesty k JSON súborom z AssetManifest alebo alternatívne z index.json
-Map<String, dynamic> _parseManifest(String s) => jsonDecode(s) as Map<String, dynamic>;
+Map<String, dynamic> _parseManifest(String s) =>
+    jsonDecode(s) as Map<String, dynamic>;
 
 Future<List<String>> loadJsonPaths() async {
   try {
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap =
-        await compute(_parseManifest, manifestContent);
+    final Map<String, dynamic> manifestMap = await compute(
+      _parseManifest,
+      manifestContent,
+    );
 
     return manifestMap.keys
-        .where(
-          (p) => p.startsWith('assets/data/') && p.endsWith('.json'),
-        )
+        .where((p) => p.startsWith('assets/data/') && p.endsWith('.json'))
         .toList();
   } catch (_) {
     try {
-      final indexContent =
-          await rootBundle.loadString('assets/data/index.json');
+      final indexContent = await rootBundle.loadString(
+        'assets/data/index.json',
+      );
       final list = jsonDecode(indexContent) as List<dynamic>;
       return list.cast<String>();
     } catch (_) {
@@ -84,7 +85,6 @@ Future<List<Map<String, dynamic>>> loadAllTextbooks() async {
 
   return textbooks;
 }
-
 
 // Načíta ImageInfo pre danú cestu (asset alebo súbor), s ošetrením chýb
 Future<ImageInfo> loadImageInfo(String path) async {
@@ -166,7 +166,10 @@ class _HomePageState extends State<HomePage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.surface],
+            colors: [
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.surface,
+            ],
             stops: const [0.0, 0.15],
           ),
         ),
@@ -184,51 +187,103 @@ class _HomePageState extends State<HomePage> {
                 onSelected: (v) async {
                   if (v == 'import') return _openImportManager();
                   if (v == 'theme') {
-                    final tn = Provider.of<ThemeNotifier>(context, listen: false);
+                    final tn = Provider.of<ThemeNotifier>(
+                      context,
+                      listen: false,
+                    );
                     final sel = await showDialog<String>(
                       context: context,
                       builder: (dialogCtx) => SimpleDialog(
                         title: const Text('Vyber motív'),
                         children: [
                           SimpleDialogOption(
-                            onPressed: () => Navigator.of(dialogCtx).pop('blue'),
-                            child: Row(children: [
-                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4))),
-                              const SizedBox(width: 12),
-                              const Text('Modrá (základná)'),
-                            ]),
+                            onPressed: () =>
+                                Navigator.of(dialogCtx).pop('blue'),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text('Modrá (základná)'),
+                              ],
+                            ),
                           ),
                           SimpleDialogOption(
                             onPressed: () => Navigator.of(dialogCtx).pop('red'),
-                            child: Row(children: [
-                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsRed.primary, borderRadius: BorderRadius.circular(4))),
-                              const SizedBox(width: 12),
-                              const Text('Červená'),
-                            ]),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: AppColorsRed.primary,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text('Červená'),
+                              ],
+                            ),
                           ),
                           SimpleDialogOption(
-                            onPressed: () => Navigator.of(dialogCtx).pop('green'),
-                            child: Row(children: [
-                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsGreen.primary, borderRadius: BorderRadius.circular(4))),
-                              const SizedBox(width: 12),
-                              const Text('Zelená'),
-                            ]),
+                            onPressed: () =>
+                                Navigator.of(dialogCtx).pop('green'),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: AppColorsGreen.primary,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text('Zelená'),
+                              ],
+                            ),
                           ),
                           SimpleDialogOption(
-                            onPressed: () => Navigator.of(dialogCtx).pop('orange'),
-                            child: Row(children: [
-                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsOrange.primary, borderRadius: BorderRadius.circular(4))),
-                              const SizedBox(width: 12),
-                              const Text('Oranžová'),
-                            ]),
+                            onPressed: () =>
+                                Navigator.of(dialogCtx).pop('orange'),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: AppColorsOrange.primary,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text('Oranžová'),
+                              ],
+                            ),
                           ),
                           SimpleDialogOption(
-                            onPressed: () => Navigator.of(dialogCtx).pop('turq'),
-                            child: Row(children: [
-                              Container(width: 20, height: 20, decoration: BoxDecoration(color: AppColorsTurquise.primary, borderRadius: BorderRadius.circular(4))),
-                              const SizedBox(width: 12),
-                              const Text('Tyrkysová'),
-                            ]),
+                            onPressed: () =>
+                                Navigator.of(dialogCtx).pop('turq'),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: AppColorsTurquise.primary,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text('Tyrkysová'),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -242,7 +297,11 @@ class _HomePageState extends State<HomePage> {
                     value: 'import',
                     child: Row(
                       children: [
-                        Icon(Icons.menu_book, size: 20, color: Theme.of(menuCtx).colorScheme.onSurface),
+                        Icon(
+                          Icons.menu_book,
+                          size: 20,
+                          color: Theme.of(menuCtx).colorScheme.onSurface,
+                        ),
                         const SizedBox(width: 10),
                         const Text('Správa učebníc'),
                       ],
@@ -252,7 +311,11 @@ class _HomePageState extends State<HomePage> {
                     value: 'theme',
                     child: Row(
                       children: [
-                        Icon(Icons.format_paint, size: 20, color: Theme.of(menuCtx).colorScheme.onSurface),
+                        Icon(
+                          Icons.format_paint,
+                          size: 20,
+                          color: Theme.of(menuCtx).colorScheme.onSurface,
+                        ),
                         const SizedBox(width: 10),
                         const Text('Motív'),
                       ],
@@ -277,8 +340,7 @@ class _HomePageState extends State<HomePage> {
               return GridView.builder(
                 padding: const EdgeInsets.all(20),
                 itemCount: books.length,
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 20,
                   childAspectRatio: 0.8,
@@ -286,7 +348,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 itemBuilder: (gridCtx, i) {
                   final book = books[i];
-                  final cover = book['coverImage'];
+                  final cover = (book['coverImage']?.isNotEmpty ?? false)
+                      ? book['coverImage']
+                      : 'assets/images//logo/Logo.png';
 
                   return FutureBuilder<ImageInfo>(
                     future: loadImageInfo(cover),
@@ -298,18 +362,23 @@ class _HomePageState extends State<HomePage> {
                           tileCtx.go('/chapters', extra: {'textbook': book});
                         },
                         child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Theme.of(tileCtx).colorScheme.onSurface, width: 2),
-                              borderRadius: BorderRadius.circular(13),
-                              image: DecorationImage(
-                                image: cover is String && !cover.startsWith('assets/') && io.File(cover).existsSync()
-                                    ? FileImage(io.File(cover)) as ImageProvider
-                                    : AssetImage(cover),
-                                fit: BoxFit.cover,
-                              ),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(tileCtx).colorScheme.onSurface,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(13),
+                            image: DecorationImage(
+                              image:
+                                  cover is String &&
+                                      !cover.startsWith('assets/') &&
+                                      io.File(cover).existsSync()
+                                  ? FileImage(io.File(cover)) as ImageProvider
+                                  : AssetImage(cover),
+                              fit: BoxFit.cover,
                             ),
                           ),
-                        
+                        ),
                       );
                     },
                   );
@@ -328,8 +397,7 @@ class _ImportedManagerDialog extends StatefulWidget {
   const _ImportedManagerDialog();
 
   @override
-  State<_ImportedManagerDialog> createState() =>
-      _ImportedManagerDialogState();
+  State<_ImportedManagerDialog> createState() => _ImportedManagerDialogState();
 }
 
 class _ImportedManagerDialogState extends State<_ImportedManagerDialog> {

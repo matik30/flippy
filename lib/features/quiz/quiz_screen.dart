@@ -961,9 +961,9 @@ class _QuizScreenState extends State<QuizScreen> {
             confettiController: _confettiController,
             blastDirection: pi / 2, // smerom nadol
             blastDirectionality: BlastDirectionality.explosive, // výbušný efekt
-            emissionFrequency: 0.05,
-            numberOfParticles: 20,
-            gravity: 0.3,
+            emissionFrequency: 0.03,
+            numberOfParticles: 18,
+            gravity: 0.45,
             shouldLoop: false,
             colors: const [
               Colors.green,
