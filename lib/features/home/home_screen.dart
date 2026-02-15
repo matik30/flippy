@@ -350,7 +350,7 @@ class _HomePageState extends State<HomePage> {
                   final book = books[i];
                   final cover = (book['coverImage']?.isNotEmpty ?? false)
                       ? book['coverImage']
-                      : 'assets/images//logo/Logo.png';
+                      : 'assets/images/logo/Logo.png';
 
                   return FutureBuilder<ImageInfo>(
                     future: loadImageInfo(cover),
